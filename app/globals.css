@@ -276,6 +276,34 @@ h1, h2, h3 {
   margin-top: 16px;
 }
 
+.slide-community-principles .s-title {
+  max-width: 13ch;
+}
+
+.slide-community-principles .s-sub {
+  font-size: clamp(24px, 3vw, 36px);
+  letter-spacing: -0.03em;
+  margin-top: 24px;
+}
+
+.slide-community-connect .s-title {
+  max-width: 18ch;
+  font-size: clamp(28px, 4vw, 50px);
+}
+
+.slide-community-connect .s-desc {
+  max-width: 48ch;
+}
+
+.slide-community-builders .s-title {
+  max-width: 21ch;
+  font-size: clamp(28px, 3.8vw, 48px);
+}
+
+.slide-community-builders .s-desc {
+  max-width: 42ch;
+}
+
 .s-cta {
   display: flex;
   gap: 14px;

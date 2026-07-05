@@ -43,7 +43,6 @@ export const AUDIENCE = [
   "Investors",
   "Product Managers",
   "Creative Technologists",
-  "Students",
 ];
 
 // Only display organisations with real community members

@@ -11,7 +11,7 @@ const AUTO_MS = 10000;
 const INTERACTION_RESUME_MS = 20000;
 const WHEEL_THRESHOLD = 80;
 const WHEEL_SETTLE_MS = 260;
-const COUNT = 4;
+const COUNT = 7;
 
 /** One carousel slide. When it becomes active, its [data-anim] children
  *  blur-in in sequence (title → … → buttons). Reduced-motion: instant. */
@@ -207,19 +207,45 @@ export default function HomeStage() {
             </div>
           </Slide>
 
-          <Slide active={slide === 1} className="slide-main">
+          <Slide active={slide === 1} className="slide-main slide-community-title">
             <span className="eyebrow" data-anim>
               The Community
             </span>
             <h1 className="s-title" data-anim>
               London&apos;s community for Physical&nbsp;AI, Robotics &amp; Spatial&nbsp;Intelligence
             </h1>
+          </Slide>
+
+          <Slide active={slide === 2} className="slide-main slide-community-principles">
+            <span className="eyebrow" data-anim>
+              Our Position
+            </span>
+            <h2 className="s-title" data-anim>
+              Independent. Multidisciplinary.
+            </h2>
             <p className="s-sub" data-anim>
-              Independent. Multidisciplinary. Built in London.
+              Built in London.
             </p>
+          </Slide>
+
+          <Slide active={slide === 3} className="slide-main slide-community-connect">
+            <span className="eyebrow" data-anim>
+              Community Network
+            </span>
+            <h2 className="s-title" data-anim>
+              Connect with people building physical intelligence.
+            </h2>
+          </Slide>
+
+          <Slide active={slide === 4} className="slide-main slide-community-builders">
+            <span className="eyebrow" data-anim>
+              The Builders
+            </span>
+            <h2 className="s-title" data-anim>
+              Founders, engineers, designers, researchers, investors and builders.
+            </h2>
             <p className="s-desc" data-anim>
-              A community connecting founders, engineers, designers, researchers, investors and builders exploring
-              Physical AI, Robotics, Spatial Intelligence, Wearables and Intelligent Hardware.
+              Exploring Physical AI, Robotics, Spatial Intelligence, Wearables and Intelligent Hardware.
             </p>
             <div className="s-cta" data-anim>
               <a className="btn btn-primary btn-lg" href={JOIN_URL} target="_blank" rel="noopener">
@@ -231,7 +257,7 @@ export default function HomeStage() {
             </div>
           </Slide>
 
-          <Slide active={slide === 2} className="slide-chips">
+          <Slide active={slide === 5} className="slide-chips">
             <span className="eyebrow" data-anim>
               Focus Areas
             </span>
@@ -247,7 +273,7 @@ export default function HomeStage() {
             </div>
           </Slide>
 
-          <Slide active={slide === 3} className="slide-chips">
+          <Slide active={slide === 6} className="slide-chips">
             <span className="eyebrow" data-anim>
               Who&apos;s in the room
             </span>
