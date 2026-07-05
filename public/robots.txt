@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://physical-io.example/sitemap.xml
