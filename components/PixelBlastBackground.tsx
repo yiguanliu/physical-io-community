@@ -1,9 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { ComponentType } from "react";
 
 // WebGL background — load on the client only (uses window/canvas).
-const PixelBlast = dynamic(() => import("./PixelBlast"), { ssr: false });
+// PixelBlast is a plain-JS component, so type its props loosely here.
+const PixelBlast = dynamic(() => import("./PixelBlast"), {
+  ssr: false,
+}) as unknown as ComponentType<Record<string, unknown>>;
 
 export default function PixelBlastBackground() {
   return (
