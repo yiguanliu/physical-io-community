@@ -171,6 +171,24 @@ h1, h2, h3 {
   z-index: 60;
 }
 
+/* Progressive blur that fades out over the top ~1/5 of the frame, so the
+   top bar stays legible over the carousel. Sits below the bar (z-index 60). */
+.page-home::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 22vh;
+  z-index: 55;
+  pointer-events: none;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0));
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 32%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 32%, transparent 100%);
+}
+
 .home-brand {
   display: inline-flex;
   align-items: center;
@@ -221,7 +239,13 @@ h1, h2, h3 {
   color: var(--ink);
 }
 
-.slide[aria-hidden="true"] { pointer-events: none; }
+/* Only the active slide is visible — prevents all slides rendering stacked
+   (and overlapping) before JS hydrates and the animation runs. */
+.slide[aria-hidden="true"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 .slide .eyebrow { margin-bottom: 18px; }
 
@@ -372,7 +396,7 @@ h1, h2, h3 {
 
 .dots {
   position: fixed;
-  bottom: clamp(150px, 21vh, 220px);
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -387,12 +411,14 @@ h1, h2, h3 {
   padding: 0;
   border: none;
   border-radius: 100px;
-  background: rgba(0, 0, 0, 0.22);
+  /* Light dot + soft shadow reads over both the bright aisle and dark seats. */
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: width 0.4s ease, background 0.4s ease;
 }
 
-.dot:hover { background: rgba(0, 0, 0, 0.42); }
+.dot:hover { background: rgba(255, 255, 255, 0.9); }
 .dot.is-active { width: 28px; background: var(--accent); }
 
 /* ---------- Copyright ---------- */
@@ -407,45 +433,123 @@ h1, h2, h3 {
   z-index: 50;
 }
 
+/* ---------- Light-rays overlay (always on top of the home page) ---------- */
+
+.home-rays {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* ---------- Intro loading animation ---------- */
+
+.home-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: #000;
+  pointer-events: none;
+  animation: homeIntroBackdrop 2.1s ease forwards;
+}
+
+.home-intro-logo {
+  display: block;
+  color: #fff;
+  animation: homeIntroLogo 2.1s ease forwards;
+  will-change: opacity, filter, transform;
+}
+
+.home-intro-logo svg {
+  width: clamp(72px, 13vw, 128px);
+  height: auto;
+}
+
+@keyframes homeIntroBackdrop {
+  0%, 55% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes homeIntroLogo {
+  0% { opacity: 0; filter: blur(10px); transform: scale(0.9); }
+  22% { opacity: 1; filter: blur(0); transform: scale(1); }
+  55% { opacity: 1; filter: blur(0); transform: scale(1); }
+  85%, 100% { opacity: 0; filter: blur(18px); transform: scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-intro {
+    animation: none;
+    opacity: 0;
+    visibility: hidden;
+  }
+  .home-intro-logo { animation: none; }
+}
+
 @media (max-width: 640px) {
+  /* Stack the carousel and its pager as one centred group over the lit
+     screen, so the dots always flow *below* the content and can never
+     overlap it — regardless of slide length or device height. */
   .page-home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background-position: center 42%;
     background-size: auto 116dvh;
   }
-  .screen-arrow { display: none; }
-  .s-desc { display: none; }
+
+  .screen-arrow,
+  .s-desc,
   .stage-foot { display: none; }
+
   .stage {
-    padding: clamp(116px, 14vh, 132px) 20px clamp(260px, 34vh, 320px);
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 0 20px;
+    /* The lit screen band centres at ~42% of viewport height; flex centring
+       lands the group at 50%, so lift it by ~8vh to sit on the screen. */
+    margin-top: -8vh;
   }
+
   .carousel {
-    width: min(360px, calc(100vw - 40px));
-    min-height: clamp(250px, 32vh, 310px);
-    transform: translateY(0);
+    width: min(340px, calc(100vw - 40px));
+    /* Fixed height sized to the tallest slide; the absolutely-positioned
+       slides centre within it and never push past its bounds. */
+    min-height: clamp(200px, 28vh, 224px);
+    transform: none;
   }
-  .dots { bottom: clamp(330px, 42vh, 370px); }
+
   .slide .eyebrow { margin-bottom: 10px; }
-  .s-title { font-size: clamp(27px, 8vw, 34px); }
+
+  .s-title { font-size: clamp(24px, 6.8vw, 32px); }
+
   .s-sub {
     margin-top: 12px;
     font-size: 15px;
   }
-  .s-cta {
-    gap: 8px;
-    margin-top: 18px;
-  }
+  .slide-community-principles .s-sub { font-size: clamp(20px, 6vw, 26px); }
+
   .chips {
-    gap: 6px;
+    gap: 5px;
     max-width: min(330px, calc(100vw - 32px));
-    margin-top: 14px;
+    margin-top: 12px;
   }
   .chip {
-    padding: 5px 9px;
+    padding: 4px 9px;
     border-width: 1px;
     font-size: clamp(10px, 3.15vw, 12px);
   }
   .brand-lockup { gap: clamp(36px, 14vw, 72px); }
   .brand-word { font-size: clamp(28px, 9vw, 42px); }
+
+  /* Slide 4's stacked buttons are the tallest content — keep them tight. */
+  .slide-community-builders .s-title { font-size: clamp(23px, 6.4vw, 30px); }
 }
 
 @media (max-height: 640px) {
@@ -456,23 +560,100 @@ h1, h2, h3 {
    ABOUT — minimal centered layout
    ============================================ */
 
+/* Animated PixelBlast background, fixed behind the page content. */
+.about-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.about-bg .pixel-blast-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Content sits above the animated background; sections stay transparent so
+   it shows through, while the hero image and solid cards/footer cover it. */
+.page-about > *:not(.about-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Group each section's content in a frosted card that pops over the animated
+   background (the hero keeps its own image backdrop, so it's excluded). */
+.page-about .section > .narrow,
+.page-about .cta-band > .narrow {
+  padding: clamp(32px, 5vw, 56px);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 28px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.1), 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
 .narrow {
   width: min(800px, calc(100% - 48px));
   margin-inline: auto;
   text-align: center;
 }
 
+/* Full-bleed hero — the industrial gallery mockup as the backdrop. */
 .page-about .hero {
-  padding: clamp(80px, 12vw, 150px) 0 clamp(40px, 6vw, 70px);
+  position: relative;
+  min-height: 100vh;
+  min-height: calc(100dvh - var(--nav-h));
+  display: flex;
+  align-items: flex-end;
+  padding: clamp(96px, 14vw, 170px) 0 clamp(52px, 7vw, 92px);
+  /* Focal point pushed low so the wall wordmark rises clear of the headline
+     and the darker floor sits behind the text. */
+  background: #0a0a0a url("/assets/about_hero.jpg") center 68% / cover no-repeat;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* Cinematic bottom scrim so the white headline stays legible over any crop. */
+.page-about .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0) 25%,
+    rgba(0, 0, 0, 0.35) 50%,
+    rgba(0, 0, 0, 0.72) 78%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
+  pointer-events: none;
+}
+
+.page-about .hero .narrow {
+  position: relative;
+  z-index: 1;
 }
 
 .page-about .hero h1 {
   margin: 0 auto;
   font-size: clamp(34px, 5vw, 60px);
   max-width: 16ch;
+  color: #fff;
 }
 
-.page-about .section { padding: clamp(56px, 8vw, 96px) 0; }
+/* Each content section fills the viewport and is separated by a hairline. */
+.page-about .section {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(72px, 10vw, 120px) 0;
+  border-top: 1px solid var(--line);
+}
 
 .statement {
   font-size: clamp(21px, 2.7vw, 30px);
@@ -494,19 +675,23 @@ h1, h2, h3 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  column-gap: 12px;
-  row-gap: 10px;
-  margin-top: 26px;
-  font-size: clamp(15px, 1.7vw, 18px);
-  font-weight: 500;
-  color: var(--ink-soft);
+  gap: 8px 10px;
+  margin: 28px auto 0;
+  max-width: 720px;
 }
 
-.dot-list li:not(:last-child)::after {
-  content: "·";
-  margin-left: 12px;
-  color: var(--ink-faint);
+/* Chip-styled items, matching the home carousel chips. */
+.dot-list li {
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1.2px solid rgba(0, 0, 0, 0.18);
+  font-size: clamp(13px, 1.25vw, 15px);
+  font-weight: 500;
+  color: var(--ink);
+  transition: border-color 0.2s ease;
 }
+
+.dot-list li:hover { border-color: var(--ink); }
 
 /* ---------- Logos ---------- */
 
@@ -551,7 +736,7 @@ h1, h2, h3 {
 }
 
 .tier-name {
-  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-family: var(--font);
   font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -657,6 +842,11 @@ h1, h2, h3 {
 /* ---------- CTA band ---------- */
 
 .cta-band {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: clamp(72px, 10vw, 130px) 0;
   text-align: center;
   border-top: 1px solid var(--line);
@@ -744,8 +934,10 @@ h1, h2, h3 {
 
 @media (max-width: 600px) {
   .nav-links { gap: 16px; }
+  /* Logo-only brand on mobile so the nav items never crowd the wordmark. */
+  .brand-name { display: none; }
   .home-topbar .nav-links a:not(.btn) { display: inline; }
-  .nav-links .btn { padding: 10px 18px; font-size: 14px; }
+  .nav-links .btn { padding: 10px 18px; font-size: 14px; white-space: nowrap; }
   .roadmap-item { grid-template-columns: 1fr; gap: 6px; }
   .tier { grid-template-columns: 1fr; gap: 8px; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }

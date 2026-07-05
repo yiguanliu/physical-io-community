@@ -8,7 +8,7 @@ export default function Nav() {
       <div className="container nav-inner">
         <Link className="brand" href="/" aria-label="Physical I/O home">
           <LogoMark />
-          Physical&nbsp;I/O
+          <span className="brand-name">Physical&nbsp;I/O</span>
         </Link>
         <nav className="nav-links" aria-label="Main">
           <Link href="/about">About</Link>

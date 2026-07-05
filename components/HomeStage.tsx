@@ -2,10 +2,14 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import LogoMark from "./LogoMark";
 import { AUDIENCE, FOCUS_AREAS, JOIN_URL } from "@/lib/site";
 import { useSiteStore } from "@/lib/store";
+
+// WebGL light-rays overlay — client only (uses WebGL/window).
+const LightRays = dynamic(() => import("./LightRays"), { ssr: false });
 
 const AUTO_MS = 10000;
 const INTERACTION_RESUME_MS = 20000;
@@ -67,6 +71,7 @@ export default function HomeStage() {
   const slide = useSiteStore((s) => s.slide);
   const setSlide = useSiteStore((s) => s.setSlide);
   const [resumeAutoAt, setResumeAutoAt] = useState(0);
+  const [introGone, setIntroGone] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
   const startX = useRef<number | null>(null);
   const didSwipe = useRef(false);
@@ -247,14 +252,6 @@ export default function HomeStage() {
             <p className="s-desc" data-anim>
               Exploring Physical AI, Robotics, Spatial Intelligence, Wearables and Intelligent Hardware.
             </p>
-            <div className="s-cta" data-anim>
-              <a className="btn btn-primary btn-lg" href={JOIN_URL} target="_blank" rel="noopener">
-                Join the Community <span className="arrow">→</span>
-              </a>
-              <Link className="btn btn-ghost btn-lg" href="/about">
-                About
-              </Link>
-            </div>
           </Slide>
 
           <Slide active={slide === 5} className="slide-chips">
@@ -286,11 +283,6 @@ export default function HomeStage() {
                   {x}
                 </span>
               ))}
-            </div>
-            <div className="s-cta" data-anim>
-              <a className="btn btn-primary btn-lg" href={JOIN_URL} target="_blank" rel="noopener">
-                Join the Community <span className="arrow">→</span>
-              </a>
             </div>
           </Slide>
         </div>
@@ -324,6 +316,35 @@ export default function HomeStage() {
       </div>
 
       <p className="stage-foot">© 2026 Physical I/O — London, United Kingdom</p>
+
+      <div className="home-rays" aria-hidden="true">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#ffffff"
+          raysSpeed={1.1}
+          lightSpread={1.7}
+          rayLength={2.6}
+          fadeDistance={1.4}
+          followMouse
+          mouseInfluence={0.12}
+          noiseAmount={0.12}
+          distortion={0.05}
+        />
+      </div>
+
+      {!introGone && (
+        <div
+          className="home-intro"
+          aria-hidden="true"
+          onAnimationEnd={(e) => {
+            if (e.animationName === "homeIntroBackdrop") setIntroGone(true);
+          }}
+        >
+          <span className="home-intro-logo">
+            <LogoMark />
+          </span>
+        </div>
+      )}
     </div>
   );
 }
