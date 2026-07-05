@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "gsap": "^3.12.7",
     "next": "^15.3.4",
     "playcanvas": "^2.7.0",
