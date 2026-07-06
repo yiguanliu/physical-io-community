@@ -3,7 +3,6 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import Faq from "@/components/Faq";
-import PixelBlastBackground from "@/components/PixelBlastBackground";
 import {
   AUDIENCE,
   DECK_URL,
@@ -53,8 +52,6 @@ export default function AboutPage() {
     <div className="page-about">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutPageJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-
-      <PixelBlastBackground />
 
       <Nav />
 
