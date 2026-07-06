@@ -1,6 +1,6 @@
 // Site-wide constants and content data.
 
-export const SITE_URL = "https://physical-io.com";
+export const SITE_URL = "https://www.physical-io.com";
 export const JOIN_URL = "https://forms.gle/DTY4AZDd56FWPmo76";
 
 export const SITE_NAME = "Physical I/O";

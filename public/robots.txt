@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://physical-io.com/sitemap.xml
+Sitemap: https://www.physical-io.com/sitemap.xml
