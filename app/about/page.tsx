@@ -6,6 +6,7 @@ import Faq from "@/components/Faq";
 import PixelBlastBackground from "@/components/PixelBlastBackground";
 import {
   AUDIENCE,
+  DECK_URL,
   FAQ,
   FOCUS_AREAS,
   HOW_WE_BUILD,
@@ -188,9 +189,14 @@ export default function AboutPage() {
           <Reveal className="container narrow">
             <h2>Be part of it from the start.</h2>
             <p>We are building the founding community right now. Join early, shape what it becomes.</p>
-            <a className="btn btn-primary btn-lg" href={JOIN_URL} target="_blank" rel="noopener">
-              Join the Community <span className="arrow">→</span>
-            </a>
+            <div className="cta-actions">
+              <a className="btn btn-primary btn-lg" href={JOIN_URL} target="_blank" rel="noopener">
+                Join the Community <span className="arrow">→</span>
+              </a>
+              <a className="btn btn-ghost btn-lg" href={DECK_URL} target="_blank" rel="noopener">
+                View the Deck
+              </a>
+            </div>
           </Reveal>
         </section>
       </main>

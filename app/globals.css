@@ -146,7 +146,21 @@ h1, h2, h3 {
 .nav-links a:not(.btn):hover { color: var(--ink); }
 
 .nav-social {
-  white-space: nowrap;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--ink-soft);
+}
+
+.nav-social-icon {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ============================================
@@ -512,7 +526,7 @@ h1, h2, h3 {
 
   .stage {
     position: absolute;
-    top: 70dvh;
+    top: 44dvh;
     left: 0;
     transform: translateY(-50%);
     flex: 0 0 auto;
@@ -520,8 +534,8 @@ h1, h2, h3 {
     height: auto;
     min-height: 0;
     padding: 0 20px;
-    /* The projected white canvas spans the lower half of the portrait
-       background; this anchors the slide group to that canvas centre. */
+    /* Anchor the slide group to the vertical centre of the projected
+       white canvas in the portrait background. */
     margin-top: 0;
   }
 
@@ -869,6 +883,13 @@ h1, h2, h3 {
   margin: 0 auto 36px;
 }
 
+.cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+
 /* ---------- Footer ---------- */
 
 .footer {
@@ -945,8 +966,7 @@ h1, h2, h3 {
   /* Logo-only brand on mobile so the nav items never crowd the wordmark. */
   .brand-name { display: none; }
   .home-topbar .nav-links a:not(.btn) { display: inline; }
-  .nav-social::after { content: attr(data-short); }
-  .nav-social-handle { display: none; }
+  .home-topbar .nav-links .nav-social { display: inline-grid; }
   .nav-links .btn { padding: 10px 14px; font-size: 14px; white-space: nowrap; }
   .roadmap-item { grid-template-columns: 1fr; gap: 6px; }
   .tier { grid-template-columns: 1fr; gap: 8px; }
