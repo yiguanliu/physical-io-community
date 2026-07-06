@@ -19,7 +19,7 @@ export default function Footer() {
             <ul>
               {/* TODO: replace placeholder contact links */}
               <li>
-                <a href="mailto:hello@physical-io.example">Email</a>
+                <a href="mailto:hello@physical-io.com">Email</a>
               </li>
               <li>
                 <a href="#" rel="noopener">Instagram</a>

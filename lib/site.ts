@@ -1,7 +1,6 @@
 // Site-wide constants and content data.
 
-// TODO: replace with the real domain
-export const SITE_URL = "https://physical-io.example";
+export const SITE_URL = "https://physical-io.com";
 export const JOIN_URL = "https://forms.gle/DTY4AZDd56FWPmo76";
 
 export const SITE_NAME = "Physical I/O";
