@@ -2,6 +2,8 @@
 
 export const SITE_URL = "https://www.physical-io.com";
 export const JOIN_URL = "https://forms.gle/DTY4AZDd56FWPmo76";
+export const INSTAGRAM_URL = "https://www.instagram.com/physical.io/";
+export const LINKEDIN_URL = "https://www.linkedin.com/company/physical-i-o/";
 
 export const SITE_NAME = "Physical I/O";
 export const SITE_DESCRIPTION =

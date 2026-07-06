@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import HomeStage from "@/components/HomeStage";
-import { SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
+import { INSTAGRAM_URL, LINKEDIN_URL, SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Physical I/O | London's Physical AI Community",
@@ -22,6 +22,7 @@ const organizationJsonLd = {
   logo: `${SITE_URL}/assets/favicon.svg`,
   description:
     "Physical I/O is an independent London community connecting founders, engineers, designers, researchers, investors and builders exploring Physical AI, Robotics, Spatial Intelligence, Wearables and Intelligent Hardware.",
+  sameAs: [INSTAGRAM_URL, LINKEDIN_URL],
   address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
   knowsAbout: [
     "Physical AI",

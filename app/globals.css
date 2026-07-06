@@ -145,6 +145,10 @@ h1, h2, h3 {
 .nav-links a:not(.btn) { color: var(--ink-soft); transition: color 0.15s ease; }
 .nav-links a:not(.btn):hover { color: var(--ink); }
 
+.nav-social {
+  white-space: nowrap;
+}
+
 /* ============================================
    HOME — carousel over the auditorium screen
    ============================================ */
@@ -507,14 +511,18 @@ h1, h2, h3 {
   .stage-foot { display: none; }
 
   .stage {
+    position: absolute;
+    top: 70dvh;
+    left: 0;
+    transform: translateY(-50%);
     flex: 0 0 auto;
     width: 100%;
     height: auto;
     min-height: 0;
     padding: 0 20px;
-    /* The lit screen band centres at ~42% of viewport height; flex centring
-       lands the group at 50%, so lift it by ~8vh to sit on the screen. */
-    margin-top: -8vh;
+    /* The projected white canvas spans the lower half of the portrait
+       background; this anchors the slide group to that canvas centre. */
+    margin-top: 0;
   }
 
   .carousel {
@@ -527,13 +535,13 @@ h1, h2, h3 {
 
   .slide .eyebrow { margin-bottom: 10px; }
 
-  .s-title { font-size: clamp(24px, 6.8vw, 32px); }
+  .s-title { font-size: clamp(22px, 6.2vw, 29px); }
 
   .s-sub {
     margin-top: 12px;
     font-size: 15px;
   }
-  .slide-community-principles .s-sub { font-size: clamp(20px, 6vw, 26px); }
+  .slide-community-principles .s-sub { font-size: clamp(18px, 5.4vw, 23px); }
 
   .chips {
     gap: 5px;
@@ -546,10 +554,10 @@ h1, h2, h3 {
     font-size: clamp(10px, 3.15vw, 12px);
   }
   .brand-lockup { gap: clamp(36px, 14vw, 72px); }
-  .brand-word { font-size: clamp(28px, 9vw, 42px); }
+  .brand-word { font-size: clamp(25px, 8.4vw, 39px); }
 
   /* Slide 4's stacked buttons are the tallest content — keep them tight. */
-  .slide-community-builders .s-title { font-size: clamp(23px, 6.4vw, 30px); }
+  .slide-community-builders .s-title { font-size: clamp(21px, 5.9vw, 27px); }
 }
 
 @media (max-height: 640px) {
@@ -933,11 +941,13 @@ h1, h2, h3 {
 }
 
 @media (max-width: 600px) {
-  .nav-links { gap: 16px; }
+  .nav-links { gap: 12px; }
   /* Logo-only brand on mobile so the nav items never crowd the wordmark. */
   .brand-name { display: none; }
   .home-topbar .nav-links a:not(.btn) { display: inline; }
-  .nav-links .btn { padding: 10px 18px; font-size: 14px; white-space: nowrap; }
+  .nav-social::after { content: attr(data-short); }
+  .nav-social-handle { display: none; }
+  .nav-links .btn { padding: 10px 14px; font-size: 14px; white-space: nowrap; }
   .roadmap-item { grid-template-columns: 1fr; gap: 6px; }
   .tier { grid-template-columns: 1fr; gap: 8px; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import LogoMark from "./LogoMark";
-import { FOOTER_TOPICS, JOIN_URL } from "@/lib/site";
+import { FOOTER_TOPICS, INSTAGRAM_URL, JOIN_URL, LINKEDIN_URL } from "@/lib/site";
 
 export default function Footer() {
   return (
@@ -19,13 +19,13 @@ export default function Footer() {
             <ul>
               {/* TODO: replace placeholder contact links */}
               <li>
-                <a href="mailto:hello@physical-io.com">Email</a>
+                <a href="mailto:soul@physical-io.com">Email</a>
               </li>
               <li>
-                <a href="#" rel="noopener">Instagram</a>
+                <a href={INSTAGRAM_URL} target="_blank" rel="noopener">Instagram</a>
               </li>
               <li>
-                <a href="#" rel="noopener">LinkedIn</a>
+                <a href={LINKEDIN_URL} target="_blank" rel="noopener">LinkedIn</a>
               </li>
             </ul>
           </div>

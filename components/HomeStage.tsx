@@ -5,7 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import LogoMark from "./LogoMark";
-import { AUDIENCE, FOCUS_AREAS, JOIN_URL } from "@/lib/site";
+import { AUDIENCE, FOCUS_AREAS, INSTAGRAM_URL, JOIN_URL, LINKEDIN_URL } from "@/lib/site";
 import { useSiteStore } from "@/lib/store";
 
 // WebGL light-rays overlay — client only (uses WebGL/window).
@@ -181,6 +181,12 @@ export default function HomeStage() {
         </Link>
         <nav className="nav-links" aria-label="Main">
           <Link href="/about">About</Link>
+          <a className="nav-social" href={INSTAGRAM_URL} target="_blank" rel="noopener" aria-label="Instagram @physical.io" data-short="IG">
+            <span className="nav-social-handle">@physical.io</span>
+          </a>
+          <a className="nav-social" href={LINKEDIN_URL} target="_blank" rel="noopener" aria-label="LinkedIn Physical I/O" data-short="in">
+            <span className="nav-social-handle">LinkedIn</span>
+          </a>
           <a className="btn btn-primary" href={JOIN_URL} target="_blank" rel="noopener">
             Join Community
           </a>
