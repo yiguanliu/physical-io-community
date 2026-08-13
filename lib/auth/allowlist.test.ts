@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adminAllowlist, canCreateAdmin, FOUNDING_ADMINS, PENDING_ROLE, roleForNewUser } from "./allowlist";
+import { adminAllowlist, canCreateAdmin, canAccessAdmin, FOUNDING_ADMINS, PENDING_ROLE, roleForNewUser } from "./allowlist";
 
 describe("adminAllowlist", () => {
   it("always includes the founding operator", () => {
@@ -20,5 +20,11 @@ describe("adminAllowlist", () => {
   it("marks non-allowlisted signups as pending once an admin exists", () => {
     expect(roleForNewUser("soul@physical-io.com", 1)).toBe("admin");
     expect(roleForNewUser("stranger@example.com", 1)).toBe(PENDING_ROLE);
+  });
+
+  it("lets founding emails into the workspace even while pending", () => {
+    expect(canAccessAdmin("soul@physical-io.com", PENDING_ROLE)).toBe(true);
+    expect(canAccessAdmin("stranger@example.com", PENDING_ROLE)).toBe(false);
+    expect(canAccessAdmin("stranger@example.com", "admin")).toBe(true);
   });
 });

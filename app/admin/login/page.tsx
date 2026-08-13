@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import LogoMark from "@/components/LogoMark";
 import LoginForm from "@/components/admin/login-form";
 import { getAdminSession, sessionRole } from "@/lib/auth/session";
-import { isAdminRole } from "@/lib/auth/allowlist";
+import { canAccessAdmin } from "@/lib/auth/allowlist";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -20,9 +20,11 @@ export default async function AdminLoginPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const session = await getAdminSession();
-  if (session?.user && isAdminRole(sessionRole(session))) redirect("/admin");
+  if (session?.user && canAccessAdmin(session.user.email, sessionRole(session))) redirect("/admin");
   const params = await searchParams;
-  const pending = params.status === "pending" || sessionRole(session) === "pending";
+  const pending =
+    params.status === "pending" ||
+    (sessionRole(session) === "pending" && !canAccessAdmin(session?.user?.email ?? "", sessionRole(session)));
   return (
     <main className="admin-app admin-auth">
       <section className="admin-auth-card">

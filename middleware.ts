@@ -2,20 +2,27 @@ import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 
 function hasAdminSessionCookie(request: NextRequest) {
-  return Boolean(
-    request.cookies.get("better-auth.session_token")?.value ||
-      request.cookies.get("__Secure-better-auth.session_token")?.value,
+  return request.cookies.getAll().some(
+    (cookie) => cookie.value && cookie.name.includes("better-auth.session_token"),
   );
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/api/auth")) {
+    return NextResponse.next();
+  }
+
   const isAdminApp = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
   if (isAdminApp && !hasAdminSessionCookie(request)) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
+  }
+
+  if (pathname.startsWith("/admin")) {
+    return NextResponse.next();
   }
 
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {

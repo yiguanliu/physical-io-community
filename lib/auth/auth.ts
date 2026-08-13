@@ -38,11 +38,16 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 8,
     updateAge: 60 * 30,
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 8,
+    },
   },
   trustedOrigins: [
     authBaseURL,
     "https://www.physical-io.com",
     "https://physical-io.com",
+    "https://dash.better-auth.com",
     "http://localhost:3000",
   ],
   databaseHooks: {
@@ -66,8 +71,12 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    dash(),
-    sentinel(),
+    dash({
+      apiKey: process.env.BETTER_AUTH_API_KEY,
+    }),
+    sentinel({
+      apiKey: process.env.BETTER_AUTH_API_KEY,
+    }),
     nextCookies(),
   ],
 });
