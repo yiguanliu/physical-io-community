@@ -25,6 +25,10 @@
 .admin-form-actions{display:flex;gap:8px;justify-content:flex-end}
 .admin-auth-error{color:#9b3617;font-size:12px}
 .admin-auth-success{color:#23714c;font-size:12px}
+.admin-auth-warning{border:1px solid #e8c39a;background:#fdf5ec;border-radius:10px;padding:12px 14px;margin-bottom:20px}
+.admin-auth-warning strong{display:block;font-size:12px;margin-bottom:4px;color:#8a4b12}
+.admin-auth-warning span{display:block;color:#7a5c3c;font-size:12px;line-height:1.5}
+.admin-auth-warning code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:#f2e3d1;border-radius:4px;padding:1px 4px}
 .admin-auth-switch{border:0;background:transparent;color:var(--a-orange);font-size:12px;font-weight:650;cursor:pointer;padding:4px 0;text-align:left}
 .admin-empty-note{padding:18px 16px 22px;color:var(--a-muted);font-size:13px}
 .admin-inline-form{display:flex;align-items:center;gap:8px}

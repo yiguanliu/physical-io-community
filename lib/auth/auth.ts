@@ -3,6 +3,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { getDb } from "@/lib/db/client";
+import { assertAccountsPersist } from "@/lib/auth/guards";
 import * as schema from "@/lib/db/schema";
 import { ADMIN_ROLE, roleForNewUser } from "@/lib/auth/allowlist";
 import { SITE_URL } from "@/lib/site";
@@ -54,6 +55,7 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
+          assertAccountsPersist();
           await (await import("@/lib/db/client")).readyDb();
           const db = getDb();
           const [{ total }] = await db
