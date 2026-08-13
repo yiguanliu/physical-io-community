@@ -16,6 +16,14 @@ export function isAdminRole(role?: string | null) {
   return role === ADMIN_ROLE;
 }
 
+export function isAllowlistedAdmin(email: string, envValue?: string) {
+  return adminAllowlist(envValue).includes(email.trim().toLowerCase());
+}
+
+export function canAccessAdmin(email: string, role?: string | null, envValue?: string) {
+  return isAdminRole(role) || isAllowlistedAdmin(email, envValue);
+}
+
 /** First administrator, or an allowlisted email, is granted admin on signup. Everyone else is pending. */
 export function canCreateAdmin(email: string, existingAdminCount: number, envValue?: string) {
   if (existingAdminCount <= 0) return true;

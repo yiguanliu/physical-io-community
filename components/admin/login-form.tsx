@@ -1,13 +1,17 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/auth-client";
+import { canAccessAdmin } from "@/lib/auth/allowlist";
 
 type Mode = "signin" | "request";
 
+function goToAdmin(path: string) {
+  window.location.assign(path);
+}
+
 export default function LoginForm({ initialStatus }: { initialStatus?: string }) {
-  const router = useRouter();
   const nextPath = useSearchParams().get("next") || "/admin";
   const [mode, setMode] = useState<Mode>("signin");
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +31,8 @@ export default function LoginForm({ initialStatus }: { initialStatus?: string })
     const email = String(form.get("email") ?? "");
     const password = String(form.get("password") ?? "");
     const result = await authClient.signIn.email({ email, password });
-    setPending(false);
     if (result.error) {
+      setPending(false);
       setError(result.error.message || "Could not sign in.");
       return;
     }
@@ -36,12 +40,12 @@ export default function LoginForm({ initialStatus }: { initialStatus?: string })
     const role =
       (session.data?.user as { role?: string } | undefined)?.role ??
       (result.data?.user as { role?: string } | undefined)?.role;
-    if (role === "pending") {
+    if (role === "pending" && !canAccessAdmin(email, role)) {
+      setPending(false);
       setNotice("Your request is waiting for an administrator to add you.");
       return;
     }
-    router.push(nextPath);
-    router.refresh();
+    goToAdmin(nextPath);
   }
 
   async function onRequest(event: React.FormEvent<HTMLFormElement>) {
@@ -54,20 +58,20 @@ export default function LoginForm({ initialStatus }: { initialStatus?: string })
     const password = String(form.get("password") ?? "");
     const name = String(form.get("name") ?? "").trim() || "Administrator";
     const result = await authClient.signUp.email({ email, password, name });
-    setPending(false);
     if (result.error) {
+      setPending(false);
       setError(result.error.message || "Could not create an account.");
       return;
     }
     const role = (result.data?.user as { role?: string } | undefined)?.role;
-    if (role === "pending") {
+    if (role === "pending" && !canAccessAdmin(email, role)) {
       await authClient.signOut();
+      setPending(false);
       setMode("signin");
       setNotice("Account created. An administrator will add you before you can sign in to the workspace.");
       return;
     }
-    router.push(nextPath);
-    router.refresh();
+    goToAdmin(nextPath);
   }
 
   if (mode === "request") {
