@@ -8,6 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3",
     "@vercel/analytics": "^2.0.1",
     "gsap": "^3.12.7",
     "next": "^15.3.4",
