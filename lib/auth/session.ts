@@ -1,28 +1,35 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { count, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
+import { ADMIN_ROLE, isAdminRole } from "@/lib/auth/allowlist";
 import { readyDb } from "@/lib/db/client";
+import { user } from "@/lib/db/schema";
 
 export async function getAdminSession() {
   await readyDb();
   return auth.api.getSession({ headers: await headers() });
 }
 
+export function sessionRole(session: Awaited<ReturnType<typeof getAdminSession>>) {
+  return (session?.user as { role?: string } | undefined)?.role;
+}
+
 export async function requireAdmin() {
   const session = await getAdminSession();
   if (!session?.user) redirect("/admin/login");
+  const role = sessionRole(session);
+  if (!isAdminRole(role)) redirect("/admin/login?status=pending");
   return {
     id: session.user.id,
     name: session.user.name,
     email: session.user.email,
-    role: (session.user as { role?: string }).role ?? "admin",
+    role: role ?? ADMIN_ROLE,
   };
 }
 
 export async function hasAdminUsers() {
-  const { count } = await import("drizzle-orm");
-  const { user } = await import("@/lib/db/schema");
   const db = await readyDb();
-  const [{ total }] = await db.select({ total: count() }).from(user);
+  const [{ total }] = await db.select({ total: count() }).from(user).where(eq(user.role, ADMIN_ROLE));
   return Number(total) > 0;
 }

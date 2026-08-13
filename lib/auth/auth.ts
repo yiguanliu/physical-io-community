@@ -2,18 +2,11 @@ import { dash, sentinel } from "@better-auth/infra";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { APIError, createAuthMiddleware } from "better-auth/api";
 import { getDb } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
+import { ADMIN_ROLE, roleForNewUser } from "@/lib/auth/allowlist";
 import { SITE_URL } from "@/lib/site";
-import { count } from "drizzle-orm";
-
-function allowlist() {
-  return (process.env.ADMIN_ALLOWLIST ?? "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-}
+import { count, eq } from "drizzle-orm";
 
 const authBaseURL = process.env.BETTER_AUTH_URL || (process.env.VERCEL ? SITE_URL : "http://localhost:3000");
 
@@ -36,8 +29,9 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        defaultValue: "admin",
+        defaultValue: "pending",
         input: false,
+        returned: true,
       },
     },
   },
@@ -51,20 +45,25 @@ export const auth = betterAuth({
     "https://physical-io.com",
     "http://localhost:3000",
   ],
-  hooks: {
-    before: createAuthMiddleware(async (ctx) => {
-      if (ctx.path !== "/sign-up/email") return;
-      await (await import("@/lib/db/client")).readyDb();
-      const db = getDb();
-      const [{ total }] = await db.select({ total: count() }).from(schema.user);
-      const email = String(ctx.body?.email ?? "").toLowerCase();
-      const allowed = allowlist();
-      if (Number(total) > 0 && !allowed.includes(email)) {
-        throw new APIError("FORBIDDEN", {
-          message: "Administrator signup is invitation-only. Ask an existing admin to add your email to ADMIN_ALLOWLIST.",
-        });
-      }
-    }),
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          await (await import("@/lib/db/client")).readyDb();
+          const db = getDb();
+          const [{ total }] = await db
+            .select({ total: count() })
+            .from(schema.user)
+            .where(eq(schema.user.role, ADMIN_ROLE));
+          return {
+            data: {
+              ...user,
+              role: roleForNewUser(String(user.email ?? ""), Number(total)),
+            },
+          };
+        },
+      },
+    },
   },
   plugins: [
     dash(),
