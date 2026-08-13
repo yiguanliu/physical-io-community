@@ -20,7 +20,7 @@ pnpm build     # production build
 
 ## Admin workspace
 
-Open `/admin`. The first visit creates the first administrator account; later signups require `ADMIN_ALLOWLIST`.
+Open `/admin`. Sign in with an administrator email. `soul@physical-io.com` can always create an account; other signups require `ADMIN_ALLOWLIST`.
 
 | Area | What it does |
 | --- | --- |
@@ -38,7 +38,7 @@ Copy `.env.example` and set:
 - `BETTER_AUTH_SECRET` — required in production
 - `BETTER_AUTH_URL` — public site URL
 - `BETTER_AUTH_API_KEY` — optional Better Auth Infrastructure key from the [dashboard](https://better-auth.com/dashboard)
-- `ADMIN_ALLOWLIST` — comma-separated emails allowed to create extra admin accounts
+- `ADMIN_ALLOWLIST` — comma-separated extra emails allowed to create administrator accounts (`soul@physical-io.com` is always allowed)
 - `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` — live sending
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — persistent database on Vercel
 

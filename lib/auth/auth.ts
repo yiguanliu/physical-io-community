@@ -5,15 +5,9 @@ import { nextCookies } from "better-auth/next-js";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { getDb } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
+import { canCreateAdmin } from "@/lib/auth/allowlist";
 import { SITE_URL } from "@/lib/site";
 import { count } from "drizzle-orm";
-
-function allowlist() {
-  return (process.env.ADMIN_ALLOWLIST ?? "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-}
 
 const authBaseURL = process.env.BETTER_AUTH_URL || (process.env.VERCEL ? SITE_URL : "http://localhost:3000");
 
@@ -58,8 +52,7 @@ export const auth = betterAuth({
       const db = getDb();
       const [{ total }] = await db.select({ total: count() }).from(schema.user);
       const email = String(ctx.body?.email ?? "").toLowerCase();
-      const allowed = allowlist();
-      if (Number(total) > 0 && !allowed.includes(email)) {
+      if (!canCreateAdmin(email, Number(total))) {
         throw new APIError("FORBIDDEN", {
           message: "Administrator signup is invitation-only. Ask an existing admin to add your email to ADMIN_ALLOWLIST.",
         });

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/auth-client";
 
-export default function LoginForm({ setup }: { setup: boolean }) {
+export default function LoginForm() {
   const router = useRouter();
   const nextPath = useSearchParams().get("next") || "/admin";
   const [error, setError] = useState<string | null>(null);
@@ -17,38 +17,43 @@ export default function LoginForm({ setup }: { setup: boolean }) {
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "");
     const password = String(form.get("password") ?? "");
-    const name = String(form.get("name") ?? "Administrator");
-    const result = setup
-      ? await authClient.signUp.email({ email, password, name })
-      : await authClient.signIn.email({ email, password });
-    setPending(false);
-    if (result.error) {
-      setError(result.error.message || "Could not authenticate.");
+    const name = String(form.get("name") ?? "").trim() || "Administrator";
+
+    const signIn = await authClient.signIn.email({ email, password });
+    if (!signIn.error) {
+      router.push(nextPath);
+      router.refresh();
       return;
     }
-    router.push(nextPath);
-    router.refresh();
+
+    const signUp = await authClient.signUp.email({ email, password, name });
+    setPending(false);
+    if (!signUp.error) {
+      router.push(nextPath);
+      router.refresh();
+      return;
+    }
+
+    setError(signIn.error.message || signUp.error.message || "Could not authenticate.");
   }
 
   return (
     <form className="admin-auth-form" onSubmit={onSubmit}>
-      {setup ? (
-        <label>
-          Name
-          <input name="name" required placeholder="Your name" autoComplete="name" />
-        </label>
-      ) : null}
+      <label>
+        Name
+        <input name="name" placeholder="Your name" autoComplete="name" />
+      </label>
       <label>
         Email
-        <input name="email" type="email" required placeholder="you@physical-io.com" autoComplete="email" />
+        <input name="email" type="email" required placeholder="you@physical-io.com" autoComplete="email" defaultValue="soul@physical-io.com" />
       </label>
       <label>
         Password
-        <input name="password" type="password" required minLength={8} placeholder="At least 8 characters" autoComplete={setup ? "new-password" : "current-password"} />
+        <input name="password" type="password" required minLength={8} placeholder="At least 8 characters" autoComplete="current-password" />
       </label>
       {error ? <p className="admin-auth-error">{error}</p> : null}
       <button className="admin-primary" type="submit" disabled={pending}>
-        {pending ? "Please wait…" : setup ? "Create admin account" : "Sign in"}
+        {pending ? "Please wait…" : "Sign in"}
       </button>
     </form>
   );

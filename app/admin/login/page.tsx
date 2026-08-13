@@ -24,14 +24,14 @@ export default async function AdminLoginPage() {
           <LogoMark />
           <span>PHYSICAL I/O</span>
         </div>
-        <h1>{setup ? "Create the first admin" : "Sign in to admin"}</h1>
+        <h1>Sign in to admin</h1>
         <p>
           {setup
-            ? "This workspace is empty. Create the first invitation-only administrator account."
+            ? "If this workspace is empty, signing in with an allowed administrator email will create the first account."
             : "Use your administrator email. Public signup is disabled."}
         </p>
         <Suspense>
-          <LoginForm setup={setup} />
+          <LoginForm />
         </Suspense>
       </section>
     </main>
