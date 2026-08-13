@@ -1,3 +1,4 @@
+import { dash, sentinel } from "@better-auth/infra";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -57,7 +58,11 @@ export const auth = betterAuth({
       }
     }),
   },
-  plugins: [nextCookies()],
+  plugins: [
+    dash(),
+    sentinel(),
+    nextCookies(),
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;

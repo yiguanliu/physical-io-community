@@ -11,6 +11,7 @@
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
+    "@better-auth/infra": "^0.3.7",
     "@libsql/client": "^0.17.4",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
