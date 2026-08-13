@@ -5,6 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { getDb } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
+import { SITE_URL } from "@/lib/site";
 import { count } from "drizzle-orm";
 
 function allowlist() {
@@ -14,9 +15,11 @@ function allowlist() {
     .filter(Boolean);
 }
 
+const authBaseURL = process.env.BETTER_AUTH_URL || (process.env.VERCEL ? SITE_URL : "http://localhost:3000");
+
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || "dev-only-physical-io-admin-secret-change-me",
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: authBaseURL,
   database: drizzleAdapter(getDb(), {
     provider: "sqlite",
     schema: {
@@ -42,7 +45,12 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 8,
     updateAge: 60 * 30,
   },
-  trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
+  trustedOrigins: [
+    authBaseURL,
+    "https://www.physical-io.com",
+    "https://physical-io.com",
+    "http://localhost:3000",
+  ],
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path !== "/sign-up/email") return;
