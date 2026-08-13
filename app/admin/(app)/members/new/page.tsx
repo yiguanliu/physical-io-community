@@ -44,8 +44,20 @@ export default function NewMemberPage() {
           </select>
         </label>
         <label className="admin-form-wide">
-          Interests
-          <input name="interests" placeholder="Robotics, AI/ML" />
+          Work areas
+          <input name="interests" placeholder="Robotics, AI/ML Training" />
+        </label>
+        <label className="admin-form-wide">
+          Community goals
+          <input name="communityGoals" placeholder="Meeting collaborators / co-founders" />
+        </label>
+        <label className="admin-form-wide">
+          Preferred formats
+          <input name="eventFormats" placeholder="Talks / panels, Hands-on workshops" />
+        </label>
+        <label className="admin-form-wide">
+          Community suggestions
+          <textarea name="suggestions" rows={3} />
         </label>
         <label className="admin-form-wide">
           Notes

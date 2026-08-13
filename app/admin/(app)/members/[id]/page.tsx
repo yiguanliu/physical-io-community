@@ -14,7 +14,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
       <PageHeading
         eyebrow="Member"
         title={member.fullName}
-        description={`${member.email} · joined ${new Date(member.signedUpAt).toLocaleDateString("en-GB")}`}
+        description={`${member.email} · joined ${new Date(member.signedUpAt).toLocaleDateString("en-GB")} · ${member.source.replaceAll("_", " ")}`}
         action={<Badge tone={member.status === "active" ? "success" : "neutral"}>{member.status}</Badge>}
       />
       <form className="admin-form" action={updateMemberAction}>
@@ -57,8 +57,20 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
           </select>
         </label>
         <label className="admin-form-wide">
-          Interests
+          Work areas
           <input name="interests" defaultValue={member.interests.join(", ")} />
+        </label>
+        <label className="admin-form-wide">
+          Community goals
+          <input name="communityGoals" defaultValue={member.communityGoals.join(", ")} />
+        </label>
+        <label className="admin-form-wide">
+          Preferred formats
+          <input name="eventFormats" defaultValue={member.eventFormats.join(", ")} />
+        </label>
+        <label className="admin-form-wide">
+          Community suggestions
+          <textarea name="suggestions" rows={3} defaultValue={member.suggestions} />
         </label>
         <label className="admin-form-wide">
           Notes
