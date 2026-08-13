@@ -20,7 +20,7 @@ pnpm build     # production build
 
 ## Admin workspace
 
-Open `/admin`. Sign in with an administrator email. `soul@physical-io.com` can always create an account; other signups require `ADMIN_ALLOWLIST`.
+Open `/admin`. Sign in with an administrator email and password. People without an account can request access; an existing admin approves them under **Access**. `soul@physical-io.com` is granted admin immediately.
 
 | Area | What it does |
 | --- | --- |
@@ -28,6 +28,7 @@ Open `/admin`. Sign in with an administrator email. `soul@physical-io.com` can a
 | Communications | Draft campaigns, count eligible recipients, test send, mass send, delivery log |
 | Outreach | Sponsor pipeline, notes, status changes, 1:1 email |
 | Events | Event records used by campaign targeting |
+| Access | Approve or decline administrator requests |
 
 Emails honour newsletter/event consent. Members with `consent_unknown`, bounces, complaints or unsubscribes are skipped. Without `RESEND_API_KEY`, sends are recorded locally so you can still practise the workflow.
 
@@ -38,7 +39,7 @@ Copy `.env.example` and set:
 - `BETTER_AUTH_SECRET` — required in production
 - `BETTER_AUTH_URL` — public site URL
 - `BETTER_AUTH_API_KEY` — optional Better Auth Infrastructure key from the [dashboard](https://better-auth.com/dashboard)
-- `ADMIN_ALLOWLIST` — comma-separated extra emails allowed to create administrator accounts (`soul@physical-io.com` is always allowed)
+- `ADMIN_ALLOWLIST` — comma-separated extra emails granted admin immediately on signup (`soul@physical-io.com` is always included). Everyone else can request access.
 - `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` — live sending
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — persistent database on Vercel
 

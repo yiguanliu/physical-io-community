@@ -1,6 +1,9 @@
 /** Emails that may always create an administrator account. */
 export const FOUNDING_ADMINS = ["soul@physical-io.com"];
 
+export const ADMIN_ROLE = "admin";
+export const PENDING_ROLE = "pending";
+
 export function adminAllowlist(envValue = process.env.ADMIN_ALLOWLIST) {
   const extra = (envValue ?? "")
     .split(",")
@@ -9,7 +12,16 @@ export function adminAllowlist(envValue = process.env.ADMIN_ALLOWLIST) {
   return [...new Set([...FOUNDING_ADMINS, ...extra])];
 }
 
-export function canCreateAdmin(email: string, existingUserCount: number, envValue?: string) {
-  if (existingUserCount <= 0) return true;
+export function isAdminRole(role?: string | null) {
+  return role === ADMIN_ROLE;
+}
+
+/** First administrator, or an allowlisted email, is granted admin on signup. Everyone else is pending. */
+export function canCreateAdmin(email: string, existingAdminCount: number, envValue?: string) {
+  if (existingAdminCount <= 0) return true;
   return adminAllowlist(envValue).includes(email.trim().toLowerCase());
+}
+
+export function roleForNewUser(email: string, existingAdminCount: number, envValue?: string) {
+  return canCreateAdmin(email, existingAdminCount, envValue) ? ADMIN_ROLE : PENDING_ROLE;
 }

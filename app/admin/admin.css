@@ -24,6 +24,9 @@
 .admin-check input{width:auto}
 .admin-form-actions{display:flex;gap:8px;justify-content:flex-end}
 .admin-auth-error{color:#9b3617;font-size:12px}
+.admin-auth-success{color:#23714c;font-size:12px}
+.admin-auth-switch{border:0;background:transparent;color:var(--a-orange);font-size:12px;font-weight:650;cursor:pointer;padding:4px 0;text-align:left}
+.admin-empty-note{padding:18px 16px 22px;color:var(--a-muted);font-size:13px}
 .admin-inline-form{display:flex;align-items:center;gap:8px}
 .admin-inline-form small{font-size:10px;color:var(--a-muted)}
 .admin-send-box{background:#fff;border:1px solid var(--a-line);border-radius:10px;padding:16px;margin-bottom:16px;display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}

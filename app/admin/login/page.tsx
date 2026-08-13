@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import LogoMark from "@/components/LogoMark";
 import LoginForm from "@/components/admin/login-form";
-import { getAdminSession, hasAdminUsers } from "@/lib/auth/session";
+import { getAdminSession, sessionRole } from "@/lib/auth/session";
+import { isAdminRole } from "@/lib/auth/allowlist";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -13,10 +14,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AdminLoginPage() {
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
   const session = await getAdminSession();
-  if (session?.user) redirect("/admin");
-  const setup = !(await hasAdminUsers());
+  if (session?.user && isAdminRole(sessionRole(session))) redirect("/admin");
+  const params = await searchParams;
+  const pending = params.status === "pending" || sessionRole(session) === "pending";
   return (
     <main className="admin-app admin-auth">
       <section className="admin-auth-card">
@@ -25,13 +31,9 @@ export default async function AdminLoginPage() {
           <span>PHYSICAL I/O</span>
         </div>
         <h1>Sign in to admin</h1>
-        <p>
-          {setup
-            ? "If this workspace is empty, signing in with an allowed administrator email will create the first account."
-            : "Use your administrator email. Public signup is disabled."}
-        </p>
+        <p>Use your administrator email and password. New users can request access.</p>
         <Suspense>
-          <LoginForm />
+          <LoginForm initialStatus={pending ? "pending" : undefined} />
         </Suspense>
       </section>
     </main>

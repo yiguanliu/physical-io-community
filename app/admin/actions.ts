@@ -225,3 +225,17 @@ export async function saveEventAction(formData: FormData) {
   });
   revalidateAdmin();
 }
+
+export async function approveAccessAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const { setUserRole } = await import("@/lib/admin/access");
+  await setUserRole({ userId: text(formData, "userId"), role: "admin", actor: admin });
+  revalidatePath("/admin/access");
+}
+
+export async function declineAccessAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const { setUserRole } = await import("@/lib/admin/access");
+  await setUserRole({ userId: text(formData, "userId"), role: "denied", actor: admin });
+  revalidatePath("/admin/access");
+}
