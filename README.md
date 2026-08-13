@@ -1,34 +1,56 @@
 # Physical I/O — Website (v0.2)
 
-Landing site for **Physical I/O**, London's community for Physical AI, Robotics & Spatial Intelligence. Built per `Physical_IO_Website_Specification_v0.1.md`.
+Landing site for **Physical I/O**, London's community for Physical AI, Robotics & Spatial Intelligence, plus a private admin workspace for members, email campaigns and sponsor outreach.
 
 ## Stack
 
-- **Next.js 15** (App Router) + **React 19** + **TypeScript**, static export (`output: "export"`)
-- **GSAP** — home intro timeline, scroll reveals (ScrollTrigger), FAQ accordion animation
-- **PlayCanvas** — 3D AXO unit on the home stage (dark cube, glowing paprika panel, transparent canvas)
-- **Zustand** — UI state (`lib/store.ts`: intro/scene readiness, FAQ open index)
+- **Next.js 15** (App Router) + **React 19** + **TypeScript**
+- **Better Auth** — invitation-only administrator login
+- **Drizzle ORM** + **libSQL** — local SQLite by default, Turso in production
+- **Resend** — optional live email sending and webhook tracking
+- **GSAP** — home intro timeline, scroll reveals
+- **PlayCanvas** — 3D AXO unit on the home stage
+- **Zustand** — public-site UI state
 
 ```bash
-npm run dev     # dev server on :3000
-npm run build   # static export → out/
+pnpm dev       # dev server on :3000
+pnpm test      # audience and import unit tests
+pnpm build     # production build
 ```
 
-Deploy `out/` to Netlify, Vercel, Cloudflare Pages or GitHub Pages.
+## Admin workspace
 
-## Structure
+Open `/admin`. The first visit creates the first administrator account; later signups require `ADMIN_ALLOWLIST`.
+
+| Area | What it does |
+| --- | --- |
+| Members | Search, filter, edit, CSV import, consent/suppression |
+| Communications | Draft campaigns, count eligible recipients, test send, mass send, delivery log |
+| Outreach | Sponsor pipeline, notes, status changes, 1:1 email |
+| Events | Event records used by campaign targeting |
+
+Emails honour newsletter/event consent. Members with `consent_unknown`, bounces, complaints or unsubscribes are skipped. Without `RESEND_API_KEY`, sends are recorded locally so you can still practise the workflow.
+
+### Environment
+
+Copy `.env.example` and set:
+
+- `BETTER_AUTH_SECRET` — required in production
+- `BETTER_AUTH_URL` — public site URL
+- `ADMIN_ALLOWLIST` — comma-separated emails allowed to create extra admin accounts
+- `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` — live sending
+- `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — persistent database on Vercel
+
+CSV import accepts the Google Form export headers (`Full name`, `Email address`, `City`, and so on).
+
+## Public site structure
 
 ```
 app/layout.tsx        Root layout — Host Grotesk, metadata defaults
 app/page.tsx          Home (one-screen stage) + Organization/WebSite JSON-LD
-app/about/page.tsx    About — why/how/what, community, structure, roadmap, FAQ (+ FAQPage JSON-LD)
-app/globals.css       Design system — neutral palette, paprika amber accent (#e8940a), Swiss layout
-components/           Nav, Footer, LogoMark (official path), HomeStage (GSAP intro),
-                      AxoScene (PlayCanvas), Reveal (ScrollTrigger), Faq (Zustand + GSAP)
-lib/site.ts           All content data + JOIN_URL / SITE_URL placeholders
-lib/store.ts          Zustand store
-public/assets/        logo.svg (official mark), favicon.svg, home_bg.jpg (auditorium photo)
-_legacy-static/       The previous plain-HTML version (v0.1), kept for reference — safe to delete
+app/about/page.tsx    About — why/how/what, community, structure, roadmap, FAQ
+app/admin/            Private admin workspace
+lib/site.ts           Public content data + JOIN_URL / SITE_URL
 ```
 
 ## Before launch — replace placeholders
