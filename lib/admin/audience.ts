@@ -118,6 +118,112 @@ export const CSV_HEADER_ALIASES: Record<string, string> = {
   linkedin: "linkedinUrl",
 };
 
+export const INTEREST_KIND = {
+  workArea: "work_area",
+  communityGoal: "community_goal",
+  eventFormat: "event_format",
+} as const;
+
+export const KNOWN_WORK_AREAS = [
+  "I'm new to this industry, just here to learn.",
+  "Software Development",
+  "Electrical Engineering",
+  "Operation Management",
+  "Industrial Design",
+  "AI/ML Training",
+  "Manufacturing",
+  "Distribution",
+  "Policy Making",
+  "Investment",
+  "Marketing",
+  "Research",
+  "UI/UX",
+  "HR",
+] as const;
+
+export const KNOWN_COMMUNITY_GOALS = [
+  "Meeting collaborators / co-founders",
+  "Showcasing what I'm building",
+  "Learning from talks & demos",
+  "Staying on top of the field",
+  "Hiring or finding work",
+] as const;
+
+export const KNOWN_EVENT_FORMATS = [
+  "In-person meetups & demos",
+  "Online (Discord / Slack)",
+  "Socials & networking",
+  "Hands-on workshops",
+  "Talks / panels",
+] as const;
+
+export type InterestKind = (typeof INTEREST_KIND)[keyof typeof INTEREST_KIND];
+
+function normalizeHeader(header: string) {
+  return header
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function mapCsvHeader(header: string): string {
+  const normalized = normalizeHeader(header);
+  const exact = CSV_HEADER_ALIASES[normalized];
+  if (exact) return exact;
+  const rules: Array<[string, string]> = [
+    ["timestamp", "signedUpAt"],
+    ["full name", "fullName"],
+    ["email address", "email"],
+    ["which city", "city"],
+    ["what best describes you", "professionalRole"],
+    ["how many years", "experienceRange"],
+    ["what are you working on", "interests"],
+    ["physical ai", "interests"],
+    ["company portfolio github", "websiteUrl"],
+    ["website link", "websiteUrl"],
+    ["linedkin", "linkedinUrl"],
+    ["linkedin", "linkedinUrl"],
+    ["what do you most want", "communityGoals"],
+    ["what format would you actually show up", "eventFormats"],
+    ["anything youd love to see", "suggestions"],
+  ];
+  for (const [needle, field] of rules) {
+    if (normalized === needle || normalized.includes(needle)) return field;
+  }
+  return header;
+}
+
+export function splitFormList(value: string) {
+  return value
+    .split(/[,;|]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+export function extractKnownOptions(value: string, known: readonly string[]): string[] {
+  if (!value.trim()) return [];
+  let rest = value;
+  const found: string[] = [];
+  for (const option of [...known].sort((left, right) => right.length - left.length)) {
+    const escaped = option.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pattern = new RegExp(escaped, "i");
+    if (pattern.test(rest)) {
+      found.push(option);
+      rest = rest.replace(pattern, " ");
+    }
+  }
+  const leftover = rest.replace(/^[\s,;|/]+|[\s,;|/]+$/g, "").trim();
+  if (leftover) found.push(...splitFormList(leftover));
+  return found;
+}
+
+export function normalizeCity(value: string) {
+  const city = value.replace(/\s+/g, " ").trim();
+  if (city.toLowerCase() === "london") return "London";
+  return city;
+}
+
 export type ParsedMemberRow = {
   email: string;
   fullName: string;
@@ -127,20 +233,32 @@ export type ParsedMemberRow = {
   websiteUrl: string;
   linkedinUrl: string;
   interests: string[];
+  communityGoals: string[];
+  eventFormats: string[];
+  suggestions: string;
   signedUpAt: string;
   sourceRow?: string;
 };
 
 export function parseFlexibleDate(value: string) {
-  if (!value.trim()) return new Date().toISOString();
-  const direct = Date.parse(value);
-  if (!Number.isNaN(direct)) return new Date(direct).toISOString();
-  const uk = value.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (uk) {
-    const iso = `${uk[3]}-${uk[2].padStart(2, "0")}-${uk[1].padStart(2, "0")}`;
-    const parsed = Date.parse(iso);
+  const trimmed = value.trim();
+  if (!trimmed) return new Date().toISOString();
+  const withTime = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (withTime) {
+    const first = Number(withTime[1]);
+    const second = Number(withTime[2]);
+    const year = Number(withTime[3]);
+    const hour = Number(withTime[4] ?? "0");
+    const minute = Number(withTime[5] ?? "0");
+    const seconds = Number(withTime[6] ?? "0");
+    const dayFirst = first > 12 && second <= 12;
+    const month = dayFirst ? second : first;
+    const day = dayFirst ? first : second;
+    const parsed = Date.UTC(year, month - 1, day, hour, minute, seconds);
     if (!Number.isNaN(parsed)) return new Date(parsed).toISOString();
   }
+  const direct = Date.parse(trimmed);
+  if (!Number.isNaN(direct)) return new Date(direct).toISOString();
   return new Date().toISOString();
 }
 
@@ -182,10 +300,38 @@ export function parseCsv(text: string): string[][] {
   return rows;
 }
 
+export function mergeMemberRows(rows: ParsedMemberRow[]): ParsedMemberRow[] {
+  const unique = (values: string[]) => [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+  const byEmail = new Map<string, ParsedMemberRow>();
+  for (const row of rows) {
+    const existing = byEmail.get(row.email);
+    if (!existing) {
+      byEmail.set(row.email, { ...row, interests: unique(row.interests), communityGoals: unique(row.communityGoals), eventFormats: unique(row.eventFormats) });
+      continue;
+    }
+    const [earlier, later] = existing.signedUpAt <= row.signedUpAt ? [existing, row] : [row, existing];
+    byEmail.set(row.email, {
+      ...earlier,
+      fullName: later.fullName || earlier.fullName,
+      city: later.city || earlier.city,
+      professionalRole: later.professionalRole || earlier.professionalRole,
+      experienceRange: later.experienceRange || earlier.experienceRange,
+      websiteUrl: later.websiteUrl || earlier.websiteUrl,
+      linkedinUrl: later.linkedinUrl || earlier.linkedinUrl,
+      interests: unique([...earlier.interests, ...later.interests]),
+      communityGoals: unique([...earlier.communityGoals, ...later.communityGoals]),
+      eventFormats: unique([...earlier.eventFormats, ...later.eventFormats]),
+      suggestions: [earlier.suggestions, later.suggestions].filter(Boolean).join("\n"),
+      sourceRow: [earlier.sourceRow, later.sourceRow].filter(Boolean).join(","),
+    });
+  }
+  return [...byEmail.values()].sort((left, right) => left.signedUpAt.localeCompare(right.signedUpAt));
+}
+
 export function parseMemberCsv(text: string): { rows: ParsedMemberRow[]; errors: string[] } {
   const table = parseCsv(text);
   if (table.length < 2) return { rows: [], errors: ["CSV must include a header row and at least one member."] };
-  const headers = table[0].map((header) => CSV_HEADER_ALIASES[header.toLowerCase()] ?? header);
+  const headers = table[0].map((header) => mapCsvHeader(header));
   const emailIndex = headers.indexOf("email");
   const nameIndex = headers.indexOf("fullName");
   if (emailIndex < 0 || nameIndex < 0) {
@@ -208,24 +354,21 @@ export function parseMemberCsv(text: string): { rows: ParsedMemberRow[]; errors:
       errors.push(`Row ${index + 2}: missing name`);
       return;
     }
-    const interests = read("interests")
-      .split(/[,;|]/)
-      .map((item) => item.trim())
-      .filter(Boolean);
-    const signedUpAtRaw = read("signedUpAt");
-    const signedUpAt = parseFlexibleDate(signedUpAtRaw);
     rows.push({
       email,
       fullName,
-      city: read("city"),
+      city: normalizeCity(read("city")),
       professionalRole: read("professionalRole"),
       experienceRange: read("experienceRange"),
       websiteUrl: read("websiteUrl"),
       linkedinUrl: read("linkedinUrl"),
-      interests,
-      signedUpAt,
+      interests: extractKnownOptions(read("interests"), KNOWN_WORK_AREAS),
+      communityGoals: extractKnownOptions(read("communityGoals"), KNOWN_COMMUNITY_GOALS),
+      eventFormats: extractKnownOptions(read("eventFormats"), KNOWN_EVENT_FORMATS),
+      suggestions: read("suggestions"),
+      signedUpAt: parseFlexibleDate(read("signedUpAt")),
       sourceRow: String(index + 2),
     });
   });
-  return { rows, errors };
+  return { rows: mergeMemberRows(rows), errors };
 }

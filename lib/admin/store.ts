@@ -1,10 +1,18 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
-import { firstNameFrom, normalizeEmail, parseAudienceFilter, type AudienceFilter, type AudienceMember } from "@/lib/admin/audience";
+import {
+  EMAIL_TOPICS,
+  INTEREST_KIND,
+  firstNameFrom,
+  normalizeEmail,
+  parseAudienceFilter,
+  type AudienceFilter,
+  type AudienceMember,
+  type InterestKind,
+  type ParsedMemberRow,
+} from "@/lib/admin/audience";
 import { createId, createToken, nowIso } from "@/lib/db/ids";
 import { readyDb } from "@/lib/db/client";
 import { auditLog, campaignEvents, campaignRecipients, campaigns, communityEvents, contacts, leadActivities, leads, memberInterests, members, organisations, outreachMessages, subscriptions } from "@/lib/db/schema";
-import type { ParsedMemberRow } from "@/lib/admin/audience";
-import { EMAIL_TOPICS } from "@/lib/admin/audience";
 
 export type Db = Awaited<ReturnType<typeof readyDb>>;
 
@@ -66,7 +74,7 @@ export async function listMembers(params: { query?: string; status?: string; cit
     .from(members)
     .where(where)
     .orderBy(desc(members.signedUpAt))
-    .limit(params.limit ?? 200);
+    .limit(params.limit ?? 500);
   const ids = rows.map((row) => row.id);
   const interestRows = ids.length ? await db.select().from(memberInterests).where(inArray(memberInterests.memberId, ids)) : [];
   const subscriptionRows = ids.length ? await db.select().from(subscriptions).where(inArray(subscriptions.memberId, ids)) : [];
@@ -75,7 +83,7 @@ export async function listMembers(params: { query?: string; status?: string; cit
   return {
     members: rows.map((row) => ({
       ...row,
-      interests: interestRows.filter((item) => item.memberId === row.id).map((item) => item.interest),
+      ...interestsForMember(interestRows, row.id),
       subscriptions: subscriptionRows.filter((item) => item.memberId === row.id),
     })),
     total: Number(total),
@@ -89,7 +97,27 @@ export async function getMember(id: string) {
   if (!member) return null;
   const interests = await db.select().from(memberInterests).where(eq(memberInterests.memberId, id));
   const memberSubscriptions = await db.select().from(subscriptions).where(eq(subscriptions.memberId, id));
-  return { ...member, interests: interests.map((item) => item.interest), subscriptions: memberSubscriptions };
+  return { ...member, ...interestsForMember(interests, id), subscriptions: memberSubscriptions };
+}
+
+function interestsForMember(rows: Array<{ memberId: string; kind?: string | null; interest: string }>, memberId: string) {
+  const items = rows.filter((item) => item.memberId === memberId);
+  const ofKind = (kind: InterestKind) =>
+    items.filter((item) => (item.kind || INTEREST_KIND.workArea) === kind).map((item) => item.interest);
+  return {
+    interests: ofKind(INTEREST_KIND.workArea),
+    communityGoals: ofKind(INTEREST_KIND.communityGoal),
+    eventFormats: ofKind(INTEREST_KIND.eventFormat),
+  };
+}
+
+async function replaceInterests(db: Db, memberId: string, kind: InterestKind, values: string[]) {
+  await db.delete(memberInterests).where(and(eq(memberInterests.memberId, memberId), eq(memberInterests.kind, kind)));
+  const unique = [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+  if (!unique.length) return;
+  await db.insert(memberInterests).values(
+    unique.map((interest) => ({ id: createId(), memberId, kind, interest })),
+  );
 }
 
 export async function getAllAudienceMembers(): Promise<AudienceMember[]> {
@@ -118,9 +146,12 @@ export async function upsertMember(
     experienceRange?: string;
     websiteUrl?: string;
     linkedinUrl?: string;
+    suggestions?: string;
     status?: string;
     notes?: string;
     interests?: string[];
+    communityGoals?: string[];
+    eventFormats?: string[];
     source?: string;
     sourceRow?: string;
     signedUpAt?: string;
@@ -145,6 +176,7 @@ export async function upsertMember(
     experienceRange: input.experienceRange?.trim() ?? existing?.experienceRange ?? "",
     websiteUrl: input.websiteUrl?.trim() ?? existing?.websiteUrl ?? "",
     linkedinUrl: input.linkedinUrl?.trim() ?? existing?.linkedinUrl ?? "",
+    suggestions: input.suggestions?.trim() ?? existing?.suggestions ?? "",
     status: input.status ?? existing?.status ?? "active",
     notes: input.notes ?? existing?.notes ?? "",
     source: input.source ?? existing?.source ?? "manual",
@@ -164,14 +196,9 @@ export async function upsertMember(
     });
     await defaultSubscriptions(db, id, input.newsletterConsent ? "subscribed" : "consent_unknown");
   }
-  if (input.interests) {
-    await db.delete(memberInterests).where(eq(memberInterests.memberId, id));
-    if (input.interests.length) {
-      await db.insert(memberInterests).values(
-        input.interests.map((interest) => ({ id: createId(), memberId: id, interest })),
-      );
-    }
-  }
+  if (input.interests) await replaceInterests(db, id, INTEREST_KIND.workArea, input.interests);
+  if (input.communityGoals) await replaceInterests(db, id, INTEREST_KIND.communityGoal, input.communityGoals);
+  if (input.eventFormats) await replaceInterests(db, id, INTEREST_KIND.eventFormat, input.eventFormats);
   if (typeof input.newsletterConsent === "boolean" && existing) {
     await db
       .update(subscriptions)
@@ -194,7 +221,11 @@ export async function upsertMember(
   return id;
 }
 
-export async function importMemberRows(rows: ParsedMemberRow[], actor: { id?: string; name: string }) {
+export async function importMemberRows(
+  rows: ParsedMemberRow[],
+  actor: { id?: string; name: string },
+  options: { source?: string } = {},
+) {
   let created = 0;
   let updated = 0;
   const rejected: string[] = [];
@@ -211,8 +242,11 @@ export async function importMemberRows(rows: ParsedMemberRow[], actor: { id?: st
           experienceRange: row.experienceRange,
           websiteUrl: row.websiteUrl,
           linkedinUrl: row.linkedinUrl,
+          suggestions: row.suggestions,
           interests: row.interests,
-          source: "csv",
+          communityGoals: row.communityGoals,
+          eventFormats: row.eventFormats,
+          source: options.source ?? "csv",
           sourceRow: row.sourceRow,
           signedUpAt: row.signedUpAt,
         },

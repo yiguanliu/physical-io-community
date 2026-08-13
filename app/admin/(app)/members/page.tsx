@@ -21,7 +21,7 @@ export default async function MembersPage({
       <PageHeading
         eyebrow="Community"
         title="Members"
-        description="Search, filter and manage everyone collected into the Physical I/O workspace."
+        description="Everyone who signed up through the Physical I/O Google Form, plus any members added here."
         action={
           <Link className="admin-primary" href="/admin/members/new">
             <Icon name="plus" size={16} />
@@ -67,16 +67,14 @@ export default async function MembersPage({
                 <th>Member</th>
                 <th>Role</th>
                 <th>Location</th>
-                <th>Interests</th>
-                <th>Email</th>
+                <th>Experience</th>
+                <th>Work areas</th>
                 <th>Joined</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => {
-                const newsletter = member.subscriptions.find((item) => item.topic === "newsletter");
-                return (
+              {members.map((member) => (
                   <tr key={member.id}>
                     <td>
                       <Link className="member-cell" href={`/admin/members/${member.id}`}>
@@ -89,17 +87,13 @@ export default async function MembersPage({
                     </td>
                     <td>{member.professionalRole || "—"}</td>
                     <td>{member.city || "—"}</td>
+                    <td>{member.experienceRange || "—"}</td>
                     <td>
                       <div className="topic-list">
                         {member.interests.slice(0, 2).map((topic) => (
                           <Badge key={topic}>{topic}</Badge>
                         ))}
                       </div>
-                    </td>
-                    <td>
-                      <Badge tone={newsletter?.status === "subscribed" ? "success" : newsletter?.status === "unsubscribed" ? "warning" : "neutral"}>
-                        {newsletter?.status ?? "unknown"}
-                      </Badge>
                     </td>
                     <td>{formatDate(member.signedUpAt)}</td>
                     <td>
@@ -108,8 +102,7 @@ export default async function MembersPage({
                       </Badge>
                     </td>
                   </tr>
-                );
-              })}
+              ))}
             </tbody>
           </table>
         </div>

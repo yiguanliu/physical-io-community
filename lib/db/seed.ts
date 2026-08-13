@@ -1,9 +1,9 @@
-import { count } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
+import { EMAIL_TOPICS, INTEREST_KIND, firstNameFrom, parseMemberCsv } from "@/lib/admin/audience";
+import { SIGNUP_RESPONSES_CSV } from "@/lib/db/fixtures/signup-responses";
 import { createId, createToken, nowIso } from "@/lib/db/ids";
 import {
   auditLog,
-  campaignEvents,
-  campaignRecipients,
   campaigns,
   communityEvents,
   contacts,
@@ -16,131 +16,92 @@ import {
   subscriptions,
 } from "@/lib/db/schema";
 import type { readyDb } from "@/lib/db/client";
+import type { ParsedMemberRow } from "@/lib/admin/audience";
 
 type Db = Awaited<ReturnType<typeof readyDb>>;
 
-const sampleMembers = [
-  {
-    name: "Ava Oppenheimer",
-    email: "ava@tryito.io",
-    role: "Founder / Operator",
-    city: "London",
-    interests: ["Robotics", "AI/ML"],
-    status: "active",
-    subscribed: true,
-  },
-  {
-    name: "Calvin Calica",
-    email: "calvin@network.rca.ac.uk",
-    role: "Designer",
-    city: "London",
-    interests: ["Industrial Design"],
-    status: "active",
-    subscribed: true,
-  },
-  {
-    name: "Nora Chen",
-    email: "nora@example.com",
-    role: "Founder / Operator",
-    city: "London",
-    interests: ["AI/ML", "Marketing"],
-    status: "review",
-    subscribed: false,
-  },
-  {
-    name: "Adam Klestil",
-    email: "adam@example.com",
-    role: "Designer",
-    city: "Vienna",
-    interests: ["UI/UX", "Research"],
-    status: "active",
-    subscribed: true,
-  },
-  {
-    name: "Mina Park",
-    email: "mina@example.com",
-    role: "Researcher",
-    city: "Cambridge",
-    interests: ["Embodied AI"],
-    status: "active",
-    subscribed: true,
-  },
-  {
-    name: "Leo Martins",
-    email: "leo@example.com",
-    role: "Engineer",
-    city: "London",
-    interests: ["Robotics", "Hardware"],
-    status: "paused",
-    subscribed: false,
-  },
-  {
-    name: "Priya Shah",
-    email: "priya@example.com",
-    role: "Engineer",
-    city: "London",
-    interests: ["Computer Vision", "Robotics"],
-    status: "active",
-    subscribed: true,
-  },
-  {
-    name: "James Hall",
-    email: "james@example.com",
-    role: "Researcher",
-    city: "Manchester",
-    interests: ["Spatial Intelligence"],
-    status: "active",
-    subscribed: true,
-  },
-];
-
-export async function seedIfEmpty(db: Db) {
-  const [{ total }] = await db.select({ total: count() }).from(members);
-  if (Number(total) > 0) return;
-
+async function insertParsedMember(db: Db, row: ParsedMemberRow, source: string) {
+  const id = createId();
   const timestamp = nowIso();
-  const memberIds: string[] = [];
-
-  for (const [index, sample] of sampleMembers.entries()) {
-    const id = createId();
-    memberIds.push(id);
-    const signedUpAt = new Date(Date.UTC(2026, 5, 29 + (index % 6))).toISOString();
-    await db.insert(members).values({
-      id,
-      email: sample.email,
-      emailNormalized: sample.email.toLowerCase(),
-      fullName: sample.name,
-      firstName: sample.name.split(" ")[0],
-      city: sample.city,
-      professionalRole: sample.role,
-      experienceRange: "3-7 years",
-      status: sample.status,
-      emailStatus: sample.subscribed ? "ok" : "ok",
-      source: "seed",
-      unsubscribeToken: createToken(),
-      signedUpAt,
+  await db.insert(members).values({
+    id,
+    email: row.email,
+    emailNormalized: row.email,
+    fullName: row.fullName,
+    firstName: firstNameFrom(row.fullName),
+    city: row.city,
+    professionalRole: row.professionalRole,
+    experienceRange: row.experienceRange,
+    websiteUrl: row.websiteUrl,
+    linkedinUrl: row.linkedinUrl,
+    suggestions: row.suggestions,
+    status: "active",
+    emailStatus: "ok",
+    source,
+    sourceRow: row.sourceRow ?? null,
+    unsubscribeToken: createToken(),
+    signedUpAt: row.signedUpAt,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  });
+  const tags = [
+    ...row.interests.map((interest) => ({ kind: INTEREST_KIND.workArea, interest })),
+    ...row.communityGoals.map((interest) => ({ kind: INTEREST_KIND.communityGoal, interest })),
+    ...row.eventFormats.map((interest) => ({ kind: INTEREST_KIND.eventFormat, interest })),
+  ];
+  if (tags.length) {
+    await db.insert(memberInterests).values(tags.map((tag) => ({ id: createId(), memberId: id, ...tag })));
+  }
+  await db.insert(subscriptions).values(
+    EMAIL_TOPICS.map((topic) => ({
+      id: createId(),
+      memberId: id,
+      channel: "email",
+      topic,
+      status: "consent_unknown" as const,
       createdAt: timestamp,
       updatedAt: timestamp,
-    });
-    if (sample.interests.length) {
-      await db.insert(memberInterests).values(
-        sample.interests.map((interest) => ({ id: createId(), memberId: id, interest })),
-      );
-    }
-    await db.insert(subscriptions).values(
-      (["newsletter", "events", "announcements"] as const).map((topic) => ({
-        id: createId(),
-        memberId: id,
-        channel: "email",
-        topic,
-        status: sample.subscribed ? "subscribed" : "consent_unknown",
-        consentAt: sample.subscribed ? signedUpAt : null,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      })),
-    );
+    })),
+  );
+  return id;
+}
+
+async function ensureSignupMembers(db: Db) {
+  const [{ total }] = await db.select({ total: count() }).from(members).where(eq(members.source, "google_form"));
+  if (Number(total) > 0) return;
+
+  const seedRows = await db.select({ id: members.id }).from(members).where(eq(members.source, "seed"));
+  for (const row of seedRows) {
+    await db.delete(members).where(eq(members.id, row.id));
   }
 
+  const parsed = parseMemberCsv(SIGNUP_RESPONSES_CSV);
+  let imported = 0;
+  for (const row of parsed.rows) {
+    const [existing] = await db
+      .select({ id: members.id })
+      .from(members)
+      .where(eq(members.emailNormalized, row.email))
+      .limit(1);
+    if (existing) continue;
+    await insertParsedMember(db, row, "google_form");
+    imported += 1;
+  }
+
+  await db.insert(auditLog).values({
+    id: createId(),
+    actorName: "System",
+    action: "import",
+    entityType: "member",
+    summary: `Imported ${imported} members from Google Form signup responses${parsed.errors.length ? ` (${parsed.errors.length} rows skipped)` : ""}`,
+  });
+}
+
+async function seedWorkspaceIfEmpty(db: Db) {
+  const [{ campaignCount }] = await db.select({ campaignCount: count() }).from(campaigns);
+  if (Number(campaignCount) > 0) return;
+
+  const timestamp = nowIso();
   const eventId = createId();
   await db.insert(communityEvents).values({
     id: eventId,
@@ -153,49 +114,6 @@ export async function seedIfEmpty(db: Db) {
     registeredCount: 184,
     createdAt: timestamp,
     updatedAt: timestamp,
-  });
-
-  const sentCampaignId = createId();
-  await db.insert(campaigns).values({
-    id: sentCampaignId,
-    name: "July node spotlight",
-    type: "newsletter",
-    status: "sent",
-    subject: "July in the Physical I/O community",
-    previewText: "Demos, people, and what’s next.",
-    body: "Hi {{first_name}},\n\nA short note on what the community built this month.",
-    audienceFilter: JSON.stringify({ campaignType: "newsletter", requireConsent: true }),
-    sentAt: "2026-07-24T09:00:00.000Z",
-    createdByName: "System",
-    idempotencyKey: createId(),
-    recipientCount: 5,
-    skipCount: 3,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  });
-
-  const optedIn = sampleMembers
-    .map((sample, index) => ({ sample, id: memberIds[index] }))
-    .filter((item) => item.sample.subscribed);
-  await db.insert(campaignRecipients).values(
-    optedIn.map((item, index) => ({
-      id: createId(),
-      campaignId: sentCampaignId,
-      memberId: item.id,
-      email: item.sample.email,
-      name: item.sample.name,
-      status: index === 0 ? "opened" : "delivered",
-      sentAt: "2026-07-24T09:01:00.000Z",
-      openedAt: index === 0 ? "2026-07-24T10:12:00.000Z" : null,
-      createdAt: timestamp,
-    })),
-  );
-  await db.insert(campaignEvents).values({
-    id: createId(),
-    campaignId: sentCampaignId,
-    type: "sent",
-    payload: JSON.stringify({ provider: "seed" }),
-    createdAt: "2026-07-24T09:01:00.000Z",
   });
 
   await db.insert(campaigns).values({
@@ -291,12 +209,9 @@ export async function seedIfEmpty(db: Db) {
       });
     }
   }
+}
 
-  await db.insert(auditLog).values({
-    id: createId(),
-    actorName: "System",
-    action: "seed",
-    entityType: "workspace",
-    summary: "Loaded starter members, campaigns and outreach records",
-  });
+export async function seedIfEmpty(db: Db) {
+  await ensureSignupMembers(db);
+  await seedWorkspaceIfEmpty(db);
 }

@@ -75,6 +75,7 @@ export const members = sqliteTable(
     experienceRange: text("experience_range").notNull().default(""),
     websiteUrl: text("website_url").notNull().default(""),
     linkedinUrl: text("linkedin_url").notNull().default(""),
+    suggestions: text("suggestions").notNull().default(""),
     status: text("status").notNull().default("active"),
     emailStatus: text("email_status").notNull().default("ok"),
     source: text("source").notNull().default("manual"),
@@ -100,9 +101,13 @@ export const memberInterests = sqliteTable(
     memberId: text("member_id")
       .notNull()
       .references(() => members.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull().default("work_area"),
     interest: text("interest").notNull(),
   },
-  (table) => [index("member_interests_member_idx").on(table.memberId)],
+  (table) => [
+    index("member_interests_member_idx").on(table.memberId),
+    index("member_interests_kind_idx").on(table.kind),
+  ],
 );
 
 export const subscriptions = sqliteTable(

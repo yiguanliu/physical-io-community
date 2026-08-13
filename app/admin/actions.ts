@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { parseMemberCsv, type AudienceFilter } from "@/lib/admin/audience";
+import { parseMemberCsv, extractKnownOptions, KNOWN_WORK_AREAS, KNOWN_COMMUNITY_GOALS, KNOWN_EVENT_FORMATS, type AudienceFilter } from "@/lib/admin/audience";
 import { previewAudience, sendCampaign, sendTestCampaign } from "@/lib/admin/campaigns";
 import { sendOutreachMessage } from "@/lib/admin/outreach";
 import {
@@ -27,6 +27,10 @@ function revalidateAdmin() {
   revalidatePath("/admin");
 }
 
+function taggedList(form: FormData, key: string, known: readonly string[]) {
+  return extractKnownOptions(text(form, key), known);
+}
+
 export async function createMemberAction(formData: FormData) {
   const admin = await requireAdmin();
   const id = await upsertMember(
@@ -38,12 +42,12 @@ export async function createMemberAction(formData: FormData) {
       experienceRange: text(formData, "experienceRange"),
       websiteUrl: text(formData, "websiteUrl"),
       linkedinUrl: text(formData, "linkedinUrl"),
+      suggestions: text(formData, "suggestions"),
       status: text(formData, "status") || "active",
       notes: text(formData, "notes"),
-      interests: text(formData, "interests")
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
+      interests: taggedList(formData, "interests", KNOWN_WORK_AREAS),
+      communityGoals: taggedList(formData, "communityGoals", KNOWN_COMMUNITY_GOALS),
+      eventFormats: taggedList(formData, "eventFormats", KNOWN_EVENT_FORMATS),
       newsletterConsent: formData.get("newsletterConsent") === "on",
     },
     admin,
@@ -65,12 +69,12 @@ export async function updateMemberAction(formData: FormData) {
       experienceRange: text(formData, "experienceRange"),
       websiteUrl: text(formData, "websiteUrl"),
       linkedinUrl: text(formData, "linkedinUrl"),
+      suggestions: text(formData, "suggestions"),
       status: text(formData, "status") || "active",
       notes: text(formData, "notes"),
-      interests: text(formData, "interests")
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
+      interests: taggedList(formData, "interests", KNOWN_WORK_AREAS),
+      communityGoals: taggedList(formData, "communityGoals", KNOWN_COMMUNITY_GOALS),
+      eventFormats: taggedList(formData, "eventFormats", KNOWN_EVENT_FORMATS),
     },
     admin,
   );
@@ -88,7 +92,7 @@ export async function importMembersAction(formData: FormData) {
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) throw new Error("Choose a CSV file to import.");
   const parsed = parseMemberCsv(await file.text());
-  const result = await importMemberRows(parsed.rows, admin);
+  const result = await importMemberRows(parsed.rows, admin, { source: "csv" });
   revalidateAdmin();
   return { ...result, parseErrors: parsed.errors };
 }
