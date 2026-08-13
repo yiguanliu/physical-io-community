@@ -32,9 +32,11 @@ export default async function AdminOverviewPage() {
           <div className="stage-index">01</div>
           <div>
             <span>SETUP</span>
-            <h2>{stats.resendConfigured ? "Preview database is ephemeral" : "Connect sending to go live"}</h2>
+            <h2>{stats.ephemeral ? "No persistent database connected" : "Connect sending to go live"}</h2>
             <p>
-              {stats.ephemeral ? "This Vercel instance is using a temporary database. Set TURSO_DATABASE_URL for persistence. " : ""}
+              {stats.ephemeral
+                ? "Each request can be served by a different machine with its own temporary database, so new admin accounts and edits are lost. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN, then redeploy. "
+                : ""}
               {stats.resendConfigured
                 ? "Resend is configured — production sends will go out."
                 : "Campaigns still run and are tracked without RESEND_API_KEY; they are delivered locally until a sending domain is connected."}

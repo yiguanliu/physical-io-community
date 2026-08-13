@@ -41,9 +41,34 @@ Copy `.env.example` and set:
 - `BETTER_AUTH_API_KEY` — optional Better Auth Infrastructure key from the [dashboard](https://better-auth.com/dashboard)
 - `ADMIN_ALLOWLIST` — comma-separated extra emails granted admin immediately on signup (`soul@physical-io.com` is always included). Everyone else can request access.
 - `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` — live sending
-- `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — persistent database on Vercel
+- `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — **required on Vercel**, see below
 
 CSV import accepts the Google Form export headers (`Full name`, `Email address`, `City`, and so on).
+
+### Database on Vercel
+
+Local development writes to `data/physical-io-admin.db`, which persists between restarts. Vercel has no writable
+disk, so without a configured database each serverless instance falls back to its own `/tmp` file. Those files are not
+shared between instances and are wiped on every deploy, so an admin account created on one request is gone by the
+next one — Better Auth reports it as `User not found`.
+
+The admin refuses to create accounts in that state and shows a warning on `/admin/login` and the workspace overview.
+To make the deployment persistent:
+
+1. Create a database and token — for example with the [Turso CLI](https://docs.turso.tech/quickstart):
+
+   ```bash
+   turso db create physical-io-admin
+   turso db show physical-io-admin --url   # libsql://…
+   turso db tokens create physical-io-admin
+   ```
+
+2. Add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` to the Vercel project (Production, Preview, Development).
+3. Redeploy. The first request runs the Drizzle migrations and imports the Google Form signups.
+4. Create the administrator account once, at `/admin/login` → **Request admin access**.
+
+Any libSQL-compatible URL works. `TURSO_DATABASE_URL` without `TURSO_AUTH_TOKEN` fails fast with a clear error
+instead of a libSQL `401`.
 
 ## Public site structure
 

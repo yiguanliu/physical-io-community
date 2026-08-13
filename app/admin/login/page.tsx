@@ -4,6 +4,7 @@ import LogoMark from "@/components/LogoMark";
 import LoginForm from "@/components/admin/login-form";
 import { getAdminSession, sessionRole } from "@/lib/auth/session";
 import { canAccessAdmin } from "@/lib/auth/allowlist";
+import { isEphemeralDatabase } from "@/lib/db/client";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,15 @@ export default async function AdminLoginPage({
         </div>
         <h1>Sign in to admin</h1>
         <p>Use your administrator email and password. New users can request access.</p>
+        {isEphemeralDatabase() ? (
+          <div className="admin-auth-warning">
+            <strong>No persistent database connected</strong>
+            <span>
+              This deployment stores data on the machine that happens to serve each request, so accounts cannot be
+              created. Set <code>TURSO_DATABASE_URL</code> and <code>TURSO_AUTH_TOKEN</code>, then redeploy.
+            </span>
+          </div>
+        ) : null}
         <Suspense>
           <LoginForm initialStatus={pending ? "pending" : undefined} />
         </Suspense>
