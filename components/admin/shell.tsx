@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import LogoMark from "@/components/LogoMark";
-import { NAV } from "@/components/admin/nav";
+import { NAV, labelForPath, parentPath } from "@/components/admin/nav";
 import { Icon } from "@/components/admin/ui";
 import { authClient } from "@/lib/auth/auth-client";
 
@@ -18,7 +18,8 @@ export default function AdminShell({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const view = NAV.find((item) => (item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href)))?.label ?? "Overview";
+  const view = labelForPath(pathname);
+  const parent = parentPath(pathname);
 
   async function signOut() {
     await authClient.signOut();
@@ -78,8 +79,17 @@ export default function AdminShell({
             <span />
           </button>
           <div className="admin-breadcrumb">
-            <span>Physical I/O</span>
-            <b>/</b>
+            {parent ? (
+              <Link
+                className="admin-breadcrumb-back"
+                href={parent}
+                aria-label={`Back to ${labelForPath(parent)}`}
+                title={`Back to ${labelForPath(parent)}`}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <Icon name="arrow-left" size={16} />
+              </Link>
+            ) : null}
             <strong>{view}</strong>
           </div>
           <div className="admin-top-actions">

@@ -9,6 +9,7 @@ export type IconName =
   | "bell"
   | "plus"
   | "arrow"
+  | "arrow-left"
   | "spark"
   | "dots"
   | "clock"
@@ -71,6 +72,7 @@ export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
     ),
     plus: <path d="M12 5v14M5 12h14" />,
     arrow: <path d="m9 18 6-6-6-6" />,
+    "arrow-left": <path d="m15 18-6-6 6-6" />,
     spark: <path d="m12 3 1.4 4.2L18 9l-4.6 1.8L12 15l-1.4-4.2L6 9l4.6-1.8L12 3Zm6 11 .7 2.3L21 17l-2.3.7L18 20l-.7-2.3L15 17l2.3-.7L18 14Z" />,
     dots: (
       <>
