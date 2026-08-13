@@ -1,3 +1,4 @@
+import { dash, sentinel } from "@better-auth/infra";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -57,7 +58,29 @@ export const auth = betterAuth({
       }
     }),
   },
-  plugins: [nextCookies()],
+  plugins: [
+    ...(process.env.BETTER_AUTH_API_KEY
+      ? [
+          dash({
+            apiKey: process.env.BETTER_AUTH_API_KEY,
+            ...(process.env.BETTER_AUTH_API_URL ? { apiUrl: process.env.BETTER_AUTH_API_URL } : {}),
+            ...(process.env.BETTER_AUTH_KV_URL ? { kvUrl: process.env.BETTER_AUTH_KV_URL } : {}),
+          }),
+          sentinel({
+            apiKey: process.env.BETTER_AUTH_API_KEY,
+            ...(process.env.BETTER_AUTH_API_URL ? { apiUrl: process.env.BETTER_AUTH_API_URL } : {}),
+            ...(process.env.BETTER_AUTH_KV_URL ? { kvUrl: process.env.BETTER_AUTH_KV_URL } : {}),
+            security: {
+              credentialStuffing: {
+                enabled: true,
+                thresholds: { challenge: 3, block: 5 },
+              },
+            },
+          }),
+        ]
+      : []),
+    nextCookies(),
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;
