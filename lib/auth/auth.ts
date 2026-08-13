@@ -59,26 +59,8 @@ export const auth = betterAuth({
     }),
   },
   plugins: [
-    ...(process.env.BETTER_AUTH_API_KEY
-      ? [
-          dash({
-            apiKey: process.env.BETTER_AUTH_API_KEY,
-            ...(process.env.BETTER_AUTH_API_URL ? { apiUrl: process.env.BETTER_AUTH_API_URL } : {}),
-            ...(process.env.BETTER_AUTH_KV_URL ? { kvUrl: process.env.BETTER_AUTH_KV_URL } : {}),
-          }),
-          sentinel({
-            apiKey: process.env.BETTER_AUTH_API_KEY,
-            ...(process.env.BETTER_AUTH_API_URL ? { apiUrl: process.env.BETTER_AUTH_API_URL } : {}),
-            ...(process.env.BETTER_AUTH_KV_URL ? { kvUrl: process.env.BETTER_AUTH_KV_URL } : {}),
-            security: {
-              credentialStuffing: {
-                enabled: true,
-                thresholds: { challenge: 3, block: 5 },
-              },
-            },
-          }),
-        ]
-      : []),
+    dash(),
+    sentinel(),
     nextCookies(),
   ],
 });
