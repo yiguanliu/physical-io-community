@@ -50,7 +50,7 @@ CSV import accepts the Google Form export headers (`Full name`, `Email address`,
 
 Supabase schema and cleaned signup import files live under `supabase/`:
 
-- `supabase/migrations/20260814000000_admin_workspace.sql` creates the admin/community tables.
+- `supabase/migrations/20260814014839_admin_workspace.sql` creates the admin/community tables.
 - `supabase/seed.sql` imports the cleaned Google Form signup members.
 - `supabase/seeds/signup_members_cleaned.csv` is the cleaned CSV used to produce the seed.
 

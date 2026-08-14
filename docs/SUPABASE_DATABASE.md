@@ -1,19 +1,26 @@
 # Supabase Database
 
-The Supabase schema lives in `supabase/migrations/20260814000000_admin_workspace.sql`.
+The Supabase schema lives in `supabase/migrations/20260814014839_admin_workspace.sql`.
 It mirrors the admin workspace data model for members, interests, subscriptions,
 campaigns, events, sponsor outreach, and audit logs.
 
 ## Apply The Migration
 
-Use the Supabase SQL editor or CLI against project `dozeanhsgkjztmewtlqd`:
+Use the Supabase CLI against project `dozeanhsgkjztmewtlqd`:
 
 ```bash
+supabase link --project-ref dozeanhsgkjztmewtlqd
+supabase migration list
 supabase db push
 ```
 
-If you are using the SQL editor, run the migration SQL first, then run
-`supabase/seed.sql`.
+The committed migration filenames are intentionally aligned with the hosted
+project's migration ledger. The `seed_members_chunk_*` and one-shot RPC files are
+historical markers for changes that were applied remotely during setup; the
+repeatable seed data now lives in `supabase/seed.sql`.
+
+If you are using the SQL editor against a fresh database, run the schema
+migration SQL first, then run `supabase/seed.sql`.
 
 ## Seeded Signup Data
 
