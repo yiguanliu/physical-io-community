@@ -17,10 +17,12 @@ function authErrorMessage(message?: string) {
 }
 
 export async function signInAdminAction(formData: FormData): Promise<AdminAuthActionResult> {
+  let supabase: ReturnType<typeof createClient> | null = null;
   try {
+    assertAccountsPersist();
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const password = String(formData.get("password") ?? "");
-    const supabase = createClient(await cookies());
+    supabase = createClient(await cookies());
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error || !data.user) return { ok: false, error: authErrorMessage(error?.message) };
 
@@ -34,17 +36,19 @@ export async function signInAdminAction(formData: FormData): Promise<AdminAuthAc
     }
     return { ok: true };
   } catch (error) {
+    await supabase?.auth.signOut().catch(() => undefined);
     return { ok: false, error: authErrorMessage(error instanceof Error ? error.message : undefined) };
   }
 }
 
 export async function requestAdminAccessAction(formData: FormData): Promise<AdminAuthActionResult> {
+  let supabase: ReturnType<typeof createClient> | null = null;
   try {
     assertAccountsPersist();
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const password = String(formData.get("password") ?? "");
     const name = String(formData.get("name") ?? "").trim() || "Administrator";
-    const supabase = createClient(await cookies());
+    supabase = createClient(await cookies());
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -65,6 +69,7 @@ export async function requestAdminAccessAction(formData: FormData): Promise<Admi
     }
     return { ok: true, confirmationRequired: !data.session };
   } catch (error) {
+    await supabase?.auth.signOut().catch(() => undefined);
     return { ok: false, error: authErrorMessage(error instanceof Error ? error.message : undefined) };
   }
 }

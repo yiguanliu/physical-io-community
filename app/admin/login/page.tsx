@@ -4,6 +4,7 @@ import LogoMark from "@/components/LogoMark";
 import LoginForm from "@/components/admin/login-form";
 import { getAdminSession, sessionRole } from "@/lib/auth/session";
 import { canAccessAdmin } from "@/lib/auth/allowlist";
+import { hasSupabaseAdminEnv } from "@/lib/auth/guards";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -14,17 +15,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-function hasSupabaseAdminConfig() {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY));
-}
-
 export default async function AdminLoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
   const session = await getAdminSession();
-  if (session?.user && canAccessAdmin(session.user.email, sessionRole(session))) redirect("/admin");
+  const hasAdminConfig = hasSupabaseAdminEnv();
+  if (hasAdminConfig && session?.user && canAccessAdmin(session.user.email, sessionRole(session))) redirect("/admin");
   const params = await searchParams;
   const pending =
     params.status === "pending" ||
@@ -38,7 +36,7 @@ export default async function AdminLoginPage({
         </div>
         <h1>Sign in to admin</h1>
         <p>Use your administrator email and password. New users can request access.</p>
-        {!hasSupabaseAdminConfig() ? (
+        {!hasAdminConfig ? (
           <div className="admin-auth-warning">
             <strong>Supabase admin key missing</strong>
             <span>
