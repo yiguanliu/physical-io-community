@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { PageHeading } from "@/components/admin/shell";
 import ImportMembersForm from "@/components/admin/import-members-form";
-import { Badge, formatDate, Icon, initials } from "@/components/admin/ui";
+import MemberSelectionTable from "@/components/admin/member-selection-table";
+import { Icon } from "@/components/admin/ui";
 import { listMembers } from "@/lib/admin/store";
 
 export default async function MembersPage({
@@ -53,60 +54,7 @@ export default async function MembersPage({
         <div className="toolbar-spacer" />
         <ImportMembersForm />
       </form>
-      <section className="admin-table-panel">
-        <div className="member-summary">
-          <strong>{members.length} shown</strong>
-          <span>{total} total members</span>
-          <div />
-          <Link href="/admin/campaigns/new">Email this view</Link>
-        </div>
-        <div className="admin-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Member</th>
-                <th>Role</th>
-                <th>Location</th>
-                <th>Experience</th>
-                <th>Work areas</th>
-                <th>Joined</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member) => (
-                  <tr key={member.id}>
-                    <td>
-                      <Link className="member-cell" href={`/admin/members/${member.id}`}>
-                        <span>{initials(member.fullName)}</span>
-                        <p>
-                          <strong>{member.fullName}</strong>
-                          <small>{member.email}</small>
-                        </p>
-                      </Link>
-                    </td>
-                    <td>{member.professionalRole || "—"}</td>
-                    <td>{member.city || "—"}</td>
-                    <td>{member.experienceRange || "—"}</td>
-                    <td>
-                      <div className="topic-list">
-                        {member.interests.slice(0, 2).map((topic) => (
-                          <Badge key={topic}>{topic}</Badge>
-                        ))}
-                      </div>
-                    </td>
-                    <td>{formatDate(member.signedUpAt)}</td>
-                    <td>
-                      <Badge tone={member.status === "active" ? "success" : member.status === "review" ? "warning" : "neutral"}>
-                        {member.status}
-                      </Badge>
-                    </td>
-                  </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <MemberSelectionTable members={members} total={total} />
     </>
   );
 }

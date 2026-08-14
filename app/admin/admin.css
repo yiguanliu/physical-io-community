@@ -48,3 +48,13 @@
 .member-cell{color:inherit}
 @media(max-width:820px){.admin-form{grid-template-columns:1fr}.campaign-list>a{grid-template-columns:38px 1fr auto 16px}}
 
+.member-summary .compact-action{height:29px;padding:0 10px;font-size:10px}
+.member-summary .admin-primary{background:#171714;color:#fff;border-color:#171714}
+.member-summary .admin-primary:hover{background:var(--a-orange);border-color:var(--a-orange)}
+.member-summary .admin-primary:disabled,.member-summary .admin-secondary:disabled{opacity:.4;cursor:not-allowed}
+.member-select-col{width:42px;text-align:center}
+.admin-table-wrap th.member-select-col,.admin-table-wrap td.member-select-col{padding-left:14px;padding-right:6px}
+.admin-table-wrap th.member-main-col,.admin-table-wrap td.member-main-col{padding-left:10px;width:auto}
+.member-select-col input{width:15px;height:15px;accent-color:var(--a-orange);cursor:pointer}
+.selected-row td{background:#fffaf7}
+.admin-selected-audience{grid-column:1/-1;border:1px solid #f0d2c8;background:#fff8f5;border-radius:8px;padding:10px 12px;color:#74402e;font-size:12px}

@@ -50,6 +50,22 @@ describe("audience eligibility", () => {
     expect(result.skipped.map((item) => item.reason)).toEqual(["archived", "bounced"]);
   });
 
+  it("restricts campaigns to selected member ids before sending", () => {
+    const people = [
+      member(),
+      member({ id: "2", email: "selected@example.com", fullName: "Selected Member" }),
+      member({ id: "3", email: "other@example.com", fullName: "Other Member", emailStatus: "bounced" }),
+    ];
+    const result = resolveAudience(people, {
+      campaignType: "newsletter",
+      memberIds: ["2"],
+      requireConsent: true,
+    });
+    expect(result.eligible.map((item) => item.email)).toEqual(["selected@example.com"]);
+    expect(result.skipped).toEqual([]);
+    expect(isEligibleForCampaign(people[0], { memberIds: ["2"] })).toBe(false);
+  });
+
   it("personalises first names", () => {
     expect(personalise("Hi {{first_name}}", member())).toBe("Hi Ava");
   });

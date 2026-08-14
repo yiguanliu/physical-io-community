@@ -31,6 +31,14 @@ function taggedList(form: FormData, key: string, known: readonly string[]) {
   return extractKnownOptions(text(form, key), known);
 }
 
+function selectedMemberIds(form: FormData) {
+  return form
+    .getAll("memberIds")
+    .flatMap((value) => String(value).split(","))
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export async function createMemberAction(formData: FormData) {
   const admin = await requireAdmin();
   const id = await upsertMember(
@@ -102,6 +110,7 @@ export async function saveCampaignAction(formData: FormData) {
   const id = text(formData, "id") || undefined;
   const audience: AudienceFilter = {
     campaignType: (text(formData, "type") || "newsletter") as AudienceFilter["campaignType"],
+    memberIds: selectedMemberIds(formData),
     requireConsent: formData.get("requireConsent") === "on",
     statuses: text(formData, "statuses")
       .split(",")
@@ -132,6 +141,33 @@ export async function saveCampaignAction(formData: FormData) {
       body: text(formData, "body"),
       audienceFilter: audience,
       eventId: text(formData, "eventId") || null,
+    },
+    admin,
+  );
+  revalidateAdmin();
+  redirect(`/admin/campaigns/${savedId}`);
+}
+
+export async function createSelectedCampaignAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const memberIds = [...new Set(selectedMemberIds(formData))];
+  if (!memberIds.length) throw new Error("Select at least one member.");
+  const savedId = await saveCampaign(
+    {
+      name: `Selected member email - ${new Date().toLocaleDateString("en-GB")}`,
+      type: "newsletter",
+      subject: "Physical I/O update",
+      previewText: "",
+      fromName: "Physical I/O",
+      replyTo: "",
+      body: "Hi {{first_name}},\n\n",
+      audienceFilter: {
+        campaignType: "newsletter",
+        memberIds,
+        requireConsent: true,
+        statuses: ["active"],
+      },
+      eventId: null,
     },
     admin,
   );

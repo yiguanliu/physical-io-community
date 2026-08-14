@@ -32,6 +32,10 @@ export default function CampaignForm({
     const data = new FormData(form);
     return {
       campaignType: String(data.get("type") || "newsletter") as AudienceFilter["campaignType"],
+      memberIds: String(data.get("memberIds") || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
       requireConsent: data.get("requireConsent") === "on",
       statuses: String(data.get("statuses") || "")
         .split(",")
@@ -55,6 +59,7 @@ export default function CampaignForm({
   return (
     <form className="admin-form" action={saveCampaignAction}>
       {campaign ? <input type="hidden" name="id" value={campaign.id} /> : null}
+      <input type="hidden" name="memberIds" value={audience.memberIds?.join(",") ?? ""} />
       <label>
         Campaign name
         <input name="name" required defaultValue={campaign?.name} disabled={locked} />
@@ -110,6 +115,11 @@ export default function CampaignForm({
         Statuses
         <input name="statuses" defaultValue={audience.statuses?.join(", ") ?? "active"} disabled={locked} />
       </label>
+      {audience.memberIds?.length ? (
+        <p className="admin-selected-audience">
+          Selected audience: <strong>{audience.memberIds.length}</strong> member{audience.memberIds.length === 1 ? "" : "s"}
+        </p>
+      ) : null}
       <label className="admin-check">
         <input type="checkbox" name="requireConsent" value="on" defaultChecked={audience.requireConsent !== false} disabled={locked} />
         Only send to members subscribed to this topic
