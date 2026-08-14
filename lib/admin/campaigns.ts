@@ -1,10 +1,17 @@
-import { eq } from "drizzle-orm";
 import { SITE_URL } from "@/lib/site";
 import { parseAudienceFilter, resolveAudience, skipReasonForMember, type AudienceFilter } from "@/lib/admin/audience";
-import { getAllAudienceMembers, getCampaign, writeAudit } from "@/lib/admin/store";
-import { readyDb } from "@/lib/db/client";
+import {
+  deleteRows,
+  findCampaignEvent,
+  findCampaignRecipient,
+  getAllAudienceMembers,
+  getCampaign,
+  getRawMember,
+  insertRows,
+  updateCampaignRows,
+  writeAudit,
+} from "@/lib/admin/store";
 import { createId, nowIso } from "@/lib/db/ids";
-import { campaignEvents, campaignRecipients, campaigns, members } from "@/lib/db/schema";
 import { renderMemberEmail, sendEmail } from "@/lib/email/send";
 
 const SEND_LOCKS = new Set<string>();
@@ -37,12 +44,11 @@ export async function sendTestCampaign(campaignId: string, toEmail: string, acto
     replyTo: campaign.replyTo,
     campaignId,
   });
-  const db = await readyDb();
-  await db.insert(campaignEvents).values({
+  await insertRows("campaign_events", {
     id: createId(),
-    campaignId,
+    campaign_id: campaignId,
     type: "test_sent",
-    payload: JSON.stringify({ to: toEmail, provider: result.provider, id: result.id }),
+    payload: { to: toEmail, provider: result.provider, id: result.id },
   });
   await writeAudit({
     actorUserId: actor.id,
@@ -59,7 +65,6 @@ export async function sendCampaign(campaignId: string, actor: { id?: string; nam
   if (SEND_LOCKS.has(campaignId)) throw new Error("This campaign is already sending.");
   SEND_LOCKS.add(campaignId);
   try {
-    const db = await readyDb();
     const campaign = await getCampaign(campaignId);
     if (!campaign) throw new Error("Campaign not found.");
     if (campaign.status === "sent") throw new Error("This campaign was already sent.");
@@ -70,22 +75,23 @@ export async function sendCampaign(campaignId: string, actor: { id?: string; nam
     const { eligible, skipped } = resolveAudience(people, filter);
     if (!eligible.length) throw new Error("No eligible recipients. Check consent and filters.");
 
-    await db
-      .update(campaigns)
-      .set({ status: "sending", updatedAt: nowIso(), recipientCount: eligible.length, skipCount: skipped.length })
-      .where(eq(campaigns.id, campaignId));
-
-    await db.delete(campaignRecipients).where(eq(campaignRecipients.campaignId, campaignId));
+    await updateCampaignRows("campaigns", {
+      status: "sending",
+      updated_at: nowIso(),
+      recipient_count: eligible.length,
+      skip_count: skipped.length,
+    }, campaignId);
+    await deleteRows("campaign_recipients", "campaign_id", campaignId);
 
     for (const member of skipped) {
-      await db.insert(campaignRecipients).values({
+      await insertRows("campaign_recipients", {
         id: createId(),
-        campaignId,
-        memberId: member.member.id,
+        campaign_id: campaignId,
+        member_id: member.member.id,
         email: member.member.email,
         name: member.member.fullName,
         status: "skipped",
-        skipReason: member.reason,
+        skip_reason: member.reason,
       });
     }
 
@@ -93,20 +99,18 @@ export async function sendCampaign(campaignId: string, actor: { id?: string; nam
     let failed = 0;
     for (const member of eligible) {
       const recipientId = createId();
-      const latest = (await db.select().from(members).where(eq(members.id, member.id)).limit(1))[0];
-      const liveMember = latest
-        ? { ...member, emailStatus: latest.emailStatus, status: latest.status }
-        : member;
+      const latest = await getRawMember(member.id);
+      const liveMember = latest ? { ...member, emailStatus: latest.emailStatus, status: latest.status } : member;
       const liveReason = skipReasonForMember(liveMember, filter);
       if (liveReason) {
-        await db.insert(campaignRecipients).values({
+        await insertRows("campaign_recipients", {
           id: recipientId,
-          campaignId,
-          memberId: member.id,
+          campaign_id: campaignId,
+          member_id: member.id,
           email: member.email,
           name: member.fullName,
           status: "skipped",
-          skipReason: liveReason,
+          skip_reason: liveReason,
         });
         continue;
       }
@@ -123,49 +127,46 @@ export async function sendCampaign(campaignId: string, actor: { id?: string; nam
           unsubscribeUrl: latest ? unsubscribeUrl(latest.unsubscribeToken) : undefined,
         });
         const timestamp = nowIso();
-        await db.insert(campaignRecipients).values({
+        await insertRows("campaign_recipients", {
           id: recipientId,
-          campaignId,
-          memberId: member.id,
+          campaign_id: campaignId,
+          member_id: member.id,
           email: member.email,
           name: member.fullName,
           status: result.provider === "resend" ? "sent" : "delivered",
-          providerId: result.id,
-          sentAt: timestamp,
+          provider_id: result.id,
+          sent_at: timestamp,
         });
-        await db.update(members).set({ lastContactedAt: timestamp, updatedAt: timestamp }).where(eq(members.id, member.id));
+        await updateCampaignRows("members", { last_contacted_at: timestamp, updated_at: timestamp }, member.id);
         sent += 1;
       } catch (error) {
         failed += 1;
-        await db.insert(campaignRecipients).values({
+        await insertRows("campaign_recipients", {
           id: recipientId,
-          campaignId,
-          memberId: member.id,
+          campaign_id: campaignId,
+          member_id: member.id,
           email: member.email,
           name: member.fullName,
           status: "failed",
-          skipReason: error instanceof Error ? error.message : "send_failed",
+          skip_reason: error instanceof Error ? error.message : "send_failed",
         });
       }
     }
 
     const timestamp = nowIso();
-    await db.insert(campaignEvents).values({
+    await insertRows("campaign_events", {
       id: createId(),
-      campaignId,
+      campaign_id: campaignId,
       type: "sent",
-      payload: JSON.stringify({ sent, failed, skipped: skipped.length, provider: process.env.RESEND_API_KEY ? "resend" : "local" }),
+      payload: { sent, failed, skipped: skipped.length, provider: process.env.RESEND_API_KEY ? "resend" : "local" },
     });
-    await db
-      .update(campaigns)
-      .set({
-        status: failed && !sent ? "failed" : "sent",
-        sentAt: timestamp,
-        updatedAt: timestamp,
-        recipientCount: sent,
-        skipCount: skipped.length + failed,
-      })
-      .where(eq(campaigns.id, campaignId));
+    await updateCampaignRows("campaigns", {
+      status: failed && !sent ? "failed" : "sent",
+      sent_at: timestamp,
+      updated_at: timestamp,
+      recipient_count: sent,
+      skip_count: skipped.length + failed,
+    }, campaignId);
     await writeAudit({
       actorUserId: actor.id,
       actorName: actor.name,
@@ -187,15 +188,10 @@ export async function recordProviderEvent(input: {
   providerId?: string;
   payload?: unknown;
 }) {
-  const db = await readyDb();
-  const existing = await db.select().from(campaignEvents).where(eq(campaignEvents.providerEventId, input.providerEventId)).limit(1);
-  if (existing[0]) return { duplicate: true };
+  const existing = await findCampaignEvent(input.providerEventId);
+  if (existing) return { duplicate: true };
 
-  const recipient = input.providerId
-    ? (await db.select().from(campaignRecipients).where(eq(campaignRecipients.providerId, input.providerId)).limit(1))[0]
-    : input.email
-      ? (await db.select().from(campaignRecipients).where(eq(campaignRecipients.email, input.email)).limit(1))[0]
-      : undefined;
+  const recipient = await findCampaignRecipient({ providerId: input.providerId, email: input.email });
   if (!recipient) return { ignored: true };
 
   const statusMap: Record<string, string> = {
@@ -209,31 +205,25 @@ export async function recordProviderEvent(input: {
   const nextStatus = statusMap[input.type];
   const timestamp = nowIso();
   if (nextStatus) {
-    await db
-      .update(campaignRecipients)
-      .set({
-        status: nextStatus,
-        openedAt: input.type === "opened" ? timestamp : recipient.openedAt,
-        clickedAt: input.type === "clicked" ? timestamp : recipient.clickedAt,
-      })
-      .where(eq(campaignRecipients.id, recipient.id));
+    await updateCampaignRows("campaign_recipients", {
+      status: nextStatus,
+      opened_at: input.type === "opened" ? timestamp : recipient.openedAt,
+      clicked_at: input.type === "clicked" ? timestamp : recipient.clickedAt,
+    }, recipient.id);
   }
   if (recipient.memberId && (input.type === "bounced" || input.type === "complained" || input.type === "unsubscribed")) {
-    await db
-      .update(members)
-      .set({
-        emailStatus: input.type === "unsubscribed" ? "unsubscribed" : input.type,
-        updatedAt: timestamp,
-      })
-      .where(eq(members.id, recipient.memberId));
+    await updateCampaignRows("members", {
+      email_status: input.type === "unsubscribed" ? "unsubscribed" : input.type,
+      updated_at: timestamp,
+    }, recipient.memberId);
   }
-  await db.insert(campaignEvents).values({
+  await insertRows("campaign_events", {
     id: createId(),
-    campaignId: recipient.campaignId,
-    recipientId: recipient.id,
+    campaign_id: recipient.campaignId,
+    recipient_id: recipient.id,
     type: input.type,
-    providerEventId: input.providerEventId,
-    payload: JSON.stringify(input.payload ?? {}),
+    provider_event_id: input.providerEventId,
+    payload: input.payload ?? {},
   });
   return { recorded: true };
 }
