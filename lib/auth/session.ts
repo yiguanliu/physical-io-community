@@ -1,18 +1,25 @@
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { count, eq } from "drizzle-orm";
-import { auth } from "@/lib/auth/auth";
 import { ADMIN_ROLE, canAccessAdmin, isAdminRole } from "@/lib/auth/allowlist";
+import { ensureAdminProfile } from "@/lib/auth/profiles";
 import { readyDb } from "@/lib/db/client";
 import { user } from "@/lib/db/schema";
+import { createClient } from "@/utils/supabase/server";
 
 export async function getAdminSession() {
-  await readyDb();
-  return auth.api.getSession({ headers: await headers() });
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    return null;
+  }
+  const supabase = createClient(await cookies());
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
+  const profile = await ensureAdminProfile(data.user);
+  return profile ? { user: profile } : null;
 }
 
 export function sessionRole(session: Awaited<ReturnType<typeof getAdminSession>>) {
-  return (session?.user as { role?: string } | undefined)?.role;
+  return session?.user.role;
 }
 
 export async function requireAdmin() {
@@ -21,12 +28,8 @@ export async function requireAdmin() {
   const role = sessionRole(session);
   if (!canAccessAdmin(session.user.email, role)) redirect("/admin/login?status=pending");
   if (!isAdminRole(role)) {
-    try {
-      const db = await readyDb();
-      await db.update(user).set({ role: ADMIN_ROLE, updatedAt: new Date() }).where(eq(user.id, session.user.id));
-    } catch {
-      // Cookie-cached sessions can land on an empty Vercel SQLite file; access still proceeds.
-    }
+    const db = await readyDb();
+    await db.update(user).set({ role: ADMIN_ROLE, updatedAt: new Date() }).where(eq(user.id, session.user.id));
   }
   return {
     id: session.user.id,

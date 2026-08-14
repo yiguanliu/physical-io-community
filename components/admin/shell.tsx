@@ -6,7 +6,7 @@ import { useState } from "react";
 import LogoMark from "@/components/LogoMark";
 import { NAV, labelForPath, parentPath } from "@/components/admin/nav";
 import { Icon } from "@/components/admin/ui";
-import { authClient } from "@/lib/auth/auth-client";
+import { signOutAdminAction } from "@/app/admin/auth-actions";
 
 export default function AdminShell({
   children,
@@ -22,7 +22,7 @@ export default function AdminShell({
   const parent = parentPath(pathname);
 
   async function signOut() {
-    await authClient.signOut();
+    await signOutAdminAction();
     router.push("/admin/login");
     router.refresh();
   }
