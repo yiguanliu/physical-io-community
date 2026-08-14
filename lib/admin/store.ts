@@ -703,6 +703,30 @@ export async function saveEvent(input: {
   return id;
 }
 
+function emptyOverviewStats(databaseError: string | null = null) {
+  return {
+    memberCount: 0,
+    weekCount: 0,
+    monthCount: 0,
+    subscribed: 0,
+    leadCount: 0,
+    pipelineValue: 0,
+    pipeline: {} as Record<string, number>,
+    recentCampaigns: [] as ReturnType<typeof camelCampaign>[],
+    recentAudit: [] as ReturnType<typeof camelAudit>[],
+    deliveryRate: 0,
+    openRate: 0,
+    upcomingEvent: null as ReturnType<typeof camelEvent> | null,
+    ephemeral: false,
+    resendConfigured: isResendConfigured(),
+    databaseError,
+  };
+}
+
+function requestErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Supabase request failed.";
+}
+
 export async function overviewStats() {
   const [membersResult, subscriptionsResult, leadsResult, campaignsResult, auditResult, eventsResult] = await Promise.all([
     sb().from("members").select("*"),
@@ -711,9 +735,18 @@ export async function overviewStats() {
     sb().from("campaigns").select("*").order("updated_at", { ascending: false }),
     sb().from("audit_log").select("*").order("created_at", { ascending: false }).limit(8),
     sb().from("community_events").select("*").eq("status", "published").order("starts_at", { ascending: true }).limit(1),
-  ]);
+  ]).catch((error) => {
+    return [
+      { data: null, error: { message: requestErrorMessage(error) } },
+      { data: null, error: null },
+      { data: null, error: null },
+      { data: null, error: null },
+      { data: null, error: null },
+      { data: null, error: null },
+    ];
+  });
   for (const result of [membersResult, subscriptionsResult, leadsResult, campaignsResult, auditResult, eventsResult]) {
-    if (result.error) fail(result.error);
+    if (result.error) return emptyOverviewStats(result.error.message);
   }
   const memberRows = membersResult.data ?? [];
   const subscriptionRows = subscriptionsResult.data ?? [];
@@ -728,7 +761,7 @@ export async function overviewStats() {
   let opened = 0;
   for (const campaign of sentCampaigns) {
     const { data, error } = await sb().from("campaign_recipients").select("*").eq("campaign_id", campaign.id);
-    if (error) fail(error);
+    if (error) return emptyOverviewStats(error.message);
     const rows = data ?? [];
     recipients += rows.length;
     delivered += rows.filter((row) => ["sent", "delivered", "opened", "clicked"].includes(row.status)).length;
@@ -753,6 +786,7 @@ export async function overviewStats() {
     upcomingEvent: eventsResult.data?.[0] ? camelEvent(eventsResult.data[0]) : null,
     ephemeral: false,
     resendConfigured: isResendConfigured(),
+    databaseError: null,
   };
 }
 

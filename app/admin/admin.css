@@ -30,6 +30,13 @@
 .admin-auth-warning span{display:block;color:#7a5c3c;font-size:12px;line-height:1.5}
 .admin-auth-warning code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:#f2e3d1;border-radius:4px;padding:1px 4px}
 .admin-auth-switch{border:0;background:transparent;color:var(--a-orange);font-size:12px;font-weight:650;cursor:pointer;padding:4px 0;text-align:left}
+.admin-error-panel{background:#fff;border:1px solid var(--a-line);border-radius:12px;padding:28px;max-width:720px}
+.admin-error-panel>span{font-size:10px;color:var(--a-orange);font-weight:750;letter-spacing:.13em}
+.admin-error-panel h1{font-size:28px;letter-spacing:-.04em;margin:6px 0 10px}
+.admin-error-panel p{color:var(--a-muted);font-size:13px;line-height:1.55;max-width:620px}
+.admin-error-panel code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:#f2f1ec;border-radius:4px;padding:1px 4px}
+.admin-error-panel small{display:block;margin-top:10px;color:#9b3617;font-size:12px}
+.admin-error-panel div{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
 .admin-empty-note{padding:18px 16px 22px;color:var(--a-muted);font-size:13px}
 .admin-inline-form{display:flex;align-items:center;gap:8px}
 .admin-inline-form small{font-size:10px;color:var(--a-muted)}

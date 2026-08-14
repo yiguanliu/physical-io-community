@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ADMIN_ROLE, canAccessAdmin, isAdminRole } from "@/lib/auth/allowlist";
-import { ensureAdminProfile, setAdminRole } from "@/lib/auth/profiles";
+import { hasSupabaseAdminEnv } from "@/lib/auth/guards";
+import { ensureAdminProfile, profileFromAuthUser, setAdminRole } from "@/lib/auth/profiles";
 import { createClient } from "@/utils/supabase/server";
 import { getSupabaseAdminClient } from "@/utils/supabase/admin";
 
@@ -9,11 +10,19 @@ export async function getAdminSession() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
     return null;
   }
-  const supabase = createClient(await cookies());
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) return null;
-  const profile = await ensureAdminProfile(data.user);
-  return profile ? { user: profile } : null;
+  try {
+    const supabase = createClient(await cookies());
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) return null;
+    if (!hasSupabaseAdminEnv()) {
+      const profile = profileFromAuthUser(data.user);
+      return profile ? { user: profile } : null;
+    }
+    const profile = await ensureAdminProfile(data.user).catch(() => profileFromAuthUser(data.user));
+    return profile ? { user: profile } : null;
+  } catch {
+    return null;
+  }
 }
 
 export function sessionRole(session: Awaited<ReturnType<typeof getAdminSession>>) {
@@ -23,9 +32,10 @@ export function sessionRole(session: Awaited<ReturnType<typeof getAdminSession>>
 export async function requireAdmin() {
   const session = await getAdminSession();
   if (!session?.user) redirect("/admin/login");
+  if (!hasSupabaseAdminEnv()) redirect("/admin/login?status=config");
   const role = sessionRole(session);
   if (!canAccessAdmin(session.user.email, role)) redirect("/admin/login?status=pending");
-  if (!isAdminRole(role)) await setAdminRole(session.user.id, ADMIN_ROLE);
+  if (!isAdminRole(role)) await setAdminRole(session.user.id, ADMIN_ROLE).catch(() => null);
   return {
     id: session.user.id,
     name: session.user.name,

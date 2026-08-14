@@ -27,13 +27,22 @@ export default async function AdminOverviewPage() {
           </Link>
         }
       />
-      {stats.ephemeral || !stats.resendConfigured ? (
+      {stats.databaseError || stats.ephemeral || !stats.resendConfigured ? (
         <div className="admin-stage-banner">
           <div className="stage-index">01</div>
           <div>
             <span>SETUP</span>
-            <h2>{stats.ephemeral ? "Supabase admin key missing" : "Connect sending to go live"}</h2>
+            <h2>
+              {stats.databaseError
+                ? "Supabase database unavailable"
+                : stats.ephemeral
+                  ? "Supabase admin key missing"
+                  : "Connect sending to go live"}
+            </h2>
             <p>
+              {stats.databaseError
+                ? "The admin database could not be read. Apply the Supabase migration, verify service-role table grants, then redeploy. "
+                : ""}
               {stats.ephemeral
                 ? "Admin roles and workspace data are stored in Supabase. Set SUPABASE_SECRET_KEY, then redeploy. "
                 : ""}
