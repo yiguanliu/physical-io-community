@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import LogoMark from "@/components/LogoMark";
 import { NAV, labelForPath, parentPath } from "@/components/admin/nav";
-import { Icon } from "@/components/admin/ui";
+import { Icon, initials } from "@/components/admin/ui";
 import { signOutAdminAction } from "@/app/admin/auth-actions";
 
 export default function AdminShell({
@@ -55,14 +55,7 @@ export default function AdminShell({
             </div>
           </div>
           <button className="admin-profile" onClick={signOut} type="button">
-            <span>
-              {user.name
-                .split(" ")
-                .map((part) => part[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </span>
+            <span>{initials(user.name)}</span>
             <div>
               <strong>{user.name}</strong>
               <small>Sign out</small>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageHeading } from "@/components/admin/shell";
-import { Badge, formatMoney, Icon } from "@/components/admin/ui";
+import { Badge, formatMoney, Icon, initials } from "@/components/admin/ui";
 import { overviewStats } from "@/lib/admin/store";
 
 export default async function AdminOverviewPage() {
@@ -134,12 +134,7 @@ export default async function AdminOverviewPage() {
           {stats.recentAudit.map((item) => (
             <div key={item.id}>
               <span className="avatar ink">
-                {item.actorName
-                  .split(" ")
-                  .map((part) => part[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase() || "PI"}
+                {initials(String(item.actorName)) || "PI"}
               </span>
               <p>
                 <strong>{item.summary}</strong>
