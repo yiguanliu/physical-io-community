@@ -1,7 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+type SupabaseAdminClient = SupabaseClient<any, any, any>;
 
 type GlobalSupabase = {
-  adminSupabase?: ReturnType<typeof createClient>;
+  adminSupabase?: SupabaseAdminClient;
 };
 
 const globalForSupabase = globalThis as unknown as GlobalSupabase;
@@ -20,7 +22,7 @@ export function getSupabaseAdminClient() {
         autoRefreshToken: false,
         persistSession: false,
       },
-    });
+    }) as SupabaseAdminClient;
   }
 
   return globalForSupabase.adminSupabase;
