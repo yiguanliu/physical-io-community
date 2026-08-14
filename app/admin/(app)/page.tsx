@@ -32,10 +32,10 @@ export default async function AdminOverviewPage() {
           <div className="stage-index">01</div>
           <div>
             <span>SETUP</span>
-            <h2>{stats.ephemeral ? "No persistent database connected" : "Connect sending to go live"}</h2>
+            <h2>{stats.ephemeral ? "Supabase admin key missing" : "Connect sending to go live"}</h2>
             <p>
               {stats.ephemeral
-                ? "Each request can be served by a different machine with its own temporary database, so admin role approvals and edits are lost. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN, then redeploy. "
+                ? "Admin roles and workspace data are stored in Supabase. Set SUPABASE_SECRET_KEY, then redeploy. "
                 : ""}
               {stats.resendConfigured
                 ? "Resend is configured — production sends will go out."

@@ -4,7 +4,6 @@ import LogoMark from "@/components/LogoMark";
 import LoginForm from "@/components/admin/login-form";
 import { getAdminSession, sessionRole } from "@/lib/auth/session";
 import { canAccessAdmin } from "@/lib/auth/allowlist";
-import { isEphemeralDatabase } from "@/lib/db/client";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +13,10 @@ export const metadata: Metadata = {
   title: "Admin sign in | Physical I/O",
   robots: { index: false, follow: false },
 };
+
+function hasSupabaseAdminConfig() {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY));
+}
 
 export default async function AdminLoginPage({
   searchParams,
@@ -35,12 +38,11 @@ export default async function AdminLoginPage({
         </div>
         <h1>Sign in to admin</h1>
         <p>Use your administrator email and password. New users can request access.</p>
-        {isEphemeralDatabase() ? (
+        {!hasSupabaseAdminConfig() ? (
           <div className="admin-auth-warning">
-            <strong>No persistent database connected</strong>
+            <strong>Supabase admin key missing</strong>
             <span>
-              This deployment stores admin roles on the machine that happens to serve each request, so access
-              requests cannot be recorded. Set <code>TURSO_DATABASE_URL</code> and <code>TURSO_AUTH_TOKEN</code>,
+              Admin roles and workspace data are stored in Supabase. Set <code>SUPABASE_SECRET_KEY</code>,
               then redeploy.
             </span>
           </div>
