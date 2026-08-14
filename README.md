@@ -6,6 +6,7 @@ Landing site for **Physical I/O**, London's community for Physical AI, Robotics 
 
 - **Next.js 15** (App Router) + **React 19** + **TypeScript**
 - **Supabase Auth** — invitation-only administrator login
+- **Supabase Postgres** — production admin/community database migration and cleaned member seed
 - **Drizzle ORM** + **libSQL** — local SQLite by default, Turso in production
 - **Resend** — optional live email sending and webhook tracking
 - **GSAP** — home intro timeline, scroll reveals
@@ -40,9 +41,20 @@ Copy `.env.example` and set:
 - `NEXT_PUBLIC_SITE_URL` — public site URL, used for generated links
 - `ADMIN_ALLOWLIST` — comma-separated extra emails granted admin immediately on signup (`soul@physical-io.com` is always included). Everyone else can request access.
 - `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` — live sending
+- `SUPABASE_SECRET_KEY` — server-only key for admin database access; never expose it with `NEXT_PUBLIC_`
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — **required on Vercel**, see below
 
 CSV import accepts the Google Form export headers (`Full name`, `Email address`, `City`, and so on).
+
+### Supabase database
+
+Supabase schema and cleaned signup import files live under `supabase/`:
+
+- `supabase/migrations/20260814000000_admin_workspace.sql` creates the admin/community tables.
+- `supabase/seed.sql` imports the cleaned Google Form signup members.
+- `supabase/seeds/signup_members_cleaned.csv` is the cleaned CSV used to produce the seed.
+
+See [docs/SUPABASE_DATABASE.md](docs/SUPABASE_DATABASE.md) for the import rules and apply order.
 
 ### Database on Vercel
 
