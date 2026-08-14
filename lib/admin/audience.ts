@@ -12,6 +12,7 @@ export type LeadStatus = (typeof LEAD_STATUSES)[number];
 
 export type AudienceFilter = {
   campaignType?: CampaignType;
+  memberIds?: string[];
   statuses?: string[];
   cities?: string[];
   roles?: string[];
@@ -58,6 +59,7 @@ export function parseAudienceFilter(raw: string | AudienceFilter | null | undefi
 }
 
 export function skipReasonForMember(member: AudienceMember, filter: AudienceFilter): string | null {
+  if (filter.memberIds?.length && !filter.memberIds.includes(member.id)) return "member_filter";
   if (member.status === "archived") return "archived";
   if (member.emailStatus === "unsubscribed") return "unsubscribed";
   if (member.emailStatus === "bounced") return "bounced";
@@ -84,7 +86,10 @@ export function isEligibleForCampaign(member: AudienceMember, filter: AudienceFi
 export function resolveAudience(members: AudienceMember[], filter: AudienceFilter) {
   const eligible: AudienceMember[] = [];
   const skipped: Array<{ member: AudienceMember; reason: string }> = [];
-  for (const member of members) {
+  const scopedMembers = filter.memberIds?.length
+    ? members.filter((member) => filter.memberIds?.includes(member.id))
+    : members;
+  for (const member of scopedMembers) {
     const reason = skipReasonForMember(member, filter);
     if (reason) skipped.push({ member, reason });
     else eligible.push(member);
