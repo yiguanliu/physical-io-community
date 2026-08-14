@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OutreachStage {
+  NEW_RESEARCH
+  DRAFTED
+  SENT
+  FOLLOW_UP
+  REPLIED
+  MEETING_BOOKED
+  CLOSED
+}
+
+enum OutreachType {
+  EVENT_INVITATION
+  COLLABORATION_INVITATION
+  ARRANGE_MEETING
+  COMMUNITY_INTRO
+  FOLLOW_UP
+}
+
+model Company {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  industryCategory String
+  website          String?
+  linkedinUrl      String?
+  leads            Lead[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Lead {
+  id               String            @id @default(cuid())
+  linkedinUrl      String            @unique
+  fullName         String?
+  title            String?
+  location         String?
+  category         String
+  industryCategory String
+  stage            OutreachStage     @default(NEW_RESEARCH)
+  priority         Int               @default(2)
+  notes            String?
+  lastContactedAt  DateTime?
+  nextActionAt     DateTime?
+  companyId        String?
+  company          Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  messages         OutreachMessage[]
+  stageHistory     StageHistory[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([stage, priority])
+  @@index([industryCategory])
+  @@index([companyId])
+}
+
+model OutreachMessage {
+  id        String       @id @default(cuid())
+  leadId    String
+  lead      Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type      OutreachType
+  tone      String       @default("warm")
+  subject   String?
+  body      String
+  status    String       @default("draft")
+  copiedAt  DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([leadId, createdAt])
+  @@index([type])
+}
+
+model SenderPersona {
+  id                         String   @id @default(cuid())
+  fullName                   String
+  roleTitle                  String
+  organization               String   @default("Physical.IO")
+  linkedinUrl                String?
+  email                      String?
+  introduction               String   @default("")
+  personaDetails             String   @default("")
+  personalConnectionGuidance String   @default("")
+  isDefault                  Boolean  @default(false)
+  isActive                   Boolean  @default(true)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@index([isActive, isDefault])
+}
+
+model OutreachTemplate {
+  id        String       @id @default(cuid())
+  type      OutreachType
+  label     String
+  prompt    String
+  context   String       @default("")
+  isDefault Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([type])
+}
+
+model StageHistory {
+  id        String         @id @default(cuid())
+  leadId    String
+  lead      Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fromStage OutreachStage?
+  toStage   OutreachStage
+  note      String?
+  changedAt DateTime       @default(now())
+
+  @@index([leadId, changedAt])
+}
+
+model MemoryDocument {
+  id         String   @id @default(cuid())
+  title      String
+  sourceName String?
+  content    String
+  summary    String?
+  tags       String[] @default([])
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isActive, updatedAt])
+}

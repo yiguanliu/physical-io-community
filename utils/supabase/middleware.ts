@@ -29,7 +29,38 @@ export const updateSession = async (request: NextRequest) => {
   });
 
   // Refresh the auth token. Must run immediately after creating the client.
-  await supabase.auth.getClaims();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  const isOutreachApi = pathname.startsWith("/api/outreach");
+  const isOutreachPage = pathname === "/outreach" || pathname.startsWith("/outreach/");
+  const isOutreachAuth =
+    pathname === "/outreach/login" || pathname.startsWith("/outreach/auth/");
+  const hasOutreachAccess = user?.app_metadata?.outreach_access === true;
+
+  if (isOutreachApi && !hasOutreachAccess) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (isOutreachPage && !isOutreachAuth && !hasOutreachAccess) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/outreach/login";
+    loginUrl.searchParams.set("next", pathname);
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
+  }
+
+  if (pathname === "/outreach/login" && hasOutreachAccess) {
+    const outreachUrl = request.nextUrl.clone();
+    outreachUrl.pathname = "/outreach";
+    outreachUrl.search = "";
+    const redirectResponse = NextResponse.redirect(outreachUrl);
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
+  }
 
   return supabaseResponse;
 };

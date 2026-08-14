@@ -5,7 +5,11 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+*.swp
 .claude/settings.local.json
 .env*.local
+generated/prisma/
+.vercel/
+!.env.example
 data/
 *.db

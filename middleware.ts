@@ -21,6 +21,15 @@ export async function middleware(request: NextRequest) {
     try {
       return await updateSession(request);
     } catch {
+      if (pathname.startsWith("/api/outreach")) {
+        return NextResponse.json({ error: "Authentication unavailable." }, { status: 503 });
+      }
+      if (pathname === "/outreach" || pathname.startsWith("/outreach/")) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/outreach/login";
+        url.searchParams.set("error", "authentication_unavailable");
+        return NextResponse.redirect(url);
+      }
       return NextResponse.next();
     }
   }
