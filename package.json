@@ -11,12 +11,10 @@
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
-    "@better-auth/infra": "^0.3.7",
     "@libsql/client": "^0.17.4",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "@vercel/analytics": "^2.0.1",
-    "better-auth": "^1.6.27",
     "drizzle-orm": "^0.45.2",
     "gsap": "^3.12.7",
     "next": "^15.3.4",

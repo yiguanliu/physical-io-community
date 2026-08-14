@@ -5,7 +5,7 @@ Landing site for **Physical I/O**, London's community for Physical AI, Robotics 
 ## Stack
 
 - **Next.js 15** (App Router) + **React 19** + **TypeScript**
-- **Better Auth** — invitation-only administrator login
+- **Supabase Auth** — invitation-only administrator login
 - **Drizzle ORM** + **libSQL** — local SQLite by default, Turso in production
 - **Resend** — optional live email sending and webhook tracking
 - **GSAP** — home intro timeline, scroll reveals
@@ -36,9 +36,8 @@ Emails honour newsletter/event consent. Members with `consent_unknown`, bounces,
 
 Copy `.env.example` and set:
 
-- `BETTER_AUTH_SECRET` — required in production
-- `BETTER_AUTH_URL` — public site URL
-- `BETTER_AUTH_API_KEY` — optional Better Auth Infrastructure key from the [dashboard](https://better-auth.com/dashboard)
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — Supabase project used for Auth
+- `NEXT_PUBLIC_SITE_URL` — public site URL, used for generated links
 - `ADMIN_ALLOWLIST` — comma-separated extra emails granted admin immediately on signup (`soul@physical-io.com` is always included). Everyone else can request access.
 - `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` — live sending
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — **required on Vercel**, see below
@@ -49,10 +48,10 @@ CSV import accepts the Google Form export headers (`Full name`, `Email address`,
 
 Local development writes to `data/physical-io-admin.db`, which persists between restarts. Vercel has no writable
 disk, so without a configured database each serverless instance falls back to its own `/tmp` file. Those files are not
-shared between instances and are wiped on every deploy, so an admin account created on one request is gone by the
-next one — Better Auth reports it as `User not found`.
+shared between instances and are wiped on every deploy, so admin role approvals or workspace edits written on one
+request can be gone by the next one.
 
-The admin refuses to create accounts in that state and shows a warning on `/admin/login` and the workspace overview.
+The admin refuses to record access requests in that state and shows a warning on `/admin/login` and the workspace overview.
 To make the deployment persistent:
 
 1. Create a database and token — for example with the [Turso CLI](https://docs.turso.tech/quickstart):
