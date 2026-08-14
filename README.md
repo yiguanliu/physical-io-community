@@ -6,7 +6,8 @@ Landing site for **Physical I/O**, London's community for Physical AI, Robotics 
 
 - **Next.js 15** (App Router) + **React 19** + **TypeScript**
 - **Better Auth** — invitation-only administrator login
-- **Drizzle ORM** + **libSQL** — local SQLite by default, Turso in production
+- **Supabase Postgres** — production admin/community database migration and cleaned member seed
+- **Drizzle ORM** + **libSQL** — current local/admin auth fallback database
 - **Resend** — optional live email sending and webhook tracking
 - **GSAP** — home intro timeline, scroll reveals
 - **PlayCanvas** — 3D AXO unit on the home stage
@@ -41,9 +42,20 @@ Copy `.env.example` and set:
 - `BETTER_AUTH_API_KEY` — optional Better Auth Infrastructure key from the [dashboard](https://better-auth.com/dashboard)
 - `ADMIN_ALLOWLIST` — comma-separated extra emails granted admin immediately on signup (`soul@physical-io.com` is always included). Everyone else can request access.
 - `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` — live sending
+- `SUPABASE_SECRET_KEY` — server-only key for admin database access; never expose it with `NEXT_PUBLIC_`
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — **required on Vercel**, see below
 
 CSV import accepts the Google Form export headers (`Full name`, `Email address`, `City`, and so on).
+
+### Supabase database
+
+Supabase schema and cleaned signup import files live under `supabase/`:
+
+- `supabase/migrations/20260814000000_admin_workspace.sql` creates the admin/community tables.
+- `supabase/seed.sql` imports the cleaned Google Form signup members.
+- `supabase/seeds/signup_members_cleaned.csv` is the cleaned CSV used to produce the seed.
+
+See [docs/SUPABASE_DATABASE.md](docs/SUPABASE_DATABASE.md) for the import rules and apply order.
 
 ### Database on Vercel
 
