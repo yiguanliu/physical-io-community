@@ -39,8 +39,9 @@ export default async function AdminLoginPage({
           <div className="admin-auth-warning">
             <strong>No persistent database connected</strong>
             <span>
-              This deployment stores data on the machine that happens to serve each request, so accounts cannot be
-              created. Set <code>TURSO_DATABASE_URL</code> and <code>TURSO_AUTH_TOKEN</code>, then redeploy.
+              This deployment stores admin roles on the machine that happens to serve each request, so access
+              requests cannot be recorded. Set <code>TURSO_DATABASE_URL</code> and <code>TURSO_AUTH_TOKEN</code>,
+              then redeploy.
             </span>
           </div>
         ) : null}

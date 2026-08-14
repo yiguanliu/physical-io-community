@@ -78,7 +78,7 @@ Documented once here; each stage lists stage-specific additions.
 
 | Control | Requirement |
 | --- | --- |
-| Auth boundary | Better Auth session validated server-side; never trust client-supplied user/role IDs |
+| Auth boundary | Supabase Auth session validated server-side; never trust client-supplied user/role IDs |
 | Data access | Protected schemas unreachable via browser Supabase Data API (`anon` / `authenticated` denied) |
 | Secrets | Service-role, Resend, OAuth, DocuSign, and DB URLs server-only; no browser exposure |
 | Audit log | Append-only records for sensitive reads (commercial/PII exports) and all privileged mutations |
@@ -103,7 +103,7 @@ Aligned to PHY-42 staged delivery and `ADMIN_MEMBERS_COMMUNICATIONS_PLAN.md` MVP
 | Stage | Name | Primary outcome |
 | --- | --- | --- |
 | **0** | Product & architecture baseline | Approved implementation baseline |
-| **1** | Platform foundation | Server-capable app, Better Auth admin, Supabase, member import, admin member UI |
+| **1** | Platform foundation | Server-capable app, Supabase Auth admin, member import, admin member UI |
 | **2** | Communications MVP | Consent-aware email campaigns, events, delivery tracking |
 | **3** | Member onboarding & dashboard | First-party `/join`, claim, member dashboard foundation |
 | **4** | Sponsor outreach MVP | Assigned CRM, approved outreach sends, reply tracking, delivery checklist |
@@ -127,10 +127,10 @@ Later plan phases (push, community directory, full DocuSign API, advanced scorin
 ### Exit
 
 - [ ] MVP boundaries approved in writing (admin communications MVP, member onboarding MVP, outreach MVP; push and community directory deferred)
-- [ ] System and data ownership documented (Better Auth identity; Supabase Postgres system of record; Google Sheets intake-only until cutover; Resend delivery)
+- [ ] System and data ownership documented (Supabase Auth identity; Supabase Postgres system of record; Google Sheets intake-only until cutover; Resend delivery)
 - [ ] Member / admin / outreach permission matrix approved
 - [ ] Consent and retention decisions recorded (including `consent_unknown` handling for legacy signups)
-- [ ] Technical decision records accepted (Better Auth + Supabase Postgres + server-only access + Drizzle + Supabase SQL migrations + Vercel Workflow)
+- [ ] Technical decision records accepted (Supabase Auth + Supabase Postgres + server-only access + Drizzle + Supabase SQL migrations + Vercel Workflow)
 - [ ] This staged release criteria document accepted
 - [ ] Stage 1 issues ready to implement (scoped, unblocked, owners assigned)
 
@@ -175,7 +175,7 @@ None required for Stage 0. Stage 1 entry requires a CI skeleton plan (test runne
 
 - [ ] Static-export-only constraint removed; Next.js runs with server routes on Vercel
 - [ ] Supabase migrations committed; `supabase db reset` succeeds from scratch
-- [ ] Better Auth configured with invitation-only administrator enrollment
+- [ ] Supabase Auth configured with invitation-only administrator enrollment
 - [ ] `/admin` and protected server actions reject unauthenticated and non-admin users
 - [ ] Protected schemas denied to Supabase Data API `anon` / `authenticated` roles
 - [ ] Google Sheet initial import: normalize, dedupe, validate, reject-queue, source-row traceability
@@ -197,7 +197,7 @@ None required for Stage 0. Stage 1 entry requires a CI skeleton plan (test runne
 
 - [ ] Admin invite and offboarding runbook (session revocation steps)
 - [ ] Supabase backup enabled; restore drill documented
-- [ ] Secret inventory and ownership (Better Auth, DB URLs, Google Sheet access)
+- [ ] Secret inventory and ownership (Supabase Auth, DB URLs, Google Sheet access)
 - [ ] Preview deploys use synthetic seed data only
 - [ ] On-call contact for auth/import failures named
 
@@ -296,7 +296,7 @@ None required for Stage 0. Stage 1 entry requires a CI skeleton plan (test runne
 
 ### Exit
 
-- [ ] Better Auth member registration + email verification live
+- [ ] Supabase Auth member registration + email verification live
 - [ ] Admin enrollment remains invitation-only and separated from member role
 - [ ] Legacy profile claim only after verified email; no account enumeration; ambiguous matches → admin review
 - [ ] `/join` resumable questionnaire with server-side validation and draft persistence
@@ -328,7 +328,7 @@ None required for Stage 0. Stage 1 entry requires a CI skeleton plan (test runne
 ### Security & audit implications
 
 - Public registration expands attack surface (enumeration, bot signups, claim fraud)
-- Members and admins share one Better Auth deployment → role separation is a hard security boundary
+- Members and admins share one Supabase Auth project → role separation is a hard security boundary
 - Consent evidence becomes member-authored, not only admin-imported
 - Account deletion must preserve legally required commercial/audit records while removing eligible PII
 - Audit events for claim, consent change, export, and deletion are mandatory

@@ -35,7 +35,7 @@ export default async function AdminOverviewPage() {
             <h2>{stats.ephemeral ? "No persistent database connected" : "Connect sending to go live"}</h2>
             <p>
               {stats.ephemeral
-                ? "Each request can be served by a different machine with its own temporary database, so new admin accounts and edits are lost. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN, then redeploy. "
+                ? "Each request can be served by a different machine with its own temporary database, so admin role approvals and edits are lost. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN, then redeploy. "
                 : ""}
               {stats.resendConfigured
                 ? "Resend is configured — production sends will go out."

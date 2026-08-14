@@ -1,4 +1,3 @@
-import { APIError } from "better-auth/api";
 import { isEphemeralDatabase, PERSISTENCE_SETUP_HINT, type DatabaseEnv } from "@/lib/db/client";
 
 export const EPHEMERAL_ACCOUNT_ERROR = `This deployment has no persistent database, so a new account would be lost as soon as another request is served. ${PERSISTENCE_SETUP_HINT}`;
@@ -10,6 +9,6 @@ export const EPHEMERAL_ACCOUNT_ERROR = `This deployment has no persistent databa
  */
 export function assertAccountsPersist(env: DatabaseEnv = process.env) {
   if (isEphemeralDatabase(env)) {
-    throw new APIError("SERVICE_UNAVAILABLE", { message: EPHEMERAL_ACCOUNT_ERROR });
+    throw new Error(EPHEMERAL_ACCOUNT_ERROR);
   }
 }

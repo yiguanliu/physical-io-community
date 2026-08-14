@@ -10,7 +10,7 @@ import { renderMemberEmail, sendEmail } from "@/lib/email/send";
 const SEND_LOCKS = new Set<string>();
 
 function unsubscribeUrl(token: string) {
-  const base = process.env.BETTER_AUTH_URL || SITE_URL;
+  const base = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
   return `${base.replace(/\/$/, "")}/unsubscribe?token=${token}`;
 }
 
