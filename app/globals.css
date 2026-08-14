@@ -973,22 +973,15 @@ h1, h2, h3 {
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
 }
 
-@media (pointer: fine) {
-  html,
-  body {
-    cursor: url("/assets/cursor-logo.svg") 4 10, auto;
-  }
-
-  a,
-  button,
-  .btn,
-  .screen-arrow,
-  .dot,
-  .faq-q,
-  [role="button"],
-  [role="tab"],
-  input[type="button"],
-  input[type="submit"] {
-    cursor: url("/assets/cursor-logo.svg") 4 10, pointer;
-  }
+a,
+button,
+.btn,
+.screen-arrow,
+.dot,
+.faq-q,
+[role="button"],
+[role="tab"],
+input[type="button"],
+input[type="submit"] {
+  cursor: pointer;
 }

@@ -6,3 +6,6 @@ out/
 next-env.d.ts
 .DS_Store
 .claude/settings.local.json
+.env*.local
+data/
+*.db

@@ -1,0 +1,24 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "pnpm install --frozen-lockfile"
+archive = "true"
+run_mode = "concurrent"
+
+[scripts.run.dev]
+available_in = [ "local" ]
+command = "pnpm dev --port $CONDUCTOR_PORT"
+default = true
+icon = "play"
+
+[scripts.run.test]
+command = "pnpm test"
+icon = "test-tube"
+
+[scripts.run.typecheck]
+command = "pnpm typecheck"
+icon = "braces"
+
+[scripts.run.build]
+command = "pnpm build"
+icon = "package"

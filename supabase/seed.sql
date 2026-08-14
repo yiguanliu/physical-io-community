@@ -1,0 +1,230 @@
+begin;
+
+create temp table signup_members_import (
+  email text not null,
+  full_name text not null,
+  first_name text not null,
+  city text not null,
+  professional_role text not null,
+  experience_range text not null,
+  website_url text not null,
+  linkedin_url text not null,
+  suggestions text not null,
+  signed_up_at timestamptz not null,
+  source_row text,
+  interests text[] not null,
+  community_goals text[] not null,
+  event_formats text[] not null
+) on commit drop;
+
+insert into signup_members_import (
+  email,
+  full_name,
+  first_name,
+  city,
+  professional_role,
+  experience_range,
+  website_url,
+  linkedin_url,
+  suggestions,
+  signed_up_at,
+  source_row,
+  interests,
+  community_goals,
+  event_formats
+)
+select
+  cols[1],
+  cols[2],
+  cols[3],
+  cols[4],
+  cols[5],
+  cols[6],
+  cols[7],
+  cols[8],
+  replace(cols[9], E'\\n', E'\n'),
+  cols[10]::timestamptz,
+  cols[11],
+  case when cols[12] = '' then array[]::text[] else string_to_array(cols[12], E'\x1e') end,
+  case when cols[13] = '' then array[]::text[] else string_to_array(cols[13], E'\x1e') end,
+  case when cols[14] = '' then array[]::text[] else string_to_array(cols[14], E'\x1e') end
+from string_to_table($members$anthony.liu218@gmail.com	Anthony Liu	Anthony	London	Engineer / Developer	Less than a year	yiguanliu.com	Yiguan		2026-06-28T23:38:39.000Z	2	AI/ML Training	Meeting collaborators / co-foundersLearning from talks & demos	In-person meetups & demosTalks / panels
+ava@tryito.io	Ava Oppenheimer	Ava	London	Founder / Operator	1-3 years	https://www.tryito.io/	https://www.linkedin.com/in/avaoppenheimer/	Demo nights/networking	2026-06-29T12:45:51.000Z	3	Software DevelopmentAI/ML TrainingResearch	Meeting collaborators / co-foundersStaying on top of the field	In-person meetups & demosSocials & networkingTalks / panels
+10027811@network.rca.ac.uk	Calvin Calica	Calvin	London	Designer	Less than a year	calvincalica.com	https://www.linkedin.com/in/calvin-calica-802377108/		2026-06-29T12:46:53.000Z	4	I'm new to this industry, just here to learn.Industrial Design	Meeting collaborators / co-foundersHiring or finding work	In-person meetups & demosOnline (Discord / Slack)
+llnleonorachan@gmail.com	Nora Chen	Nora	London	Founder / Operator	5-10 years	fotor.com	Nora Yujing Chen	co host	2026-06-29T12:59:51.000Z	5	AI/ML TrainingMarketing	Meeting collaborators / co-foundersShowcasing what I'm building	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+adamklestil@gmail.com	Adam Klestil	Adam	Vienna	Designer	3-5 years	_	https://www.linkedin.com/in/adam-klestil-0216b31aa		2026-06-29T13:02:44.000Z	6	Industrial DesignManufacturingResearchUI/UX	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingTalks / panels
+mohamadsayar@gmail.com	Mo Sayyar	Mo	London	Designer	5-10 years	https://mosayyar.com/	https://www.linkedin.com/in/mosayyar/		2026-06-29T13:44:43.000Z	7	UI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+agatainventio@gmail.com	Agata inventio	Agata	London	Designer	5-10 years	www.agatainventio.com	In/agatainventio	Connect with interesting people, work on projects together, maybe find a co finder	2026-06-29T15:04:49.000Z	8	AI/ML TrainingResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+lbedal2@gmail.com	Lauren Bedal	Lauren	Los Angeles	Designer	5-10 years	https://www.archetypeai.io/	https://www.linkedin.com/in/lbedal2/		2026-06-29T16:06:49.000Z	9	UI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	Online (Discord / Slack)Socials & networking
+m.soto.morras@gmail.com	Marta	Marta	Barcelona	Creative Technologist	5-10 years	https://www.archetypeai.io/	https://www.linkedin.com/in/marta-soto-morr%C3%A1s-56570a96/		2026-06-29T16:07:04.000Z	10	Software DevelopmentIndustrial DesignResearchUI/UX	Learning from talks & demosStaying on top of the fieldHiring or finding work	Online (Discord / Slack)
+jackclarkebaxter@gmail.com	Jack Baxter	Jack	Brighton	Talent Coordinator	3-5 years	Skillsearch	https://www.linkedin.com/in/jackbaxter-emergingtech/		2026-06-29T16:17:26.000Z	11	HR	Meeting collaborators / co-foundersStaying on top of the field	In-person meetups & demosSocials & networking
+russell@creativetechnologylab.io	Russell Hall	Russell	Beckenham	developer, founder, operator, creative technologist	5-10 years	http://seeper.com/	https://www.linkedin.com/in/russellhall101/		2026-06-29T18:38:34.000Z	12	Software DevelopmentAI/ML TrainingDistributionMarketingResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+davendw49@gmail.com	Cheng Deng	Cheng	London	Researcher / Academic	1-3 years	https://www.cdeng.net/	https://www.linkedin.com/in/cheng-deng-8a7256151/		2026-06-29T19:03:30.000Z	13	AI/ML TrainingResearch	Meeting collaborators / co-foundersHiring or finding work	In-person meetups & demosSocials & networkingTalks / panels
+zixinye1996@gmail.com	zixin ye	zixin	London	Designer	3-5 years	studio oleo	/NA		2026-06-29T19:03:33.000Z	14	I'm new to this industry, just here to learn.	Meeting collaborators / co-foundersLearning from talks & demosHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+yanzengyu98@gmail.com	Zoe Yan	Zoe	London	Engineer / Developer	3-5 years	echelonai.com	https://www.linkedin.com/in/zoe-yan-851611212		2026-06-29T19:05:03.000Z	15	Electrical EngineeringSoftware DevelopmentAI/ML Training	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demos	In-person meetups & demosTalks / panels
+xiyuwang.landarch@outlook.com	Xiyu Wang	Xiyu	Manchester	Designer	1-3 years	aiarchitectureawards.com ｜https://www.layer.studio/	https://www.linkedin.com/in/xiyu-wang-27bb05263?utm_source=share_via&utm_content=profile&utm_medium=member_ios	Spatial design × Physical AI crossover	2026-06-29T19:15:59.000Z	16	MarketingResearchUI/UX	Meeting collaborators / co-foundersLearning from talks & demos	In-person meetups & demosSocials & networkingTalks / panels
+haixiangyuann@gmail.com	Haixiang Yuan	Haixiang	London	Engineer / Developer	5-10 years	haixiangyuan.com	linkedin.com/in/haixiangyuan		2026-06-29T19:36:00.000Z	17	Software DevelopmentOperation ManagementAI/ML TrainingInvestment	Meeting collaborators / co-foundersLearning from talks & demos	In-person meetups & demosHands-on workshopsTalks / panels
+shuoyin03@gmail.com	Shuo Yin	Shuo	Manchester	Engineer / Developer	1-3 years	https://www.awaze.com/	https://www.linkedin.com/in/yin-shuo/	Social events and resources exchange	2026-06-29T20:11:35.000Z	18	Software Development	Meeting collaborators / co-foundersLearning from talks & demos	In-person meetups & demosOnline (Discord / Slack)Socials & networking
+pranavb104@gmail.com	Pranav Balasubramanian	Pranav	Coventry	Creative Technologist	5-10 years	https://pranavbe.net	https://www.linkedin.com/in/pranavb104/		2026-06-29T20:43:07.000Z	19	Software DevelopmentAI/ML TrainingResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demos	Online (Discord / Slack)Socials & networkingTalks / panels
+jackcarrington1992@gmail.com	Jack Carrington	Jack	London	Designer	5-10 years	www.jackcarrington.com	https://www.linkedin.com/in/jack-carrington-08960a43?utm_source=share_via&utm_content=profile&utm_medium=member_android		2026-06-29T20:47:07.000Z	20	UI/UX	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+472810795@qq.com	Jade Shu	Jade	London	Founder / Operator	5-10 years	TikTok	https://www.linkedin.com/in/jiayushu		2026-06-29T22:48:11.000Z	21	Marketing	Staying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networking
+czoeycy@gmail.com	Zoey	Zoey	London	Creative Technologist	5-10 years	Building it now	/		2026-06-30T01:34:46.000Z	22	Software DevelopmentUI/UX	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+changjin.kweon@aaschool.ac.uk	Changjin Kweon	Changjin	London	Researcher / Academic	1-3 years	cjkweon.com	www.linkedin.com/in/changjin-kweon	Sharing ideas !	2026-06-30T04:19:06.000Z	23,50	AI/ML TrainingResearchIndustrial Design	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshops
+zhouzhengyang_jimi@163.com	Zhou Zhengyang	Zhou	Currently Shanghai. Next 2 yrs London. Future in Shenzhen.	Designer	Less than a year	https://www.linkedin.com/company/primebot/	https://www.linkedin.com/in/正扬-周-ab3372387?utm_source=share_via&utm_content=profile&utm_medium=member_android		2026-06-30T05:27:46.000Z	24	Industrial Design	Learning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Hands-on workshops
+rich@rc3.me	Rich Cahill	Rich	London and NYC	All of above	5-10 years	https://richmak.es	In/richcahill		2026-06-30T10:01:12.000Z	25	Electrical EngineeringSoftware DevelopmentIndustrial DesignResearchUI/UX	Showcasing what I'm buildingLearning from talks & demosHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingTalks / panels
+kazuyachen1986@gmail.com	Jiayi Chen	Jiayi	Leeds	Designer	5-10 years	HSBC	https://www.linkedin.com/in/jiayi-zoey-chen-295533161/zh		2026-06-30T10:39:33.000Z	26	UI/UX	Meeting collaborators / co-foundersLearning from talks & demos	In-person meetups & demosOnline (Discord / Slack)Hands-on workshops
+20040327zjz@gmail.com	Jingzhe Zhou	Jingzhe	London	Designer	1-3 years	https://www.instagram.com/angdi_z/	https://www.linkedin.com/in/jingzhe-andy-zhou-923362295/		2026-06-30T14:41:41.000Z	27	I'm new to this industry, just here to learn.	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosSocials & networkingHands-on workshops
+harryrobertwood@gmail.com	Harry Wood	Harry	Cardiff/London	Business development	5-10 years	N/a	LinkedIn.com/harryrobertwood		2026-06-30T16:35:20.000Z	28	Software DevelopmentMarketingResearch	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+yaqing80@gmail.com	Autumn Luo	Autumn	London	Researcher / Academic	3-5 years	https://github.com/yaqing80	https://www.linkedin.com/in/yaqing-l-111429114/		2026-06-30T16:52:10.000Z	29	AI/ML TrainingResearch	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+nicolejiang818@gmail.com	Nicole Jiang	Nicole	London	Founder / Operator	1-3 years	Vocamed.co.uk	https://www.linkedin.com/in/nicole-jiang-567054201		2026-07-02T11:56:11.000Z	30	Software DevelopmentResearchUI/UX	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+qinzehaozln@gmail.com	Zehao Qin	Zehao	London	Founder / Operator	5-10 years	NA	NA		2026-07-03T15:56:29.000Z	31	Software DevelopmentAI/ML TrainingMarketingResearchUI/UX	Meeting collaborators / co-founders	In-person meetups & demosOnline (Discord / Slack)Socials & networking
+3382215368@qq.com	冯嘉楠	冯嘉楠	伦敦/广州/深圳	Researcher / Academic	Less than a year	无	无		2026-07-03T16:32:55.000Z	32	AI/ML TrainingMarketing	Meeting collaborators / co-founders	In-person meetups & demosSocials & networking
+teresazengjc@gmail.com	Jiachen Zeng	Jiachen	London	Founder / Operator	Less than a year	www.jiax2.com	jiachen-Zeng-art		2026-07-03T16:47:11.000Z	33	Industrial DesignUI/UX	Meeting collaborators / co-foundersLearning from talks & demos	In-person meetups & demosHands-on workshopsTalks / panels
+sylvansheen42@gmail.com	Sylvan Shen	Sylvan	London	Creative Technologist	3-5 years	sylvanshen.com	linkedin.com/in/xiaofan-sylvan-shen/		2026-07-04T00:31:33.000Z	34	Software DevelopmentOperation ManagementUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingTalks / panels
+shaoyue95szd@163.com	jewelina	jewelina	London	Researcher / Academic	1-3 years	https://jewelina95.github.io/JewelinaWen/	www.linkedin.com/in/shaoyue-wen-b1a927250		2026-07-04T16:40:18.000Z	35	Research	Learning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingTalks / panels
+cynthiapan0718@gmail.com	Cynthia Pan	Cynthia	London	Creative Technologist	1-3 years	Sota.tech	https://www.linkedin.com/in/cynthia-pan0718?utm_source=share_via&utm_content=profile&utm_medium=member_ios		2026-07-04T22:11:44.000Z	36	Software DevelopmentAI/ML TrainingMarketingUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the field	In-person meetups & demosSocials & networkingHands-on workshops
+halfeng0219@outlook.com	Haoran Feng	Haoran	Shanghai/London	Engineer / Developer	1-3 years	Sharpa	www.linkedin.com/in/halfeng	Networking and chat with people	2026-07-04T23:54:17.000Z	37	Electrical EngineeringSoftware DevelopmentAI/ML TrainingManufacturingInvestmentResearch	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+toch@pikd.app	Toch Emuwa	Toch	London	Founder / Operator	3-5 years	Www.pikd.app	www.linkedin.com/en/tochukwuemuwa		2026-07-05T19:12:02.000Z	38	Software DevelopmentAI/ML TrainingDistributionMarketingUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Talks / panels
+jmakivic@gmail.com	Julia Makivic	Julia	London	Creative Technologist	5-10 years	juliamakivic.com	https://www.linkedin.com/in/julia-makivic-669ab763?utm_source=share_via&utm_content=profile&utm_medium=member_android		2026-07-05T21:08:48.000Z	39	I'm new to this industry, just here to learn.Electrical Engineering	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Hands-on workshopsTalks / panels
+hheatherbell@gmail.com	Heather Bell	Heather	London	Engineer / Developer	3-5 years	Heatherbell.co.uk	LinkedIn.com/in/heather-eb		2026-07-05T22:07:51.000Z	40	Software Development	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosHands-on workshopsTalks / panels
+odafejagboro@icloud.com	Richard Jagboro	Richard	London	Engineer / Developer	3-5 years	GitHub.com/verticaan	https://www.linkedin.com/in/richard-jagboro-b69079253		2026-07-05T23:26:05.000Z	41	Software DevelopmentResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+keertimanney@gmail.com	Keerti Manney	Keerti	San Francisco	Founder / Operator	1-3 years	Stealth mode	https://www.linkedin.com/in/keerti-manney/		2026-07-06T04:55:23.000Z	42,57	ResearchIndustrial DesignAI/ML Training	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panelsOnline (Discord / Slack)
+gcesting10050719@gmail.com	Yu-Ting Peng	Yu-Ting	London	Creative Technologist	1-3 years	https://gcesting10050719.wixsite.com/portfolio	www.linkedin.com/in/tingpeng1217		2026-07-06T12:05:47.000Z	43	Software DevelopmentUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+mikefacesny@gmail.com	Mike Allen	Mike	NYC	Engineer / Developer	5-10 years	https://www.behance.net/mikeallen	https://www.linkedin.com/in/william-allen-3b538429	Spatial UI tutorials	2026-07-06T21:23:54.000Z	44	Software DevelopmentUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demos	In-person meetups & demosOnline (Discord / Slack)Socials & networking
+harrietsjpark@gmail.com	Seonjeong Park	Seonjeong	London	Engineer / Developer	3-5 years	https://www.noghost.co.uk/	https://www.linkedin.com/in/seonjeongharrietpark/		2026-07-07T11:31:53.000Z	45	Software DevelopmentResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+gloria.caihf@outlook.com	Hongfei Cai	Hongfei	Shenzhen & Hong Kong	Founder / Operator	1-3 years	https://manifest-ai.online/ & https://www.incubedglobal.com/	https://www.linkedin.com/in/hongfei-cai/		2026-07-07T16:17:02.000Z	46	Software DevelopmentOperation ManagementInvestmentMarketingResearchHR	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	Online (Discord / Slack)Socials & networkingTalks / panels
+ksam38696@gmail.com	Victor Kim	Victor	Cambridge	Engineer / Developer	1-3 years	https://github.com/VR-Jobs	https://www.linkedin.com/in/victor-jin-24b693257?utm_source=share_via&utm_content=profile&utm_medium=member_android		2026-07-07T18:14:22.000Z	47	Software DevelopmentAI/ML TrainingManufacturingResearchUI/UX	Meeting collaborators / co-foundersLearning from talks & demos	In-person meetups & demosHands-on workshopsTalks / panels
+jdjordandunn@gmail.com	Jordan dunn	Jordan	London	Engineer / Developer	5-10 years	You know it big man	You know it as well - curious to hear what you’re up to, Yiguan I’m excited for you		2026-07-07T21:06:17.000Z	48	I'm new to this industry, just here to learn.Software Development	Meeting collaborators / co-foundersShowcasing what I'm buildingStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+thomas@aarc.io	Thomas Gaudin	Thomas	Vancouver, Canada	Computational designer	5-10 years	https://github.com/aarcThom	https://ca.linkedin.com/in/thomas-gaudin-50168a6a		2026-07-07T21:54:36.000Z	49	Software Development	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demos	Online (Discord / Slack)Socials & networking
+kungjack43@gmail.com	ChaoChun Kung	ChaoChun	London	Designer	1-3 years	https://innovusdesign.org/	https://www.linkedin.com/in/chao-chun-kung?utm_source=share_via&utm_content=profile&utm_medium=member_ios		2026-07-08T12:50:32.000Z	51	Industrial DesignManufacturingResearch	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demos	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+brett.zju@gmail.com	Teke Xu	Teke	London	Researcher / Academic	Less than a year	Yatorooo.github.io	Linkedin.com/in/tekexu		2026-07-15T11:35:40.000Z	52	I'm new to this industry, just here to learn.	Hiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+kisso.selvan@stix.co	Kisso Selvan	Kisso	London	Founder / Operator	3-5 years	Full Disclosure Investments (not public)	https://www.linkedin.com/in/kisso		2026-07-16T11:31:04.000Z	53	Investment	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+hanna.he@onric.ai	Hanna He	Hanna	Reading	Founder / Operator	3-5 years	https://onric.ai	https://www.linkedin.com/in/hanna-he-ba9a95176/		2026-07-16T21:07:29.000Z	54	Industrial DesignManufacturing	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingTalks / panels
+ash@onric.ai	Aswath GI	Aswath	London & Edinburgh	Founder / Operator	5-10 years	Onric.ai	https://www.linkedin.com/in/aswathgi	Happy to volunteer, collaborate & support the community	2026-07-16T21:40:39.000Z	55	AI/ML TrainingManufacturingResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+0xjennie.web3@gmail.com	Jennie Liu	Jennie	London	Founder / Operator	5-10 years	https://jennieliu.me/	https://www.linkedin.com/in/jennie-ty-liu/		2026-07-17T00:04:57.000Z	56	Software DevelopmentOperation ManagementDistributionMarketing	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+alfred.zhang98@gmail.com	Qingyu Zhang	Qingyu	London	Researcher / Academic	1-3 years	https://alfredzhang98.github.io/	www.linkedin.com/in/qingyuzhang98		2026-07-22T08:39:35.000Z	58	Electrical EngineeringAI/ML TrainingResearch	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+zihanchen1021@gmail.com	Zihan Chen	Zihan	Shanghai	Creative Technologist	3-5 years	https://canva.link/l145rv9ee6ox6gz   Summary of Portfolio	www.linkedin.com/in/zihanchen1021	Industry communication, staying at the forefront.	2026-07-24T11:55:24.000Z	59	Electrical EngineeringIndustrial Design	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+ch.summer612@gmail.com	Summer Chao	Summer	SF	Designer	1-3 years	https://www.notwinter.me/	https://www.linkedin.com/in/summer-chao-920547158/		2026-07-25T07:22:47.000Z	60	I'm new to this industry, just here to learn.UI/UX	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingTalks / panels
+jasoncheung_@outlook.com	Junchang Zhang	Junchang	Leeds	Finance student who wants to join AI industry.	Less than a year	https://www.leeds.ac.uk	linkedin.com/in/junchang-zhang-ba6080389		2026-07-29T14:48:38.000Z	61	I'm new to this industry, just here to learn.Investment	Learning from talks & demosHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networking
+steven2swo@gmail.com	Steven Sim	Steven	Dublin	Founder / Operator	Less than a year	www.space-link.co	www.linkedin.com/in/stevenswo		2026-07-29T17:59:15.000Z	62	I'm new to this industry, just here to learn.	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+geedhpruthvi@gmail.com	Pruthvi	Pruthvi	London	Engineer / Developer	1-3 years	www.neuracore.com	/pruthvigeedh		2026-08-01T13:51:05.000Z	63	Software DevelopmentAI/ML Training	Meeting collaborators / co-foundersLearning from talks & demosHiring or finding work	In-person meetups & demosHands-on workshopsTalks / panels
+manepratik16@outlook.com	Pratik Mane	Pratik	Bristol	Engineer / Developer	3-5 years	pratikmane.com	https://www.linkedin.com/in/manepratik?utm_source=share_via&utm_content=profile&utm_medium=member_android		2026-08-01T15:43:44.000Z	64	Software Development	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demos	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+muffin21@sky.com	Emily Dennis	Emily	London	Engineer / Developer	1-3 years	https://www.edennis.tech/	https://www.linkedin.com/in/emily-dennis-5a3b4b166		2026-08-01T16:33:18.000Z	65	Software DevelopmentUI/UX	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+srivatsan.jayasankar@gmail.com	Srivatsan Jayasankar	Srivatsan	Chennai	Founder / Operator	5-10 years	tenez.ai	https://in.linkedin.com/in/srivatsan-jayasankar-09806592	Constant learning and spotlighting talent	2026-08-01T17:05:00.000Z	66	Software DevelopmentAI/ML TrainingInvestment	Meeting collaborators / co-foundersLearning from talks & demosHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Hands-on workshops
+hello@orlandomathias.me	Orando Mathias	Orando	London	& Engineer	5-10 years	https://www.fetherlabs.com/	https://www.linkedin.com/in/orlandomathias		2026-08-01T17:59:59.000Z	67	AI/ML TrainingUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingTalks / panels
+shubhamshah412@gmail.com	Shubham Shah	Shubham	Mumbai	Engineer / Developer	1-3 years	https://drive.google.com/drive/folders/1hP-odLvOVEI9zFehc9fHLwdHbe3Db4kW	https://www.linkedin.com/in/wunnderkind?utm_source=share_via&utm_content=profile&utm_medium=member_android		2026-08-01T18:44:40.000Z	68	I'm new to this industry, just here to learn.Electrical EngineeringSoftware Development	Meeting collaborators / co-foundersStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Hands-on workshops
+rik@controlz.co.uk	Rik Turnbull	Rik	Manchester	Engineer / Developer	1-3 years	controlz.co.uk	https://uk.linkedin.com/in/rikturnbull		2026-08-01T18:58:52.000Z	69	Software DevelopmentAI/ML Training	Meeting collaborators / co-foundersStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshops
+ram.seetharaman@synera.io	Ram Seetharaman	Ram	Hamburg	Engineer / Developer	3-5 years	www.synera.io	https://www.linkedin.com/in/ramdhiwakarseetharaman/		2026-08-01T20:53:26.000Z	70	Software DevelopmentIndustrial DesignManufacturing	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+oliver@contxtu.al	Oliver Weidlich	Oliver	Sydney, Australia	Founder / Operator	5-10 years	https://www.contxtu.al/spatialcomputing	https://www.linkedin.com/in/oliverw/		2026-08-01T22:03:01.000Z	71	UI/UX	Learning from talks & demosStaying on top of the field	Online (Discord / Slack)Socials & networking
+namitkpr@gmail.com	Namit Kapoor	Namit	New York	Creative Technologist	3-5 years	studio.namit.me	www.linkedin.com/in/namitkapoor		2026-08-01T22:48:13.000Z	72	AI/ML TrainingResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+pipturner.work@gmail.com	Pip Turner	Pip	Cardiff	Designer	5-10 years	pipturner.co.uk	https://www.linkedin.com/in/pip-turner97/		2026-08-02T10:56:57.000Z	73	UI/UX	Meeting collaborators / co-foundersShowcasing what I'm building	In-person meetups & demosOnline (Discord / Slack)Talks / panels
+maxpalmer@ymail.com	Max Palmer	Max	Bristol	Engineer / Developer	5-10 years	Ultraleap / Roli	https://uk.linkedin.com/in/max-palmer-0b77635		2026-08-02T11:57:54.000Z	74	Software DevelopmentAI/ML TrainingUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingTalks / panels
+antonynasce@gmail.com	Antony Nasce	Antony	Bristol, UK	Creative Technologist	5-10 years	https://5of12.co.uk	linkedin.com/in/nasce		2026-08-02T12:06:01.000Z	75	Software DevelopmentUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networking
+felicity-chen@outlook.com	Felicity Chen	Felicity	London	Founder / Operator	1-3 years	https://felicitychen.com/	https://www.linkedin.com/in/felicity-chen-xr/		2026-08-02T13:53:44.000Z	76	MarketingUI/UX	Meeting collaborators / co-foundersLearning from talks & demosHiring or finding work	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+mehmeterenozyoldas@gmail.com	Mehmet	Mehmet	Linköping	Designer	5-10 years	https://mehmeterenozyoldashv3.lovable.app/	https://se.linkedin.com/in/m-e-ozyoldash		2026-08-02T14:12:44.000Z	77	Industrial DesignResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding workConnect globally and locally with people in Sweden/ Linkoping	Socials & networkingHands-on workshops
+chris@wrenar.com	Chris Wren	Chris	San Francisco	Creative Technologist	5-10 years	wrenar.com	http://www.linkedin.com/in/wcwren		2026-08-02T15:18:15.000Z	78	Software DevelopmentAI/ML Training	Learning from talks & demosStaying on top of the fieldHiring or finding work	Online (Discord / Slack)Socials & networking
+vivianshu0923@outlook.com	Vivian Xin Shu	Vivian	Boston	Creative Technologist	1-3 years	https://www.linkedin.com/in/vivian-xin-shu-663b9231b/	https://www.linkedin.com/in/vivian-xin-shu-663b9231b/		2026-08-02T23:00:41.000Z	79	Software DevelopmentUI/UX	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	Online (Discord / Slack)Socials & networkingHands-on workshops
+dck.alx@gmail.com	Dongchan	Dongchan	Chicago	Engineer / Developer	Less than a year	www.dongchan.me	https://www.linkedin.com/in/dongckim99/		2026-08-02T23:41:32.000Z	80	Software DevelopmentIndustrial Design	Learning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networking
+nicholas@withlore.co	Nicholas Hildebrandt	Nicholas	St. Petersburg fl (moving to sf soon)	Creative Technologist	5-10 years	www.itsnicholas.com	dIn https://www.linkedin.com/in/nicholas-hildebrandt	Cocreate products/experiences	2026-08-03T04:56:02.000Z	81	Software DevelopmentDistributionMarketingUI/UX	Learning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+yeahmy1022@gmail.com	Mai Ye	Mai	HongKong	Engineer / Developer	1-3 years	https://runtomaitorunn.github.io/MaiCraft/	https://www.linkedin.com/in/mai-ye/		2026-08-03T09:10:05.000Z	82	Software DevelopmentResearch	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+info@studioanimaspace.com	Angelina Kozhevnikova	Angelina	Rotterdam	Designer	5-10 years	www.studioanaspace.com	linkedin.com/in/angelina-kozhevnikova		2026-08-03T09:14:12.000Z	83	Software DevelopmentOperation ManagementIndustrial DesignResearchUI/UX	Meeting collaborators / co-foundersLearning from talks & demos	Online (Discord / Slack)Socials & networkingTalks / panels
+hello@marcopiattelli.com	Marco Piattelli	Marco	Mexico City	Experience Strategist	Less than a year	marcopiattelli.com	https://www.linkedin.com/in/marcopiattellipalmarini/	Explore customer facing solutions for environments like retail stores, hotels, wellness and wellbeing, museums, public spaces	2026-08-03T15:26:52.000Z	84	I'm new to this industry, just here to learn.	Staying on top of the fieldHiring or finding work	Socials & networkingTalks / panels
+andy@getsocial.network	Andy Fidel	Andy	Toulouse/France	Creative Technologist	5-10 years	www.andyfidel.com	https://www.linkedin.com/in/andy-fidel/	Sounds exciting!! I'm just curious :D	2026-08-03T18:53:55.000Z	85	I'm new to this industry, just here to learn.	Staying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+davidphelan001@gmail.com	David Phelan	David	London	Interaction designer	5-10 years	https://davidphelan.figma.site/	https://www.linkedin.com/in/davidaphelan/		2026-08-03T21:57:28.000Z	86	Software DevelopmentIndustrial DesignResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosHiring or finding work	In-person meetups & demos
+lynne.qian@yahoo.com	Lynn Qian	Lynn	London	Designer	3-5 years	Lynn-qian.com	https://www.linkedin.com/in/lynn-qian-profile?utm_source=share_via&utm_content=profile&utm_medium=member_android	Hackathon	2026-08-03T22:31:12.000Z	87	ResearchUI/UX	Meeting collaborators / co-foundersStaying on top of the fieldHiring or finding work	In-person meetups & demosHands-on workshopsTalks / panels
+timlbrooke@gmail.com	Tim Brooke	Tim	London	Creative Technologist	5-10 years	https://gamesthatexplain.com/	https://www.linkedin.com/in/timbrooke/	Genrate excitement and interest more broadly about this work.	2026-08-04T15:12:01.000Z	88	Electrical EngineeringSoftware DevelopmentIndustrial DesignAI/ML TrainingResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosSocials & networkingTalks / panels
+shah.hoque@hotmail.co.uk	Shah Hoque	Shah	London	Founder / Operator	Less than a year	https://www.shah-hoque.com/	https://www.linkedin.com/in/shahhoque	I would love to join your founding team as a generalist. If that aligns with what you're looking for, please reach out.	2026-08-05T01:40:41.000Z	89	Software Development	Meeting collaborators / co-foundersLearning from talks & demosMy main motivation is to learn. As someone new to physical AII plan to build a healthcare company soon and want to dive deep into the space as quickly as possible.	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+hagar@meshartlab.com	Hagar Platner	Hagar	Munich	Designer	5-10 years	www.hagarplatner.com	https://www.linkedin.com/in/hagar-platner?utm_source=share_via&utm_content=profile&utm_medium=member_ios		2026-08-05T04:40:16.000Z	90	UI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+ashishsfb@gmail.com	Ashish Dubey	Ashish	Pune, India	Creative Technologist	5-10 years	ashish-dubey.com	https://www.linkedin.com/in/ashish-nmd17		2026-08-05T07:29:59.000Z	91	Software DevelopmentResearchUI/UX	Meeting collaborators / co-foundersShowcasing what I'm buildingHiring or finding work	In-person meetups & demosSocials & networkingHands-on workshopsTalks / panels
+iamsohyunjun@gmail.com	Sohyun Jun	Sohyun	London	Creative Technologist	3-5 years	https://www.sohyunjun.com/	https://www.linkedin.com/in/sohyunjun/		2026-08-05T13:29:40.000Z	92	Industrial DesignAI/ML TrainingResearch	Learning from talks & demosHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+q@changqiu.ca	Chloe Qiu	Chloe	London, UK	Founder / Operator	Less than a year	https://www.gobano.ai/	https://www.linkedin.com/in/changqiu/		2026-08-06T14:33:50.000Z	93	Operation ManagementDistributionInvestment	Meeting collaborators / co-foundersStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+herschel.liu@outlook.com	Zihan Liu	Zihan	London	Founder / Operator	1-3 years	engramai.co/ robotscaler.com	https://www.linkedin.com/in/zihan-liu-3724b6295/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3Boz5TEUpbQROG8t4uEzyGLw%3D%3D		2026-08-07T14:18:02.000Z	94	AI/ML TrainingDistribution	Meeting collaborators / co-foundersLearning from talks & demosHiring or finding work	In-person meetups & demosSocials & networking
+sihuixiong@outlook.com	Sihui Xiong	Sihui	London	Researcher / Academic	Less than a year	https://github.com/Summercoconutt	https://www.linkedin.com/in/xsh1007	Have good people to collaborate with, potentially build something together.	2026-08-07T17:47:29.000Z	95	Investment	Meeting collaborators / co-foundersLearning from talks & demos	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+kezhengyi@outlook.com	Zhengyi Ke	Zhengyi	Edinburgh	Hobbyist	Less than a year	NA	www.linkedin.com/in/zhengyi-ke		2026-08-07T21:29:25.000Z	96	I'm new to this industry, just here to learn.	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+sw.you1214@gmail.com	Seung Won You	Seung	London and Bristol	Engineer / Developer	1-3 years	n/a	www.linkedin.com/in/seung-won-y-34793b188		2026-08-09T19:13:20.000Z	97	Software DevelopmentIndustrial DesignAI/ML TrainingManufacturingInvestment	Meeting collaborators / co-foundersStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networking
+xuyingliu2025@gmail.com	Xuying (Fiona) Liu	Xuying	Southampton	Investor	5-10 years	https://www.femai.com/	https://www.linkedin.com/in/xuyingliu/		2026-08-10T09:54:33.000Z	98	I'm new to this industry, just here to learn.InvestmentMarketing	Learning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingTalks / panels
+info@spatialrealities.de	Thomas Riedel	Thomas	Cologne	Journalist	3-5 years	https://spatialrealities.de	https://www.linkedin.com/in/triedel/		2026-08-10T10:23:31.000Z	99	I'm new to this industry, just here to learn.Electrical EngineeringSoftware DevelopmentIndustrial DesignPolicy Making	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the field	Online (Discord / Slack)
+djagani@umich.edu	Dhruvi Jagani	Dhruvi	New York	Developer, Designer and Researcher	1-3 years	https://dhruvijagani.framer.website/	https://www.linkedin.com/in/dhruvijagani/		2026-08-12T00:04:01.000Z	100	Software DevelopmentResearchUI/UX	Meeting collaborators / co-foundersLearning from talks & demosHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshops
+stella.m.haus@gmail.com	Stella Mühlhaus	Stella	Zurich Switzerland	Designer	5-10 years	sutera.ch	https://www.linkedin.com/in/stellamuehlhaus		2026-08-12T06:23:08.000Z	101	Industrial DesignAI/ML TrainingUI/UX	Meeting collaborators / co-foundersShowcasing what I'm building	In-person meetups & demosOnline (Discord / Slack)Socials & networkingHands-on workshopsTalks / panels
+qihang.wei@outlook.com	Qihang Wei	Qihang	London	Designer	1-3 years	N/A	linkedin.com/in/qh-w/		2026-08-13T10:53:40.000Z	102	I'm new to this industry, just here to learn.Research	Meeting collaborators / co-foundersLearning from talks & demosStaying on top of the fieldHiring or finding work	In-person meetups & demosOnline (Discord / Slack)Hands-on workshopsTalks / panels$members$, E'\n') as raw(line)
+cross join lateral string_to_array(raw.line, E'\t') as cols;
+
+insert into public.members (
+  email,
+  email_normalized,
+  full_name,
+  first_name,
+  city,
+  professional_role,
+  experience_range,
+  website_url,
+  linkedin_url,
+  suggestions,
+  status,
+  email_status,
+  source,
+  source_row,
+  signed_up_at
+)
+select
+  email,
+  lower(email),
+  full_name,
+  first_name,
+  city,
+  professional_role,
+  experience_range,
+  website_url,
+  linkedin_url,
+  suggestions,
+  'active',
+  'ok',
+  'google_form',
+  source_row,
+  signed_up_at
+from signup_members_import
+on conflict (email_normalized) do update set
+  email = excluded.email,
+  full_name = excluded.full_name,
+  first_name = excluded.first_name,
+  city = excluded.city,
+  professional_role = excluded.professional_role,
+  experience_range = excluded.experience_range,
+  website_url = excluded.website_url,
+  linkedin_url = excluded.linkedin_url,
+  suggestions = excluded.suggestions,
+  source = excluded.source,
+  source_row = excluded.source_row,
+  signed_up_at = excluded.signed_up_at,
+  updated_at = now();
+
+delete from public.member_interests interests
+using public.members member
+join signup_members_import imported on imported.email = member.email_normalized
+where interests.member_id = member.id;
+
+insert into public.member_interests (member_id, kind, interest)
+select member.id, tags.kind, tags.interest
+from signup_members_import imported
+join public.members member on member.email_normalized = imported.email
+cross join lateral (
+  select 'work_area'::text as kind, unnest(imported.interests) as interest
+  union all
+  select 'community_goal'::text as kind, unnest(imported.community_goals) as interest
+  union all
+  select 'event_format'::text as kind, unnest(imported.event_formats) as interest
+) tags
+where tags.interest <> ''
+on conflict do nothing;
+
+insert into public.subscriptions (member_id, channel, topic, status)
+select member.id, 'email', topic.topic, 'consent_unknown'
+from signup_members_import imported
+join public.members member on member.email_normalized = imported.email
+cross join (values ('newsletter'), ('events'), ('announcements')) as topic(topic)
+on conflict (member_id, channel, topic) do nothing;
+
+insert into public.audit_log (actor_name, action, entity_type, summary)
+values ('System', 'import', 'member', 'Imported 99 cleaned members from Google Form signup responses');
+
+commit;
