@@ -46,7 +46,7 @@ export default async function AccessPage() {
                       </div>
                     </td>
                     <td>{row.email}</td>
-                    <td>{formatDate(row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt))}</td>
+                    <td>{formatDate(row.createdAt)}</td>
                     <td>
                       <div className="admin-inline-form">
                         <form action={approveAccessAction}>
