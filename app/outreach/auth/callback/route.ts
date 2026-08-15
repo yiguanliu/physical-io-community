@@ -5,10 +5,9 @@ import { createClient } from "@/utils/supabase/server";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const destination = new URL("/outreach", requestUrl.origin);
 
   if (!code) {
-    return NextResponse.redirect(new URL("/outreach/login?error=missing_code", requestUrl.origin));
+    return NextResponse.redirect(new URL("/admin/login?next=/outreach", requestUrl.origin));
   }
 
   const cookieStore = await cookies();
@@ -16,8 +15,10 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(new URL("/outreach/login?error=invalid_link", requestUrl.origin));
+    return NextResponse.redirect(
+      new URL("/admin/login?next=/outreach&error=invalid_link", requestUrl.origin),
+    );
   }
 
-  return NextResponse.redirect(destination);
+  return NextResponse.redirect(new URL("/outreach", requestUrl.origin));
 }
