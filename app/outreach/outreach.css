@@ -1,4 +1,6 @@
-@import "tailwindcss";
+/* The marketing site uses an unlayered legacy reset. Keep outreach utilities
+   authoritative inside this route so that reset cannot collapse the app UI. */
+@import "tailwindcss" important;
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 

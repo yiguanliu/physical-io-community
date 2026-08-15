@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { OutreachDashboard } from "@/components/outreach/outreach-dashboard";
 import { getDashboardData } from "@/lib/outreach/dashboard-data";
-import "./outreach.css";
 
 export const dynamic = "force-dynamic";
 
