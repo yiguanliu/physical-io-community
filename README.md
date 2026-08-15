@@ -39,7 +39,7 @@ Copy `.env.example` and set:
 
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — Supabase project used for Auth
 - `NEXT_PUBLIC_SITE_URL` — public site URL, used for generated links
-- `ADMIN_ALLOWLIST` — comma-separated extra emails granted admin immediately on signup (`soul@physical-io.com` is always included). Everyone else can request access.
+- `ADMIN_ALLOWLIST` — comma-separated extra emails granted admin immediately on signup (`soul@physical-io.com` and `anthony@physical-io.com` are always included). Everyone else can request access.
 - `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` — live sending
 - `SUPABASE_SECRET_KEY` — server-only key for admin database access; never expose it with `NEXT_PUBLIC_`
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — **required on Vercel**, see below

@@ -1,5 +1,5 @@
 /** Emails that may always create an administrator account. */
-export const FOUNDING_ADMINS = ["soul@physical-io.com"];
+export const FOUNDING_ADMINS = ["soul@physical-io.com", "anthony@physical-io.com"];
 
 export const ADMIN_ROLE = "admin";
 export const PENDING_ROLE = "pending";
