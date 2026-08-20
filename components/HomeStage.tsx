@@ -5,8 +5,8 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import LogoMark from "./LogoMark";
-import { InstagramIcon, LinkedInIcon } from "./SocialIcons";
-import { AUDIENCE, FOCUS_AREAS, INSTAGRAM_URL, JOIN_URL, LINKEDIN_URL } from "@/lib/site";
+import { CalendarIcon, InstagramIcon, LinkedInIcon } from "./SocialIcons";
+import { INSTAGRAM_URL, LINKEDIN_URL, LUMA_URL } from "@/lib/site";
 import { useSiteStore } from "@/lib/store";
 
 // WebGL light-rays overlay — client only (uses WebGL/window).
@@ -16,7 +16,7 @@ const AUTO_MS = 10000;
 const INTERACTION_RESUME_MS = 20000;
 const WHEEL_THRESHOLD = 80;
 const WHEEL_SETTLE_MS = 260;
-const COUNT = 7;
+const COUNT = 5;
 
 /** One carousel slide. When it becomes active, its [data-anim] children
  *  blur-in in sequence (title → … → buttons). Reduced-motion: instant. */
@@ -188,8 +188,8 @@ export default function HomeStage() {
           <a className="nav-social" href={LINKEDIN_URL} target="_blank" rel="noopener" aria-label="LinkedIn Physical I/O">
             <LinkedInIcon />
           </a>
-          <a className="btn btn-primary" href={JOIN_URL} target="_blank" rel="noopener">
-            Join Community
+          <a className="btn btn-primary nav-calendar" href={LUMA_URL} target="_blank" rel="noopener" aria-label="Physical I/O events calendar on Luma">
+            <CalendarIcon /> Calendar
           </a>
         </nav>
       </div>
@@ -261,37 +261,6 @@ export default function HomeStage() {
             </p>
           </Slide>
 
-          <Slide active={slide === 5} className="slide-chips">
-            <span className="eyebrow" data-anim>
-              Focus Areas
-            </span>
-            <h2 className="s-title" data-anim>
-              What we explore
-            </h2>
-            <div className="chips" data-anim>
-              {FOCUS_AREAS.map((x) => (
-                <span className="chip chip-accent" key={x}>
-                  {x}
-                </span>
-              ))}
-            </div>
-          </Slide>
-
-          <Slide active={slide === 6} className="slide-chips">
-            <span className="eyebrow" data-anim>
-              Who&apos;s in the room
-            </span>
-            <h2 className="s-title" data-anim>
-              Built by every discipline
-            </h2>
-            <div className="chips" data-anim>
-              {AUDIENCE.map((x) => (
-                <span className="chip" key={x}>
-                  {x}
-                </span>
-              ))}
-            </div>
-          </Slide>
         </div>
 
         <button className="screen-arrow left" onClick={() => go(-1)} aria-label="Previous slide">
@@ -323,6 +292,21 @@ export default function HomeStage() {
       </div>
 
       <p className="stage-foot">© 2026 Physical I/O — London, United Kingdom</p>
+
+      <div className="home-fab-stack">
+        <Link className="home-fab" href="/askusanything" aria-label="Ask us anything">
+          <span className="fab-glyph" aria-hidden="true">?</span>
+        </Link>
+        <a
+          className="home-fab"
+          href={LUMA_URL}
+          target="_blank"
+          rel="noopener"
+          aria-label="See upcoming Physical I/O events on Luma"
+        >
+          <CalendarIcon />
+        </a>
+      </div>
 
       <div className="home-rays" aria-hidden="true">
         <LightRays

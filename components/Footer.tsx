@@ -19,6 +19,9 @@ export default function Footer() {
             <ul>
               {/* TODO: replace placeholder contact links */}
               <li>
+                <Link href="/askusanything">Ask Us Anything</Link>
+              </li>
+              <li>
                 <a href="mailto:soul@physical-io.com">Email</a>
               </li>
               <li>
