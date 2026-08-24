@@ -103,6 +103,62 @@ h1, h2, h3 {
 
 .btn-lg { padding: 16px 32px; font-size: 16px; }
 
+/* Calendar (Luma) button in the header — primary pill with a leading icon. */
+.nav-calendar {
+  gap: 7px;
+}
+
+.nav-icon {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Floating icon buttons, pinned bottom-right on the home page, clear of the
+   carousel: Ask Us Anything (?) stacked above the Luma events (calendar). */
+.home-fab-stack {
+  position: fixed;
+  right: clamp(18px, 3vw, 32px);
+  bottom: clamp(18px, 3vw, 32px);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.home-fab {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.home-fab:hover {
+  background: #d63f12;
+  transform: translateY(-2px);
+}
+
+.home-fab .nav-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.home-fab .fab-glyph {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+}
+
 /* ---------- Nav (About page) ---------- */
 
 .nav {
@@ -984,4 +1040,225 @@ button,
 input[type="button"],
 input[type="submit"] {
   cursor: pointer;
+}
+
+/* ---------- Ask Us Anything (/askusanything) ---------- */
+
+.page-ask .ask-section {
+  padding: clamp(88px, 11vw, 128px) 0 clamp(56px, 8vw, 96px);
+  min-height: calc(100dvh - var(--nav-h));
+}
+
+.page-ask .ask-shell {
+  position: relative;
+  width: min(640px, calc(100% - 48px));
+  text-align: left;
+}
+
+/* Heading block pinned to the top of the page. */
+.page-ask .ask-intro {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-bottom: clamp(20px, 3vw, 32px);
+}
+
+.page-ask .ask-intro h1 {
+  font-size: clamp(32px, 5vw, 52px);
+}
+
+/* Snowy owl visual cue: sits behind the form, crisp at the top and
+   progressively blurred + faded toward the bottom so it dissolves into
+   the frosted form box below it. */
+.page-ask .ask-owl {
+  position: absolute;
+  left: 50%;
+  top: clamp(96px, 15vw, 150px);
+  transform: translateX(-50%);
+  width: clamp(190px, 26vw, 260px);
+  aspect-ratio: 247 / 439;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Overall fade from the bottom up (applies to both layers as a group). */
+  -webkit-mask-image: linear-gradient(to top, transparent 0%, #000 44%);
+  mask-image: linear-gradient(to top, transparent 0%, #000 44%);
+}
+
+.page-ask .ask-owl-img {
+  position: absolute;
+  inset: 0;
+  background: url("/assets/askusanything_owl.png") center top / contain no-repeat;
+}
+
+/* Blurred duplicate, revealed only toward the bottom → gradient blur. */
+.page-ask .ask-owl-img--blur {
+  filter: blur(9px);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 50%);
+  mask-image: linear-gradient(to top, #000 0%, transparent 50%);
+}
+
+/* Frosted, bordered form container that blurs whatever sits behind it. */
+.page-ask .ask-form-box {
+  position: relative;
+  z-index: 1;
+  margin-top: clamp(150px, 22vw, 230px);
+  padding: clamp(22px, 3.4vw, 36px);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.10), 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.ask-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ask-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.ask-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ask-field label,
+.ask-label {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.ask-form input[type="text"],
+.ask-form input[type="email"],
+.ask-form textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 13px 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ask-form textarea {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 1.55;
+}
+
+.ask-form input::placeholder,
+.ask-form textarea::placeholder {
+  color: var(--ink-faint);
+}
+
+.ask-form input:focus,
+.ask-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(238, 75, 26, 0.14);
+}
+
+.ask-select-wrap {
+  position: relative;
+}
+
+.ask-form select {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 13px 44px 13px 16px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ask-form select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(238, 75, 26, 0.14);
+}
+
+.ask-select-caret {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 8px;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.ask-form .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ask-error {
+  color: var(--accent-deep);
+  font-size: 14px;
+  font-weight: 500;
+  margin: -6px 0 0;
+}
+
+/* Honeypot — visually hidden but present in the DOM for bots. */
+.ask-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.ask-success {
+  text-align: center;
+  padding: clamp(28px, 5vw, 48px) 0;
+}
+
+.ask-success-mark {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ask-success h2 {
+  font-size: clamp(24px, 3.4vw, 34px);
+  margin-bottom: 12px;
+}
+
+.ask-success p {
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+
+@media (max-width: 560px) {
+  .ask-field-row {
+    grid-template-columns: 1fr;
+  }
 }

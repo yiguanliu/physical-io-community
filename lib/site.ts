@@ -6,6 +6,7 @@ export const DECK_URL =
   "https://docs.google.com/presentation/d/e/2PACX-1vSBwgQYv0gIZAM3iQnur81MkS8DAHTXaeRbBfS1TNteIxN2EDNamDlxGa3tZ2eAdIsNR6DO4OkbS1sn/pub?start=false&loop=false&delayms=5000";
 export const INSTAGRAM_URL = "https://www.instagram.com/physical.io/";
 export const LINKEDIN_URL = "https://www.linkedin.com/company/physical-i-o/";
+export const LUMA_URL = "https://luma.com/phyiscal-io";
 
 export const SITE_NAME = "Physical I/O";
 export const SITE_DESCRIPTION =
@@ -96,6 +97,17 @@ export const FOOTER_TOPICS = [
   "Human Computer Interaction",
   "Computer Vision",
   "Design Engineering",
+];
+
+// "Ask Us Anything" question categories — shown as selectable chips on
+// /askusanything to help people frame what they want to reach out about.
+export const ASK_CATEGORIES = [
+  "How to collaborate",
+  "Know more about the community",
+  "How to join us",
+  "How to co-host an event",
+  "Sponsorship & partnerships",
+  "Something else",
 ];
 
 export interface FaqEntry {
