@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import gsap from "gsap";
 import LogoMark from "./LogoMark";
 import { CalendarIcon, InstagramIcon, LinkedInIcon } from "./SocialIcons";
+import FloatingActions from "./FloatingActions";
 import { INSTAGRAM_URL, LINKEDIN_URL, LUMA_URL } from "@/lib/site";
 import { useSiteStore } from "@/lib/store";
 
@@ -293,20 +294,7 @@ export default function HomeStage() {
 
       <p className="stage-foot">© 2026 Physical I/O — London, United Kingdom</p>
 
-      <div className="home-fab-stack">
-        <Link className="home-fab" href="/askusanything" aria-label="Ask us anything">
-          <span className="fab-glyph" aria-hidden="true">?</span>
-        </Link>
-        <a
-          className="home-fab"
-          href={LUMA_URL}
-          target="_blank"
-          rel="noopener"
-          aria-label="See upcoming Physical I/O events on Luma"
-        >
-          <CalendarIcon />
-        </a>
-      </div>
+      <FloatingActions />
 
       <div className="home-rays" aria-hidden="true">
         <LightRays

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import FloatingActions from "@/components/FloatingActions";
 import Reveal from "@/components/Reveal";
 import Faq from "@/components/Faq";
 import {
@@ -199,6 +200,7 @@ export default function AboutPage() {
       </main>
 
       <Footer />
+      <FloatingActions />
     </div>
   );
 }

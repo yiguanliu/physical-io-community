@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import FloatingActions from "@/components/FloatingActions";
 import AskForm from "@/components/AskForm";
 import { SITE_URL } from "@/lib/site";
 
@@ -57,6 +58,7 @@ export default function AskUsAnythingPage() {
       </main>
 
       <Footer />
+      <FloatingActions showAsk={false} />
     </div>
   );
 }

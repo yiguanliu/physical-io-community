@@ -118,10 +118,12 @@ h1, h2, h3 {
   stroke-linejoin: round;
 }
 
-/* Floating icon buttons, pinned bottom-right on the home page, clear of the
-   carousel: Ask Us Anything (?) stacked above the Luma events (calendar). */
-.home-fab-stack {
-  position: fixed;
+/* Floating icon buttons, pinned bottom-right on every public page, clear of the
+   content: Ask Us Anything (?) stacked above the Luma events (calendar). */
+.fab-stack {
+  /* !important so page-level layout resets (e.g. .page-about's
+     `> :not(.about-bg) { position: relative }`) can't capture this overlay. */
+  position: fixed !important;
   right: clamp(18px, 3vw, 32px);
   bottom: clamp(18px, 3vw, 32px);
   z-index: 80;
@@ -131,7 +133,7 @@ h1, h2, h3 {
   gap: 14px;
 }
 
-.home-fab {
+.fab {
   display: inline-grid;
   place-items: center;
   width: 52px;
@@ -143,17 +145,17 @@ h1, h2, h3 {
   transition: transform 0.15s ease, background 0.15s ease;
 }
 
-.home-fab:hover {
+.fab:hover {
   background: #d63f12;
   transform: translateY(-2px);
 }
 
-.home-fab .nav-icon {
+.fab .nav-icon {
   width: 22px;
   height: 22px;
 }
 
-.home-fab .fab-glyph {
+.fab .fab-glyph {
   font-size: 26px;
   font-weight: 600;
   line-height: 1;
