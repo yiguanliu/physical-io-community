@@ -182,6 +182,7 @@ export default function HomeStage() {
         </Link>
         <nav className="nav-links" aria-label="Main">
           <Link href="/about">About</Link>
+          <Link href="/demo">Demo</Link>
           <a className="nav-social" href={INSTAGRAM_URL} target="_blank" rel="noopener" aria-label="Instagram @physical.io">
             <InstagramIcon />
           </a>
