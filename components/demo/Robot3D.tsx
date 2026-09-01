@@ -6,6 +6,14 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three/webgpu";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+// three ships no type declarations (and no @types/three is installed), so the
+// values from `three/webgpu` are `any`. Alias the handful of types we annotate
+// with; the runtime objects are unaffected.
+type TObject3D = any;
+type TMesh = any;
+type TVec3 = any;
+type TMaterial = any;
+
 /** Projected surface basis: a centre point plus the screen-space vectors of the
  *  robot-local +X (right) and +Y (up) axes, so DOM panels can be corner-pinned
  *  flat onto the robot's front plane and tilt with it. */
@@ -122,7 +130,7 @@ export default function Robot3D({
     // 3D perspective grid floor (static — the robot turns on it).
     const grid = new THREE.GridHelper(60, 60, 0x565b66, 0x2a2d34);
     grid.position.y = -2.9;
-    (grid.material as THREE.Material).transparent = true;
+    (grid.material as TMaterial).transparent = true;
     scene.add(grid);
 
     const renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
@@ -151,8 +159,8 @@ export default function Robot3D({
     robot.add(inner);
     scene.add(robot);
 
-    let screenMesh: THREE.Mesh | null = null;
-    let headNode: THREE.Object3D | null = null;
+    let screenMesh: TMesh | null = null;
+    let headNode: TObject3D | null = null;
     const headBaseQuat = new THREE.Quaternion();
     // Head-animation scratch (world-axis rotations mapped into head-parent space).
     const AXIS_X = new THREE.Vector3(1, 0, 0);
@@ -178,7 +186,7 @@ export default function Robot3D({
     let ready = false;
     loader.load(
       "/models/robot.glb",
-      (gltf) => {
+      (gltf: { scene: TObject3D }) => {
         if (disposed) return;
         const model = gltf.scene;
 
@@ -192,13 +200,13 @@ export default function Robot3D({
 
         // Collect meshes first — adding outline children below must not feed
         // back into the traversal (that would recurse infinitely).
-        const meshes: THREE.Mesh[] = [];
-        model.traverse((o) => {
-          if ((o as THREE.Mesh).isMesh) meshes.push(o as THREE.Mesh);
+        const meshes: TMesh[] = [];
+        model.traverse((o: TObject3D) => {
+          if ((o as TMesh).isMesh) meshes.push(o as TMesh);
         });
 
         for (const mesh of meshes) {
-          const matName = (mesh.material as THREE.Material)?.name ?? "";
+          const matName = (mesh.material as TMaterial)?.name ?? "";
 
           if (/plane/i.test(mesh.name) || /plane/i.test(mesh.parent?.name ?? "")) {
             // Remove (not just hide) — the huge floor plane would otherwise
@@ -253,7 +261,7 @@ export default function Robot3D({
         anchorsReady = true;
 
         if (screenMesh) {
-          const sm = screenMesh as THREE.Mesh;
+          const sm = screenMesh as TMesh;
           sm.geometry.computeBoundingBox();
           const gb = sm.geometry.boundingBox!;
           const gs = gb.getSize(new THREE.Vector3());
@@ -286,7 +294,7 @@ export default function Robot3D({
         ready = true;
       },
       undefined,
-      (err) => {
+      (err: unknown) => {
         // eslint-disable-next-line no-console
         console.error("[robot.glb] failed to load", err);
       }
@@ -393,14 +401,14 @@ export default function Robot3D({
     ];
     const mkBasis = () => ({ cx: 0, cy: 0, rx: 1, ry: 0, ux: 0, uy: 1 });
     const anchorOut = { left: mkBasis(), right: mkBasis(), topRight: mkBasis(), body: mkBasis() };
-    const projPx = (p: THREE.Vector3, out: { x: number; y: number }) => {
+    const projPx = (p: TVec3, out: { x: number; y: number }) => {
       p.project(camera);
       out.x = (p.x * 0.5 + 0.5) * width;
       out.y = (-p.y * 0.5 + 0.5) * height;
     };
     const tmpA = { x: 0, y: 0 };
     const tmpB = { x: 0, y: 0 };
-    const projectBasis = (local: THREE.Vector3, out: ReturnType<typeof mkBasis>) => {
+    const projectBasis = (local: TVec3, out: ReturnType<typeof mkBasis>) => {
       v.copy(local).applyMatrix4(robot.matrixWorld);
       projPx(v, tmpA);
       out.cx = tmpA.x;
@@ -450,7 +458,7 @@ export default function Robot3D({
       // parent space so nod/shake/tilt read correctly regardless of node frame).
       if (headNode) {
         const ae = now - s.animAt;
-        let axis: THREE.Vector3 | null = null;
+        let axis: TVec3 | null = null;
         let angle = 0;
         if (ae >= 0 && ae < 2.2) {
           if (s.animType === "nod") {
@@ -526,10 +534,10 @@ export default function Robot3D({
       dom.removeEventListener("pointermove", onMove);
       dom.removeEventListener("pointerup", onUp);
       dom.removeEventListener("pointercancel", onUp);
-      scene.traverse((o) => {
-        const m = o as THREE.Mesh;
+      scene.traverse((o: TObject3D) => {
+        const m = o as TMesh;
         if (m.geometry) m.geometry.dispose();
-        const mat = m.material as THREE.Material | THREE.Material[] | undefined;
+        const mat = m.material as TMaterial | TMaterial[] | undefined;
         if (mat) (Array.isArray(mat) ? mat : [mat]).forEach((x) => x.dispose());
       });
       renderer.dispose();
