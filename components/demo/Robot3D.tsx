@@ -424,10 +424,7 @@ export default function Robot3D({
       out.ux = tmpB.x - out.cx;
       out.uy = tmpB.y - out.cy;
     };
-    const clock = new THREE.Clock();
-
     const framefn = () => {
-      const t = clock.getElapsedTime();
       const now = performance.now() / 1000;
       const s = state.current;
       const since = now - s.insertAt;
@@ -441,13 +438,13 @@ export default function Robot3D({
         s.viewPending = false;
       }
 
-      // The robot stays locked facing front (only a gentle vertical bob);
+      // The robot stays locked facing front;
       // dragging orbits the CAMERA around it instead of turning the object.
       yaw += (targetYaw - yaw) * 0.12;
       pitch += (targetPitch - pitch) * 0.12;
       zoom += (targetZoom - zoom) * 0.15;
       robot.rotation.set(0, 0, 0);
-      robot.position.y = Math.sin(t * 0.9) * 0.08 - react * 0.18;
+      robot.position.y = -react * 0.18;
 
       const dist = baseZ * zoom;
       const ce = Math.cos(pitch);

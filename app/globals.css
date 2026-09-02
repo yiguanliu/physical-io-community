@@ -14,7 +14,7 @@
   --accent-deep: #ee4b1a;
   --radius: 14px;
   --nav-h: 64px;
-  --font: "Host Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font: "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
