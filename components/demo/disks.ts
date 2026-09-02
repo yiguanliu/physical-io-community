@@ -26,6 +26,10 @@ export interface DiskSection {
   entries: DiskEntry[];
 }
 
+/** Programs that take over the screen with a bespoke UI instead of the
+ *  generic section/entry browser. */
+export type DiskProgram = "news";
+
 export interface Disk {
   id: string;
   /** Filename as printed on the cartridge, e.g. "robotics.exe". */
@@ -39,8 +43,10 @@ export interface Disk {
   glyph: string;
   /** Admin-gated programs are dimmed until admin mode is toggled on. */
   admin?: boolean;
-  /** Content the screen renders once booted. */
-  sections: DiskSection[];
+  /** Renders a bespoke screen UI (and its own side panel) instead of sections. */
+  program?: DiskProgram;
+  /** Content the screen renders once booted. Omitted by bespoke programs. */
+  sections?: DiskSection[];
 }
 
 export const DISK_CATEGORIES: DiskCategory[] = [
@@ -100,24 +106,8 @@ export const DISKS: Disk[] = [
     blurb: "Official Physical I/O robotics news feed",
     accent: "#ee4b1a",
     glyph: "⬡",
-    sections: [
-      {
-        label: "Top stories",
-        entries: [
-          { title: "Manipulation", body: "Dexterous grasping · tactile sensing", tag: "01" },
-          { title: "Locomotion", body: "Legged & wheeled control stacks", tag: "02" },
-          { title: "Spatial AI", body: "3D perception · world models", tag: "03" },
-          { title: "Embodiment", body: "Sim-to-real systems in production", tag: "04" },
-        ],
-      },
-      {
-        label: "Community builds",
-        entries: [
-          { title: "Open-arm", body: "Low-cost teleop manipulator" },
-          { title: "Wanderer", body: "Sidewalk delivery platform" },
-        ],
-      },
-    ],
+    // Renders NewsScreen (feed index + article reader) instead of sections.
+    program: "news",
   },
   {
     id: "podcast",
