@@ -21,6 +21,8 @@ import {
   IconFull,
 } from "./PixelIcons";
 import { DISK_CATEGORIES, DISKS, type Disk, type DiskKind } from "./disks";
+import { NEWS, NEWS_CATEGORIES, matchesQuery } from "./news";
+import type { NewsLayout, NewsView } from "./NewsScreen";
 import type { ScreenQuad } from "./Robot3D";
 
 const Robot3D = dynamic(() => import("./Robot3D"), { ssr: false });
@@ -28,6 +30,8 @@ const Robot3D = dynamic(() => import("./Robot3D"), { ssr: false });
 const pixelFont = Silkscreen({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-pixel" });
 
 const BOOT_MS = 1400;
+// How long news.exe "loads" a page before it fades in.
+const FETCH_MS = 700;
 
 // Head-animation controls with their pixel icons.
 const ANIM_CONTROLS: [string, string, React.FC<{ className?: string }>][] = [
@@ -38,7 +42,7 @@ const ANIM_CONTROLS: [string, string, React.FC<{ className?: string }>][] = [
   ["spin", "Spin", IconSpin],
 ];
 
-const DEFAULT_VIEW = { az: -0.34, elev: 0.14, zoom: 1.35 };
+const DEFAULT_VIEW = { az: -0.36, elev: 0.13, zoom: 1.35 };
 // Zoom-in preset: a near-front close-up filling the frame with the screen.
 const CLOSEUP_VIEW = { az: -0.24, elev: 0.05, zoom: 0.5 };
 type ShelfView = "list" | "grid" | "carousel";
@@ -56,7 +60,7 @@ const SHELF_VIEWS: { id: ShelfView; label: string; icon: string }[] = [
 
 // Camera view presets for the dropdown (azimuth, elevation, zoom).
 const VIEWS: { label: string; az: number; elev: number; zoom: number }[] = [
-  { label: "Default", az: -0.34, elev: 0.14, zoom: 1.35 },
+  { label: "Default", ...DEFAULT_VIEW },
   { label: "Front", az: 0, elev: 0.03, zoom: 1.2 },
   { label: "Left", az: -1.15, elev: 0.12, zoom: 1.35 },
   { label: "Right", az: 1.15, elev: 0.12, zoom: 1.35 },
@@ -65,9 +69,22 @@ const VIEWS: { label: string; az: number; elev: number; zoom: number }[] = [
 ];
 
 // Base pixel box the OS is authored in; a matrix3d transform corner-pins it onto
-// the robot's projected (roughly square) screen glass.
-const BASE_W = 448;
-const BASE_H = 424;
+// the robot's projected (roughly square) screen glass. Render it at 2x so the
+// browser has enough source pixels before the perspective transform scales it.
+const OS_RENDER_SCALE = 2;
+const OS_W = 448;
+const OS_ASPECT = 424 / 448;
+
+// ...and then adapt on top of that floor. A fixed box has to be magnified once
+// the screen fills the viewport, which is what softens the text up close, so
+// the authored box tracks the screen's projected width and the transform stays
+// near 1:1. The 2x box above is the lower cap — quality never drops below what
+// it is today, it only improves as the camera moves in.
+const MIN_BASE_W = OS_W * OS_RENDER_SCALE;
+const MAX_BASE_W = 2688;
+// Quantised, so a slow zoom re-renders the OS a handful of times per sweep
+// rather than on every animation frame.
+const BASE_STEP = 224;
 
 // ---- Homography: map the base box's 4 corners onto the projected quad ----
 type M3 = number[];
@@ -105,6 +122,12 @@ const projection = (s: number[], d: number[]): M3 => {
   return mulMM(dst, adj(src));
 };
 
+/** True when the event came from a text field, which owns its own keys. */
+const isTyping = (target: EventTarget | null) => {
+  const el = target as HTMLElement | null;
+  return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+};
+
 interface Flyer {
   id: number;
   from: { x: number; y: number };
@@ -128,7 +151,7 @@ export default function RobotShowcase() {
   const [focus, setFocus] = useState(NEWS_INDEX);
   const [ghost, setGhost] = useState<{ x: number; y: number; over: boolean } | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
-  const [view, setView] = useState({ az: -0.34, elev: 0.14, zoom: 1.35, nonce: 0 });
+  const [view, setView] = useState({ ...DEFAULT_VIEW, nonce: 0 });
   const [powered, setPowered] = useState(true);
   const [scaledUp, setScaledUp] = useState(false);
   const [camOpen, setCamOpen] = useState(false);
@@ -139,6 +162,17 @@ export default function RobotShowcase() {
   const [shelfMinimized, setShelfMinimized] = useState(false);
   const [shelfDock, setShelfDock] = useState<ShelfDock>("bottom");
   const [shelfPos, setShelfPos] = useState<Point | null>(null);
+  // Authored width of the OS box — retargeted from the projected screen size.
+  const [baseW, setBaseW] = useState(MIN_BASE_W);
+  const baseTarget = useRef(MIN_BASE_W);
+  const [newsId, setNewsId] = useState(NEWS[0].id);
+  const [newsView, setNewsView] = useState<NewsView>("index");
+  const [newsLayout, setNewsLayout] = useState<NewsLayout>("list");
+  const [newsCategory, setNewsCategory] = useState("all");
+  const [newsQuery, setNewsQuery] = useState("");
+  const [newsLoading, setNewsLoading] = useState(true);
+  // Bumped whenever a page should replay its loading animation.
+  const [newsLoad, setNewsLoad] = useState(0);
   const wheelLock = useRef(false);
   const dragRef = useRef<{ disk: Disk; sx: number; sy: number; dragging: boolean } | null>(null);
   const shelfMoveRef = useRef<{ dx: number; dy: number } | null>(null);
@@ -156,10 +190,12 @@ export default function RobotShowcase() {
           d.file,
           d.kind,
           d.blurb,
-          ...d.sections.flatMap((section) => [
+          ...(d.sections ?? []).flatMap((section) => [
             section.label,
             ...section.entries.flatMap((entry) => [entry.title, entry.body, entry.tag ?? ""]),
           ]),
+          // Program-driven disks have no sections; index what they actually show.
+          ...(d.program === "news" ? NEWS.flatMap((a) => [a.title, a.source, a.category, a.dek]) : []),
         ]
           .join(" ")
           .toLowerCase();
@@ -225,6 +261,7 @@ export default function RobotShowcase() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTyping(e.target)) return;
       if (e.key === "ArrowRight") stepFocus(1);
       else if (e.key === "ArrowLeft") stepFocus(-1);
     };
@@ -240,6 +277,107 @@ export default function RobotShowcase() {
       if (nextFocus >= 0) setFocus(nextFocus);
     }
   }, [focus, visibleDisks]);
+  // news.exe is live whenever its disk is booted and the robot has power.
+  const newsRunning = phase === "running" && disk?.program === "news" && powered;
+  // The sidebar and search filter the index; the open story is always resolved
+  // against the whole feed so a filter change can't swap what you're reading.
+  const newsVisible = useMemo(
+    () =>
+      NEWS.filter(
+        (a) => (newsCategory === "all" || a.category === newsCategory) && matchesQuery(a, newsQuery)
+      ),
+    [newsCategory, newsQuery]
+  );
+  const newsArticle = NEWS.find((a) => a.id === newsId) ?? null;
+  const newsIndex = newsVisible.findIndex((a) => a.id === newsId);
+
+  // A filter that hides the cursor row moves it to the top of what's left.
+  useEffect(() => {
+    if (newsVisible.length && !newsVisible.some((a) => a.id === newsId)) setNewsId(newsVisible[0].id);
+  }, [newsVisible, newsId]);
+
+  // Booting the disk, or opening a story, replays the loading animation.
+  useEffect(() => {
+    if (phase !== "running" || disk?.program !== "news") return;
+    setNewsLoading(true);
+    const t = window.setTimeout(() => setNewsLoading(false), FETCH_MS);
+    return () => window.clearTimeout(t);
+  }, [phase, disk, newsLoad]);
+
+  // Each boot of news.exe starts back at the feed index.
+  useEffect(() => {
+    if (phase === "booting" && disk?.program === "news") {
+      setNewsView("index");
+      setNewsCategory("all");
+      setNewsQuery("");
+    }
+  }, [phase, disk]);
+
+  // The sidebar and search only exist in the modal; closing it clears them so
+  // the small screen is never left filtered with no control to undo it.
+  useEffect(() => {
+    if (!fullscreen) {
+      setNewsCategory("all");
+      setNewsQuery("");
+    }
+  }, [fullscreen]);
+
+  // Changing a filter always returns to the index it applies to.
+  const selectCategory = useCallback((c: string) => {
+    setNewsCategory(c);
+    setNewsView("index");
+  }, []);
+
+  const runQuery = useCallback((q: string) => {
+    setNewsQuery(q);
+    setNewsView("index");
+  }, []);
+
+  const openArticle = useCallback(
+    (id: string) => {
+      setNewsId(id);
+      setNewsView("article");
+      setNewsLoad((n) => n + 1);
+    },
+    []
+  );
+
+  const backToIndex = useCallback(() => setNewsView("index"), []);
+
+  // ↑/↓ move the cursor (index) or step between stories (article);
+  // ↵ opens the cursor row, esc returns to the index.
+  useEffect(() => {
+    if (!newsRunning) return;
+    const onKey = (e: KeyboardEvent) => {
+      // The search field owns its own keys.
+      if (isTyping(e.target)) {
+        if (e.key === "Escape") {
+          setNewsQuery("");
+          (e.target as HTMLElement).blur();
+        }
+        return;
+      }
+      if (e.key === "Escape") {
+        if (newsView === "article") setNewsView("index");
+        return;
+      }
+      if (e.key === "Enter") {
+        if (newsView === "index" && newsIndex >= 0) {
+          e.preventDefault();
+          openArticle(newsId);
+        }
+        return;
+      }
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      e.preventDefault();
+      const next = newsIndex + (e.key === "ArrowDown" ? 1 : -1);
+      if (next < 0 || next >= newsVisible.length) return;
+      if (newsView === "article") openArticle(newsVisible[next].id);
+      else setNewsId(newsVisible[next].id);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [newsRunning, newsView, newsIndex, newsId, newsVisible, openArticle]);
 
   const overlayRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -265,8 +403,30 @@ export default function RobotShowcase() {
     el.style.pointerEvents = q.facing > 0.35 ? "auto" : "none";
     if (opacity <= 0) return;
     const [tl, tr, br, bl] = q.corners;
+
+    // Retarget the authored resolution to how large the screen actually is on
+    // screen. Grow eagerly, shrink only once well past a step, so sitting on a
+    // step boundary can't thrash re-renders.
+    const projW = Math.max(
+      Math.hypot(tr.x - tl.x, tr.y - tl.y),
+      Math.hypot(br.x - bl.x, br.y - bl.y)
+    );
+    const want = Math.min(
+      MAX_BASE_W,
+      Math.max(MIN_BASE_W, Math.ceil((projW * window.devicePixelRatio) / BASE_STEP) * BASE_STEP)
+    );
+    const cur = baseTarget.current;
+    if (want !== cur && (want > cur || projW * window.devicePixelRatio < cur - BASE_STEP * 0.75)) {
+      baseTarget.current = want;
+      setBaseW(want);
+    }
+
+    // Project from the box React has actually rendered, not the new target.
+    // Reading the inline style stays in sync without forcing a layout flush.
+    const base = parseFloat(el.style.width) || MIN_BASE_W;
+    const baseH = base * OS_ASPECT;
     const t = projection(
-      [0, 0, BASE_W, 0, BASE_W, BASE_H, 0, BASE_H],
+      [0, 0, base, 0, base, baseH, 0, baseH],
       [tl.x, tl.y, tr.x, tr.y, br.x, br.y, bl.x, bl.y]
     );
     for (let i = 0; i < 9; i++) t[i] = t[i] / t[8];
@@ -587,7 +747,7 @@ export default function RobotShowcase() {
         <div
           className={`screen-overlay${fullscreen ? " is-fullscreen" : ""}`}
           ref={overlayRef}
-          style={{ width: BASE_W, height: BASE_H, fontSize: BASE_W / 30, opacity: 0 }}
+          style={{ width: baseW, height: baseW * OS_ASPECT, fontSize: baseW / 30, opacity: 0 }}
         >
           <ScreenOS
             phase={phase}
@@ -596,6 +756,24 @@ export default function RobotShowcase() {
             onEject={eject}
             fullscreen={fullscreen}
             onToggleFullscreen={() => setFullscreen((f) => !f)}
+            news={{
+              view: newsView,
+              layout: newsLayout,
+              articles: newsVisible,
+              article: newsArticle,
+              activeId: newsId,
+              loading: newsLoading,
+              total: NEWS.length,
+              onOpen: openArticle,
+              onBack: backToIndex,
+              onLayout: setNewsLayout,
+              utilities: fullscreen,
+              categories: NEWS_CATEGORIES,
+              category: newsCategory,
+              onCategory: selectCategory,
+              query: newsQuery,
+              onQuery: runQuery,
+            }}
           />
           {denied && (
             <div className="os-denied" role="alert">
@@ -612,7 +790,7 @@ export default function RobotShowcase() {
           </div>
         )}
 
-        <p className="mac-caption">Drag a disk onto the PC to load · drag to rotate · scroll to zoom.</p>
+        <p className="mac-caption">Drag a disk onto the PC to load · left-drag to rotate · right-drag to pan · scroll to zoom.</p>
       </main>
 
       {/* Software shelf */}

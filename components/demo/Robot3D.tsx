@@ -58,8 +58,9 @@ const OUTLINE = 0.05;
 
 /** Default camera orbit (azimuth, elevation) — a slight 3/4 view. The robot
  *  itself stays locked facing front; only the camera moves. */
-const DEFAULT_AZ = -0.34;
-const DEFAULT_ELEV = 0.14;
+const DEFAULT_AZ = -0.36;
+const DEFAULT_ELEV = 0.13;
+const DEFAULT_ZOOM = 1.35;
 
 /** Two-tone black/white toon ramp — hard terminator for a stark line-art read. */
 function toonGradient() {
@@ -75,7 +76,7 @@ export default function Robot3D({
   booted,
   insertNonce,
   anim = { type: "", nonce: 0 },
-  view = { az: DEFAULT_AZ, elev: DEFAULT_ELEV, zoom: 1.35, nonce: 0 },
+  view = { az: DEFAULT_AZ, elev: DEFAULT_ELEV, zoom: DEFAULT_ZOOM, nonce: 0 },
   onScreen,
 }: Robot3DProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -89,7 +90,7 @@ export default function Robot3D({
     lastViewNonce: view.nonce,
     viewAz: DEFAULT_AZ,
     viewElev: DEFAULT_ELEV,
-    viewZoom: 1.35,
+    viewZoom: DEFAULT_ZOOM,
     viewPending: false,
   });
   const cb = useRef(onScreen);
@@ -143,6 +144,7 @@ export default function Robot3D({
     dom.style.display = "block";
     dom.style.cursor = "grab";
     dom.style.touchAction = "none";
+    const inputSurface = mount.parentElement ?? dom;
 
     // ---- Lighting: a hard key + minimal fill for a crisp 2-tone terminator. ----
     scene.add(new THREE.AmbientLight(0xffffff, 0.28));
@@ -304,8 +306,8 @@ export default function Robot3D({
     let width = 1;
     let height = 1;
     let baseZ = 8;
-    let zoom = 1.35; // default framing pulled back to show the whole machine.
-    let targetZoom = 1.35;
+    let zoom = DEFAULT_ZOOM;
+    let targetZoom = DEFAULT_ZOOM;
     const resize = () => {
       const r = mount.getBoundingClientRect();
       width = Math.max(1, r.width);
@@ -327,14 +329,22 @@ export default function Robot3D({
     };
     dom.addEventListener("wheel", onWheel, { passive: false });
 
-    // ---- Drag to orbit + two-finger pinch to zoom ----
+    // ---- Drag to orbit, right-drag to pan + two-finger pinch to zoom ----
     let dragging = false;
+    let dragMode: "orbit" | "pan" | null = null;
     let lastX = 0;
     let lastY = 0;
     let yaw = DEFAULT_AZ;
     let pitch = DEFAULT_ELEV;
     let targetYaw = DEFAULT_AZ;
     let targetPitch = DEFAULT_ELEV;
+    const pan = new THREE.Vector3();
+    const targetPan = new THREE.Vector3();
+    const camOffset = new THREE.Vector3();
+    const camTarget = new THREE.Vector3();
+    const panForward = new THREE.Vector3();
+    const panRight = new THREE.Vector3();
+    const panUp = new THREE.Vector3();
     const pointers = new Map<number, { x: number; y: number }>();
     let pinchPrev = 0;
     const pinchDist = () => {
@@ -342,15 +352,27 @@ export default function Robot3D({
       return p.length < 2 ? 0 : Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
     };
     const onDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      const blocked = target?.closest(
+        ".hud-left, .hud-right, .software-shelf, .desktop-shelf-icon, .screen-modal-backdrop, .screen-overlay.is-fullscreen"
+      );
+      const leftCanvasDrag = e.button === 0 && (target === dom || target === mount);
+      const rightStagePan = e.button === 2 && !blocked;
+      if (e.pointerType !== "mouse" && target !== dom && target !== mount) return;
+      if (e.pointerType === "mouse" && !leftCanvasDrag && !rightStagePan) return;
+      if (e.pointerType === "mouse" && e.button !== 0 && e.button !== 2) return;
+      e.preventDefault();
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      dom.setPointerCapture?.(e.pointerId);
+      inputSurface.setPointerCapture?.(e.pointerId);
       if (pointers.size === 1) {
         dragging = true;
+        dragMode = e.pointerType === "mouse" && e.button === 2 ? "pan" : "orbit";
         lastX = e.clientX;
         lastY = e.clientY;
-        dom.style.cursor = "grabbing";
+        dom.style.cursor = dragMode === "pan" ? "move" : "grabbing";
       } else if (pointers.size === 2) {
         dragging = false;
+        dragMode = null;
         pinchPrev = pinchDist();
       }
     };
@@ -365,8 +387,23 @@ export default function Robot3D({
         return;
       }
       if (!dragging) return;
-      targetYaw = clamp(targetYaw + (e.clientX - lastX) * 0.007, -1.35, 1.35);
-      targetPitch = clamp(targetPitch + (e.clientY - lastY) * 0.005, -0.45, 0.5);
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      if (dragMode === "pan") {
+        const dist = baseZ * targetZoom;
+        const panScale = (2 * dist * Math.tan((camera.fov * Math.PI) / 360)) / height;
+        camera.getWorldDirection(panForward);
+        panRight.crossVectors(panForward, camera.up).normalize();
+        panUp.crossVectors(panRight, panForward).normalize();
+        targetPan.addScaledVector(panRight, -dx * panScale);
+        targetPan.addScaledVector(panUp, dy * panScale);
+        targetPan.x = clamp(targetPan.x, -2.25, 2.25);
+        targetPan.y = clamp(targetPan.y, -2, 2);
+        targetPan.z = clamp(targetPan.z, -1.5, 1.5);
+      } else {
+        targetYaw = clamp(targetYaw + dx * 0.007, -1.35, 1.35);
+        targetPitch = clamp(targetPitch + dy * 0.005, -0.45, 0.5);
+      }
       lastX = e.clientX;
       lastY = e.clientY;
     };
@@ -375,18 +412,28 @@ export default function Robot3D({
       if (pointers.size < 2) pinchPrev = 0;
       if (pointers.size === 0) {
         dragging = false;
+        dragMode = null;
         dom.style.cursor = "grab";
       } else {
         const p = [...pointers.values()][0];
         lastX = p.x;
         lastY = p.y;
         dragging = true;
+        dragMode = "orbit";
       }
     };
-    dom.addEventListener("pointerdown", onDown);
-    dom.addEventListener("pointermove", onMove);
-    dom.addEventListener("pointerup", onUp);
-    dom.addEventListener("pointercancel", onUp);
+    const onContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const blocked = target?.closest(
+        ".hud-left, .hud-right, .software-shelf, .desktop-shelf-icon, .screen-modal-backdrop, .screen-overlay.is-fullscreen"
+      );
+      if (!blocked) e.preventDefault();
+    };
+    inputSurface.addEventListener("pointerdown", onDown);
+    inputSurface.addEventListener("pointermove", onMove);
+    inputSurface.addEventListener("pointerup", onUp);
+    inputSurface.addEventListener("pointercancel", onUp);
+    inputSurface.addEventListener("contextmenu", onContextMenu);
 
     const v = new THREE.Vector3();
     const v2 = new THREE.Vector3();
@@ -435,6 +482,7 @@ export default function Robot3D({
         targetYaw = s.viewAz;
         targetPitch = s.viewElev;
         targetZoom = s.viewZoom;
+        targetPan.set(0, 0, 0);
         s.viewPending = false;
       }
 
@@ -443,13 +491,16 @@ export default function Robot3D({
       yaw += (targetYaw - yaw) * 0.12;
       pitch += (targetPitch - pitch) * 0.12;
       zoom += (targetZoom - zoom) * 0.15;
+      pan.lerp(targetPan, 0.15);
       robot.rotation.set(0, 0, 0);
       robot.position.y = -react * 0.18;
 
       const dist = baseZ * zoom;
       const ce = Math.cos(pitch);
-      camera.position.set(Math.sin(yaw) * ce * dist, Math.sin(pitch) * dist, Math.cos(yaw) * ce * dist);
-      camera.lookAt(0, 0, 0);
+      camOffset.set(Math.sin(yaw) * ce * dist, Math.sin(pitch) * dist, Math.cos(yaw) * ce * dist);
+      camTarget.copy(pan);
+      camera.position.copy(camTarget).add(camOffset);
+      camera.lookAt(camTarget);
 
       // Head-only animations (rotations about WORLD axes, mapped into the head's
       // parent space so nod/shake/tilt read correctly regardless of node frame).
@@ -527,10 +578,11 @@ export default function Robot3D({
       renderer.setAnimationLoop(null);
       ro.disconnect();
       dom.removeEventListener("wheel", onWheel);
-      dom.removeEventListener("pointerdown", onDown);
-      dom.removeEventListener("pointermove", onMove);
-      dom.removeEventListener("pointerup", onUp);
-      dom.removeEventListener("pointercancel", onUp);
+      inputSurface.removeEventListener("pointerdown", onDown);
+      inputSurface.removeEventListener("pointermove", onMove);
+      inputSurface.removeEventListener("pointerup", onUp);
+      inputSurface.removeEventListener("pointercancel", onUp);
+      inputSurface.removeEventListener("contextmenu", onContextMenu);
       scene.traverse((o: TObject3D) => {
         const m = o as TMesh;
         if (m.geometry) m.geometry.dispose();

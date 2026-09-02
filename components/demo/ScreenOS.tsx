@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import type { Disk } from "./disks";
-import { DocIcon, FolderIcon, HappyMac } from "./PixelIcons";
+import NewsScreen, { type NewsState } from "./NewsScreen";
+import { DocIcon, EjectIcon, FolderIcon, HappyMac } from "./PixelIcons";
 
 export type Phase = "idle" | "booting" | "running";
 
@@ -13,11 +14,21 @@ interface ScreenOSProps {
   onEject: () => void;
   fullscreen: boolean;
   onToggleFullscreen: () => void;
+  /** news.exe only: index/article navigation state, shared with the side panel. */
+  news?: NewsState;
 }
 
 /** The pixel Finder rendered inside the Macintosh screen: Happy Mac standby,
  *  a boot readout, then a window of the disk's contents. Black & white only. */
-export default function ScreenOS({ phase, disk, admin, onEject, fullscreen, onToggleFullscreen }: ScreenOSProps) {
+export default function ScreenOS({
+  phase,
+  disk,
+  admin,
+  onEject,
+  fullscreen,
+  onToggleFullscreen,
+  news,
+}: ScreenOSProps) {
   const [section, setSection] = useState(0);
   const [bootStep, setBootStep] = useState(0);
 
@@ -55,7 +66,9 @@ export default function ScreenOS({ phase, disk, admin, onEject, fullscreen, onTo
   }
 
   if (phase === "running" && disk) {
-    const sec = disk.sections[section];
+    const isNews = disk.program === "news";
+    const sections = disk.sections ?? [];
+    const sec = sections[Math.min(section, sections.length - 1)];
     return (
       <div className="os os-run">
         {/* Menu bar */}
@@ -67,26 +80,35 @@ export default function ScreenOS({ phase, disk, admin, onEject, fullscreen, onTo
           <button className="menu-item menu-disk">{disk.kind}</button>
           <button className="menu-item">Help</button>
           <button className="menu-eject" onClick={onEject}>
-            Eject ⏏
+            Eject <EjectIcon className="menu-eject-ico" />
           </button>
         </div>
 
         {/* Finder window */}
         <div className="win">
           <div className="win-title">
-            <button className="win-close" onClick={onEject} aria-label={`Eject ${disk.file}`} />
+            <button
+              className="win-close"
+              onClick={onEject}
+              data-tip={`Eject ${disk.file}`}
+              aria-label={`Eject ${disk.file}`}
+            >
+              <EjectIcon className="win-ico" />
+            </button>
             <span className="win-name">{disk.file}</span>
             <button
               className="win-full"
               onClick={onToggleFullscreen}
+              data-tip={fullscreen ? "Exit full screen" : "Full screen"}
               aria-label={fullscreen ? "Exit full screen" : "Full screen"}
             >
               {fullscreen ? "⤡" : "⤢"}
             </button>
           </div>
 
+          {!isNews && (
           <div className="win-tabs">
-            {disk.sections.map((s, i) => (
+            {sections.map((s, i) => (
               <button
                 key={s.label}
                 className={`win-tab${i === section ? " is-active" : ""}`}
@@ -97,9 +119,13 @@ export default function ScreenOS({ phase, disk, admin, onEject, fullscreen, onTo
               </button>
             ))}
           </div>
+          )}
 
+          {isNews && news ? (
+            <NewsScreen {...news} />
+          ) : (
           <div className="win-body">
-            {sec.entries.map((e) => {
+            {sec?.entries.map((e) => {
               const inner = (
                 <>
                   <DocIcon className="file-ico" />
@@ -128,9 +154,16 @@ export default function ScreenOS({ phase, disk, admin, onEject, fullscreen, onTo
               );
             })}
           </div>
+          )}
 
           <div className="win-status">
-            {sec.entries.length} items &middot; {disk.blurb}
+            {isNews && news
+              ? news.loading
+                ? "loading…"
+                : `${news.articles.length}${
+                    news.articles.length === news.total ? "" : ` of ${news.total}`
+                  } stories · ${news.category === "all" ? disk.blurb : news.category}`
+              : `${sec?.entries.length ?? 0} items · ${disk.blurb}`}
             {disk.admin && admin && <span className="win-admin"> &middot; admin</span>}
           </div>
         </div>
