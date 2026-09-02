@@ -2,7 +2,13 @@
 // Each "disk" is a cartridge the user slots into the robot's I/O port. Booting
 // it takes over the robot's screen with that program's browsable content.
 
-export type DiskKind = "node" | "disk" | "exe";
+export type DiskKind = "exe" | "plugin" | "node" | "signal";
+
+export interface DiskCategory {
+  id: DiskKind;
+  label: string;
+  description: string;
+}
 
 export interface DiskEntry {
   /** Heading shown inside the program window. */
@@ -37,6 +43,29 @@ export interface Disk {
   sections: DiskSection[];
 }
 
+export const DISK_CATEGORIES: DiskCategory[] = [
+  {
+    id: "exe",
+    label: "EXE",
+    description: "Official Physical I/O released apps",
+  },
+  {
+    id: "plugin",
+    label: "PLUGIN",
+    description: "Partner collaborations and external extensions",
+  },
+  {
+    id: "node",
+    label: "NODE",
+    description: "Community accounts, friends, and people you follow",
+  },
+  {
+    id: "signal",
+    label: "SIGNAL",
+    description: "Startups, mentors, and founder accounts grown from the community",
+  },
+];
+
 export const DISKS: Disk[] = [
   {
     id: "yiguan",
@@ -51,34 +80,34 @@ export const DISKS: Disk[] = [
         entries: [
           { title: "Yiguan", body: "Founder node · Physical I/O", tag: "root" },
           { title: "Location", body: "London, United Kingdom" },
-          { title: "Signal", body: "Building the physical AI community" },
+          { title: "Signal", body: "Building the physical AI community", tag: "high" },
         ],
       },
       {
-        label: "Mounted programs",
+        label: "Network",
         entries: [
-          { title: "robotics.exe", body: "Field notes & hardware log", tag: "run" },
-          { title: "content.exe", body: "In-house media production", tag: "run" },
-          { title: "outreach.exe", body: "Community outreach pipeline", tag: "run" },
+          { title: "Subscribers", body: "1,842 members tracking this account", tag: "1.8k" },
+          { title: "Subscribing", body: "Mentors, builders, startups, and labs", tag: "128" },
+          { title: "Mounted programs", body: "news.exe · podcast.exe · event.exe", tag: "run" },
         ],
       },
     ],
   },
   {
-    id: "robotics",
-    file: "robotics.exe",
+    id: "news",
+    file: "news.exe",
     kind: "exe",
-    blurb: "Robotics & embodied AI feed",
+    blurb: "Official Physical I/O robotics news feed",
     accent: "#ee4b1a",
     glyph: "⬡",
     sections: [
       {
-        label: "Now running",
+        label: "Top stories",
         entries: [
           { title: "Manipulation", body: "Dexterous grasping · tactile sensing", tag: "01" },
           { title: "Locomotion", body: "Legged & wheeled control stacks", tag: "02" },
-          { title: "Perception", body: "3D vision · spatial intelligence", tag: "03" },
-          { title: "Embodiment", body: "Sim-to-real · world models", tag: "04" },
+          { title: "Spatial AI", body: "3D perception · world models", tag: "03" },
+          { title: "Embodiment", body: "Sim-to-real systems in production", tag: "04" },
         ],
       },
       {
@@ -91,10 +120,10 @@ export const DISKS: Disk[] = [
     ],
   },
   {
-    id: "content",
-    file: "content.exe",
+    id: "podcast",
+    file: "podcast.exe",
     kind: "exe",
-    blurb: "In-house media content production",
+    blurb: "Official Physical I/O media channel",
     accent: "#0a84ff",
     glyph: "▤",
     sections: [
@@ -142,6 +171,131 @@ export const DISKS: Disk[] = [
         entries: [
           { title: "Talks", body: "Technical deep-dives" },
           { title: "Networking", body: "Builders across disciplines" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "businessname",
+    file: "businessname.plugin",
+    kind: "plugin",
+    blurb: "Partner workspace for hardware founders",
+    accent: "#ffd60a",
+    glyph: "◫",
+    sections: [
+      {
+        label: "Partner app",
+        entries: [
+          { title: "Pilot desks", body: "Shared go-to-market and lab resources", tag: "live" },
+          { title: "Founder requests", body: "Warm intros, pilots, and advisor asks", tag: "22" },
+          { title: "Perks", body: "Partner discounts for Physical I/O members" },
+        ],
+      },
+      {
+        label: "Integrations",
+        entries: [
+          { title: "CRM sync", body: "Member-safe partner collaboration records" },
+          { title: "Demo queue", body: "Prioritized product feedback sessions" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "externalevent",
+    file: "externalevent.plugin",
+    kind: "plugin",
+    blurb: "External event and conference bridge",
+    accent: "#64d2ff",
+    glyph: "◬",
+    sections: [
+      {
+        label: "Partner events",
+        entries: [
+          { title: "Robotics Summit", body: "Partner tickets and founder track", tag: "soon" },
+          { title: "Lab open day", body: "External workshop hosted with the community" },
+          { title: "Demo exchange", body: "Cross-community product showcase" },
+        ],
+      },
+      {
+        label: "Routing",
+        entries: [
+          { title: "Speaker handoff", body: "Shared speaker pool and mentor matching" },
+          { title: "Attendee sync", body: "Opt-in event account linking" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "maya",
+    file: "maya.node",
+    kind: "node",
+    blurb: "Creative technologist account",
+    accent: "#ff375f",
+    glyph: "◇",
+    sections: [
+      {
+        label: "Profile",
+        entries: [
+          { title: "Maya", body: "Creative technologist · haptics and spatial UI", tag: "node" },
+          { title: "Subscribing", body: "Labs, designers, and robotics founders", tag: "74" },
+          { title: "Subscribers", body: "Community members following Maya's builds", tag: "612" },
+        ],
+      },
+      {
+        label: "Activity",
+        entries: [
+          { title: "Project log", body: "Wearable actuator prototype notes" },
+          { title: "Following", body: "Open-arm · Kinema · Physical I/O mentors" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kinema",
+    file: "kinema.signal",
+    kind: "signal",
+    blurb: "Community-incubated robotics startup",
+    accent: "#30d158",
+    glyph: "◉",
+    sections: [
+      {
+        label: "Startup signal",
+        entries: [
+          { title: "Kinema", body: "Warehouse manipulation stack from the community", tag: "seed" },
+          { title: "Mentors", body: "High-signal operators and robotics founders", tag: "8" },
+          { title: "Open roles", body: "Controls engineer · founding designer", tag: "2" },
+        ],
+      },
+      {
+        label: "Growth",
+        entries: [
+          { title: "Origin", body: "Started as a Physical I/O demo night project" },
+          { title: "Pilot", body: "Two partner warehouses testing the stack" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "forge",
+    file: "forge.signal",
+    kind: "signal",
+    blurb: "Founder and mentor signal account",
+    accent: "#bf5af2",
+    glyph: "◭",
+    sections: [
+      {
+        label: "Signal",
+        entries: [
+          { title: "Forge Robotics", body: "Embodied AI founders growing through Physical I/O", tag: "alpha" },
+          { title: "Mentor graph", body: "Manufacturing, perception, and seed-stage advisors", tag: "12" },
+          { title: "Subscriber base", body: "Builders tracking the startup's field notes", tag: "924" },
+        ],
+      },
+      {
+        label: "Requests",
+        entries: [
+          { title: "Pilot sites", body: "Looking for inspection and logistics testbeds" },
+          { title: "Community help", body: "Dataset collection and safety review" },
         ],
       },
     ],

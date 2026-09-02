@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Silkscreen } from "next/font/google";
@@ -20,7 +20,7 @@ import {
   IconPower,
   IconFull,
 } from "./PixelIcons";
-import { DISKS, type Disk } from "./disks";
+import { DISK_CATEGORIES, DISKS, type Disk, type DiskKind } from "./disks";
 import type { ScreenQuad } from "./Robot3D";
 
 const Robot3D = dynamic(() => import("./Robot3D"), { ssr: false });
@@ -41,6 +41,18 @@ const ANIM_CONTROLS: [string, string, React.FC<{ className?: string }>][] = [
 const DEFAULT_VIEW = { az: -0.34, elev: 0.14, zoom: 1.35 };
 // Zoom-in preset: a near-front close-up filling the frame with the screen.
 const CLOSEUP_VIEW = { az: -0.24, elev: 0.05, zoom: 0.5 };
+type ShelfView = "list" | "grid" | "carousel";
+type ShelfCategory = DiskKind | "all";
+type ShelfDock = "right" | "bottom" | "free";
+
+const NEWS_DISK = DISKS.find((d) => d.id === "news") ?? DISKS[0];
+const NEWS_INDEX = Math.max(0, DISKS.findIndex((d) => d.id === NEWS_DISK.id));
+
+const SHELF_VIEWS: { id: ShelfView; label: string; icon: string }[] = [
+  { id: "list", label: "List", icon: "☷" },
+  { id: "grid", label: "Grid", icon: "▦" },
+  { id: "carousel", label: "Carousel", icon: "◧" },
+];
 
 // Camera view presets for the dropdown (azimuth, elevation, zoom).
 const VIEWS: { label: string; az: number; elev: number; zoom: number }[] = [
@@ -99,29 +111,78 @@ interface Flyer {
   to: { x: number; y: number };
 }
 
+interface Point {
+  x: number;
+  y: number;
+}
+
 export default function RobotShowcase() {
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [disk, setDisk] = useState<Disk | null>(null);
+  const [phase, setPhase] = useState<Phase>("running");
+  const [disk, setDisk] = useState<Disk | null>(NEWS_DISK);
   const [admin, setAdmin] = useState(false);
   const [insertNonce, setInsertNonce] = useState(0);
   const [denied, setDenied] = useState<string | null>(null);
   const [flyer, setFlyer] = useState<Flyer | null>(null);
   const [flyerGo, setFlyerGo] = useState(false);
   const [anim, setAnim] = useState({ type: "", nonce: 0 });
-  const [focus, setFocus] = useState(Math.floor(DISKS.length / 2));
+  const [focus, setFocus] = useState(NEWS_INDEX);
   const [ghost, setGhost] = useState<{ x: number; y: number; over: boolean } | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [view, setView] = useState({ az: -0.34, elev: 0.14, zoom: 1.35, nonce: 0 });
   const [powered, setPowered] = useState(true);
   const [scaledUp, setScaledUp] = useState(false);
   const [camOpen, setCamOpen] = useState(false);
+  const [shelfView, setShelfView] = useState<ShelfView>("carousel");
+  const [shelfQuery, setShelfQuery] = useState("");
+  const [shelfCategory, setShelfCategory] = useState<ShelfCategory>("all");
+  const [shelfOpen, setShelfOpen] = useState(true);
+  const [shelfMinimized, setShelfMinimized] = useState(false);
+  const [shelfDock, setShelfDock] = useState<ShelfDock>("bottom");
+  const [shelfPos, setShelfPos] = useState<Point | null>(null);
   const wheelLock = useRef(false);
   const dragRef = useRef<{ disk: Disk; sx: number; sy: number; dragging: boolean } | null>(null);
+  const shelfMoveRef = useRef<{ dx: number; dy: number } | null>(null);
   const suppressClick = useRef(false);
   const fullscreenRef = useRef(false);
   fullscreenRef.current = fullscreen;
   const poweredRef = useRef(true);
   poweredRef.current = powered;
+  const shelfSearch = shelfQuery.trim().toLowerCase();
+  const searchedDisks = useMemo(
+    () =>
+      DISKS.filter((d) => {
+        if (!shelfSearch) return true;
+        const haystack = [
+          d.file,
+          d.kind,
+          d.blurb,
+          ...d.sections.flatMap((section) => [
+            section.label,
+            ...section.entries.flatMap((entry) => [entry.title, entry.body, entry.tag ?? ""]),
+          ]),
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(shelfSearch);
+      }),
+    [shelfSearch]
+  );
+  const visibleDisks = useMemo(
+    () => searchedDisks.filter((d) => shelfCategory === "all" || d.kind === shelfCategory),
+    [searchedDisks, shelfCategory]
+  );
+  const shelfGroups = useMemo(
+    () =>
+      DISK_CATEGORIES.map((category) => ({
+        ...category,
+        disks: visibleDisks.filter((d) => d.kind === category.id),
+      })).filter((category) => category.disks.length > 0 || shelfCategory === category.id),
+    [searchedDisks, shelfCategory, visibleDisks]
+  );
+  const focusedVisibleIndex = Math.max(
+    0,
+    visibleDisks.findIndex((d) => d.id === DISKS[focus]?.id)
+  );
 
   const play = (type: string) => setAnim((a) => ({ type, nonce: a.nonce + 1 }));
 
@@ -130,15 +191,28 @@ export default function RobotShowcase() {
     setCamOpen(false);
   };
 
-  const stepFocus = useCallback((dir: number) => {
-    setFocus((f) => Math.max(0, Math.min(DISKS.length - 1, f + dir)));
-  }, []);
+  const stepFocus = useCallback(
+    (dir: number) => {
+      setFocus((current) => {
+        if (!visibleDisks.length) return current;
+        const currentId = DISKS[current]?.id;
+        const currentVisible = Math.max(
+          0,
+          visibleDisks.findIndex((d) => d.id === currentId)
+        );
+        const nextVisible = Math.max(0, Math.min(visibleDisks.length - 1, currentVisible + dir));
+        const nextDisk = visibleDisks[nextVisible];
+        return nextDisk ? DISKS.findIndex((d) => d.id === nextDisk.id) : current;
+      });
+    },
+    [visibleDisks]
+  );
 
   // Coverflow slab transform for a cover at signed offset `o` from focus.
   const coverTransform = (o: number) => {
     if (o === 0) return "translateX(0) translateZ(66px) rotateY(0deg) scale(1.05)";
     const dir = o < 0 ? 1 : -1; // left covers face right, right covers face left
-    return `translateX(${o * 124}px) translateZ(0px) rotateY(${dir * 52}deg)`;
+    return `translateX(${o * 170}px) translateZ(0px) rotateY(${dir * 46}deg)`;
   };
 
   const onCoverWheel = (e: React.WheelEvent) => {
@@ -157,6 +231,15 @@ export default function RobotShowcase() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [stepFocus]);
+
+  useEffect(() => {
+    if (!visibleDisks.length) return;
+    const focusedId = DISKS[focus]?.id;
+    if (!visibleDisks.some((d) => d.id === focusedId)) {
+      const nextFocus = DISKS.findIndex((d) => d.id === visibleDisks[0].id);
+      if (nextFocus >= 0) setFocus(nextFocus);
+    }
+  }, [focus, visibleDisks]);
 
   const overlayRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -269,15 +352,48 @@ export default function RobotShowcase() {
     [onDragMove, onDragUp]
   );
 
-  const onCoverClick = (d: Disk, o: number, i: number, e: React.MouseEvent) => {
+  const onShelfDiskClick = (d: Disk, shouldInsert: boolean, e: React.MouseEvent) => {
     if (suppressClick.current) return;
-    if (o === 0) {
+    if (shouldInsert) {
       const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
       doInsert(d, r.left + r.width / 2, r.top + r.height / 2);
     } else {
-      setFocus(i);
+      const nextFocus = DISKS.findIndex((candidate) => candidate.id === d.id);
+      if (nextFocus >= 0) setFocus(nextFocus);
     }
   };
+
+  const onShelfWindowMove = useCallback((e: PointerEvent) => {
+    const move = shelfMoveRef.current;
+    if (!move) return;
+    const width = Math.min(520, Math.max(320, window.innerWidth - 24));
+    const height = Math.min(560, Math.max(320, window.innerHeight - 96));
+    setShelfPos({
+      x: Math.max(12, Math.min(window.innerWidth - width - 12, e.clientX - move.dx)),
+      y: Math.max(74, Math.min(window.innerHeight - height - 12, e.clientY - move.dy)),
+    });
+  }, []);
+
+  const onShelfWindowUp = useCallback(() => {
+    shelfMoveRef.current = null;
+    window.removeEventListener("pointermove", onShelfWindowMove);
+    window.removeEventListener("pointerup", onShelfWindowUp);
+  }, [onShelfWindowMove]);
+
+  const onShelfTitleDown = useCallback(
+    (e: React.PointerEvent<HTMLElement>) => {
+      if (e.button !== 0) return;
+      const rect = (e.currentTarget.closest(".software-shelf") as HTMLElement | null)?.getBoundingClientRect();
+      if (!rect) return;
+      setShelfDock("free");
+      setShelfPos({ x: rect.left, y: rect.top });
+      shelfMoveRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+      window.addEventListener("pointermove", onShelfWindowMove);
+      window.addEventListener("pointerup", onShelfWindowUp);
+      e.preventDefault();
+    },
+    [onShelfWindowMove, onShelfWindowUp]
+  );
 
   const eject = useCallback(() => {
     if (bootTimer.current) window.clearTimeout(bootTimer.current);
@@ -292,9 +408,78 @@ export default function RobotShowcase() {
     () => () => {
       if (bootTimer.current) window.clearTimeout(bootTimer.current);
       if (deniedTimer.current) window.clearTimeout(deniedTimer.current);
+      window.removeEventListener("pointermove", onShelfWindowMove);
+      window.removeEventListener("pointerup", onShelfWindowUp);
     },
-    []
+    [onShelfWindowMove, onShelfWindowUp]
   );
+
+  const renderShelfDisk = (d: Disk, shouldInsert: boolean, variant: "card" | "row" | "cover", index?: number) => {
+    const locked = d.admin && !admin;
+    const active = d.id === disk?.id && phase !== "idle";
+    const diskIndex = DISKS.findIndex((candidate) => candidate.id === d.id);
+    const focused = DISKS[focus]?.id === d.id;
+
+    if (variant === "cover") {
+      const visibleIndex = index ?? 0;
+      const o = visibleIndex - focusedVisibleIndex;
+      const dark = visibleIndex % 2 === 1;
+      const spine = `${d.file} · ${d.blurb}`;
+      return (
+        <button
+          key={d.id}
+          className={`cover${o === 0 ? " is-focus" : ""}${dark ? " is-dark" : ""}${
+            locked ? " is-locked" : ""
+          }${active ? " is-active" : ""}${denied === d.id ? " is-denied" : ""}`}
+          style={{ transform: coverTransform(o), zIndex: 100 - Math.abs(o) }}
+          onPointerDown={(e) => onCoverDown(d, e)}
+          onClick={(e) => onShelfDiskClick(d, o === 0, e)}
+          aria-label={o === 0 ? `Insert ${d.file}` : `Select ${d.file}`}
+        >
+          <span className="cover-front">
+            <Floppy className="cover-ico" />
+            <span className="cover-title">{d.file}</span>
+            <span className="cover-kind">{locked ? "◆ ADMIN" : `.${d.kind}`}</span>
+            {locked && <LockIcon className="cover-lock" />}
+          </span>
+          <span className="cover-spine cover-spine--l" aria-hidden="true">
+            <span className="spine-text">{spine}</span>
+          </span>
+          <span className="cover-spine cover-spine--r" aria-hidden="true">
+            <span className="spine-text">{spine}</span>
+          </span>
+          <span className="cover-edge cover-edge--t" aria-hidden="true" />
+          <span className="cover-edge cover-edge--b" aria-hidden="true" />
+          <span className="cover-back" aria-hidden="true" />
+        </button>
+      );
+    }
+
+    return (
+      <button
+        key={d.id}
+        className={`shelf-app shelf-app-${variant}${focused ? " is-focus" : ""}${locked ? " is-locked" : ""}${
+          active ? " is-active" : ""
+        }${denied === d.id ? " is-denied" : ""}`}
+        onPointerDown={(e) => onCoverDown(d, e)}
+        onFocus={() => {
+          if (diskIndex >= 0) setFocus(diskIndex);
+        }}
+        onClick={(e) => onShelfDiskClick(d, shouldInsert, e)}
+        aria-label={`Insert ${d.file}`}
+      >
+        <span className="shelf-app-icon" aria-hidden="true">
+          <Floppy className="shelf-floppy-ico" />
+          {locked && <LockIcon className="shelf-lock-ico" />}
+        </span>
+        <span className="shelf-app-copy">
+          <span className="shelf-app-file">{d.file}</span>
+          <span className="shelf-app-blurb">{d.blurb}</span>
+        </span>
+        <span className="shelf-app-kind">{locked ? "ADMIN" : d.kind}</span>
+      </button>
+    );
+  };
 
   return (
     <div className={`showcase ${pixelFont.variable}`}>
@@ -372,6 +557,19 @@ export default function RobotShowcase() {
             <IconScale className="rc-icon" />
           </button>
           <button
+            className={`rc-btn shelf-toggle${shelfOpen ? " is-on" : ""}`}
+            data-tip={shelfOpen ? "Close disks" : "Disks"}
+            aria-label={shelfOpen ? "Close disks panel" : "Open disks panel"}
+            aria-expanded={shelfOpen}
+            onClick={() => {
+              setCamOpen(false);
+              setShelfMinimized(false);
+              setShelfOpen((open) => !open);
+            }}
+          >
+            <Floppy className="rc-icon" />
+          </button>
+          <button
             className={`rc-btn power-flat${powered ? " is-on" : ""}`}
             data-tip={powered ? "Power off" : "Power on"}
             aria-pressed={powered}
@@ -417,57 +615,169 @@ export default function RobotShowcase() {
         <p className="mac-caption">Drag a disk onto the PC to load · drag to rotate · scroll to zoom.</p>
       </main>
 
-      {/* Coverflow disk browser */}
-      <section className="coverflow-dock" aria-label="Disk library">
-        <div className="coverflow" onWheel={onCoverWheel}>
-          {DISKS.map((d, i) => {
-            const o = i - focus;
-            const locked = d.admin && !admin;
-            const dark = i % 2 === 1;
-            const active = d.id === disk?.id && phase !== "idle";
-            const spine = `${d.file} · ${d.blurb}`;
-            return (
+      {/* Software shelf */}
+      {shelfOpen && (
+        <section
+          className={`software-shelf is-${shelfView} is-open is-${shelfDock}`}
+          aria-label="Software shelf"
+          style={shelfDock === "free" && shelfPos ? { left: shelfPos.x, top: shelfPos.y } : undefined}
+        >
+          <div className="shelf-shell">
+            <header className="shelf-windowbar">
               <button
-                key={d.id}
-                className={`cover${o === 0 ? " is-focus" : ""}${dark ? " is-dark" : ""}${
-                  locked ? " is-locked" : ""
-                }${active ? " is-active" : ""}${denied === d.id ? " is-denied" : ""}`}
-                style={{ transform: coverTransform(o), zIndex: 100 - Math.abs(o) }}
-                onPointerDown={(e) => onCoverDown(d, e)}
-                onClick={(e) => onCoverClick(d, o, i, e)}
-                aria-label={o === 0 ? `Insert ${d.file}` : `Select ${d.file}`}
+                className="shelf-window-btn shelf-window-close"
+                type="button"
+                data-tip="Close"
+                aria-label="Close software shelf"
+                onClick={() => {
+                  setShelfMinimized(false);
+                  setShelfOpen(false);
+                }}
               >
-                <span className="cover-front">
-                  <Floppy className="cover-ico" />
-                  <span className="cover-title">{d.file}</span>
-                  <span className="cover-kind">{locked ? "◆ ADMIN" : `.${d.kind}`}</span>
-                  {locked && <LockIcon className="cover-lock" />}
-                </span>
-                <span className="cover-spine cover-spine--l" aria-hidden="true">
-                  <span className="spine-text">{spine}</span>
-                </span>
-                <span className="cover-spine cover-spine--r" aria-hidden="true">
-                  <span className="spine-text">{spine}</span>
-                </span>
-                <span className="cover-edge cover-edge--t" aria-hidden="true" />
-                <span className="cover-edge cover-edge--b" aria-hidden="true" />
-                <span className="cover-back" aria-hidden="true" />
+                <span aria-hidden="true">×</span>
               </button>
-            );
-          })}
-        </div>
-        <p className="coverflow-hint">
-          {DISKS[focus]?.file}
-          {phase === "running" && disk?.id === DISKS[focus]?.id ? " — running" : " — click to insert"}
-          <span className="coverflow-keys"> · ← → to browse</span>
-        </p>
-      </section>
+              <button
+                className="shelf-window-btn shelf-window-minimize"
+                type="button"
+                data-tip="Minimize"
+                aria-label="Minimize software shelf to desktop"
+                onClick={() => {
+                  setShelfMinimized(true);
+                  setShelfOpen(false);
+                }}
+              >
+                <span aria-hidden="true">−</span>
+              </button>
+              <button className="shelf-window-title" type="button" onPointerDown={onShelfTitleDown}>
+                Software Shelf
+              </button>
+              <button
+                className="shelf-window-btn"
+                type="button"
+                data-tip="Lock right"
+                aria-label="Dock software shelf to right"
+                aria-pressed={shelfDock === "right"}
+                onClick={() => setShelfDock("right")}
+              >
+                <LockIcon className="shelf-window-ico" />
+              </button>
+              <button
+                className="shelf-window-btn"
+                type="button"
+                data-tip="Dock bottom"
+                aria-label="Dock software shelf to bottom"
+                aria-pressed={shelfDock === "bottom"}
+                onClick={() => setShelfDock("bottom")}
+              >
+                <span aria-hidden="true">▁</span>
+              </button>
+            </header>
+
+            <div className="shelf-toolbar">
+              <label className="shelf-search">
+                <span aria-hidden="true">⌕</span>
+                <input
+                  value={shelfQuery}
+                  onChange={(e) => setShelfQuery(e.target.value)}
+                  placeholder="Search disks"
+                  aria-label="Search disks"
+                />
+              </label>
+              <div className="shelf-view-toggle" aria-label="Shelf layout">
+                {SHELF_VIEWS.map((mode) => (
+                  <button
+                    key={mode.id}
+                    className={shelfView === mode.id ? "is-active" : ""}
+                    type="button"
+                    aria-label={`${mode.label} view`}
+                    aria-pressed={shelfView === mode.id}
+                    onClick={() => setShelfView(mode.id)}
+                  >
+                    <span aria-hidden="true">{mode.icon}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="shelf-categories" aria-label="Software categories">
+              <button
+                className={shelfCategory === "all" ? "is-active" : ""}
+                type="button"
+                onClick={() => setShelfCategory("all")}
+              >
+                <span>ALL</span>
+                <b>{searchedDisks.length}</b>
+              </button>
+              {DISK_CATEGORIES.map((category) => (
+                <button
+                  key={category.id}
+                  className={shelfCategory === category.id ? "is-active" : ""}
+                  type="button"
+                  onClick={() => setShelfCategory(category.id)}
+                  title={category.description}
+                >
+                  <span>{category.label}</span>
+                  <b>{searchedDisks.filter((d) => d.kind === category.id).length}</b>
+                </button>
+              ))}
+            </div>
+
+            {visibleDisks.length ? (
+              <>
+                {shelfView === "carousel" ? (
+                  <div className="coverflow" onWheel={onCoverWheel}>
+                    {visibleDisks.map((d, i) => renderShelfDisk(d, i === focusedVisibleIndex, "cover", i))}
+                  </div>
+                ) : (
+                  <div className="shelf-groups">
+                    {shelfGroups.map((category) => (
+                      <section className="shelf-group" key={category.id}>
+                        <header className="shelf-group-head">
+                          <span>{category.label}</span>
+                          <small>{category.description}</small>
+                        </header>
+                        <div className="shelf-items">
+                          {category.disks.map((d) => renderShelfDisk(d, true, shelfView === "list" ? "row" : "card"))}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                )}
+                <p className="coverflow-hint">
+                  {visibleDisks[focusedVisibleIndex]?.file ?? "No disk"}
+                  {phase === "running" && disk?.id === visibleDisks[focusedVisibleIndex]?.id
+                    ? " - running"
+                    : " - click to insert"}
+                  <span className="coverflow-keys"> · ← → to browse</span>
+                </p>
+              </>
+            ) : (
+              <div className="shelf-empty">No disks found</div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {shelfMinimized && (
+        <button
+          className="desktop-shelf-icon"
+          type="button"
+          aria-label="Restore software shelf"
+          onClick={() => {
+            setShelfOpen(true);
+            setShelfMinimized(false);
+          }}
+        >
+          <Floppy className="desktop-shelf-ico" />
+          <span>Disks</span>
+        </button>
+      )}
 
       {/* Disk being dragged toward the PC */}
       {ghost && (
         <span
           className={`drag-ghost${ghost.over ? " is-over" : ""}`}
-          style={{ transform: `translate(calc(${ghost.x}px - 50%), calc(${ghost.y}px - 50%))` }}
+          style={{ left: ghost.x, top: ghost.y, transform: "translate(-50%, -50%)" }}
           aria-hidden="true"
         >
           <Floppy className="floppy-ico" />
