@@ -544,3 +544,21 @@ export function IconGrid({ className }: { className?: string }) {
 export function IconSearch({ className }: { className?: string }) {
   return <Bitmap rows={I_SEARCH} className={className} />;
 }
+
+const I_EJECT = [
+  "...........",
+  "...........",
+  ".....#.....",
+  "....###....",
+  "...#####...",
+  "..#######..",
+  ".#########.",
+  "...........",
+  ".#########.",
+  ".#########.",
+  "...........",
+];
+
+export function EjectIcon({ className }: { className?: string }) {
+  return <Bitmap rows={I_EJECT} className={className} />;
+}

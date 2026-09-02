@@ -272,10 +272,10 @@
 .os-progress {
   width: 66%;
   height: 0.95em;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   margin-top: 0.4em;
   background: #fff;
-  padding: 1px;
+  padding: 0.067em;
 }
 .os-progress span {
   display: block;
@@ -306,8 +306,8 @@
 .os-denied-sub { font-size: 0.85em; color: rgba(0, 0, 0, 0.6); }
 @keyframes osShake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
+  25% { transform: translateX(-0.4018em); }
+  75% { transform: translateX(0.4018em); }
 }
 
 /* ---------- Running: menu bar ---------- */
@@ -319,7 +319,7 @@
   align-items: center;
   gap: 0.15em;
   padding: 0.15em 0.5em;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 0.1339em solid var(--ink);
   background: #fff;
   font-family: var(--ui);
   font-weight: 700;
@@ -339,7 +339,11 @@
 .menu-disk { text-transform: none; }
 .menu-eject {
   margin-left: auto;
-  border: 2px solid var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  white-space: nowrap;
+  border: 0.1339em solid var(--ink);
   background: var(--ink);
   color: #fff;
   font: inherit;
@@ -356,7 +360,7 @@
   margin: 0.7em;
   display: flex;
   flex-direction: column;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   background: #fff;
   box-shadow: 0.4em 0.4em 0 var(--ink);
 }
@@ -368,31 +372,38 @@
   align-items: center;
   gap: 0.4em;
   padding: 0.25em 0.4em;
-  border-bottom: 2px solid var(--ink);
-  /* dotted classic title bar */
-  background-image: radial-gradient(var(--ink) 30%, transparent 32%);
-  background-size: 3px 3px;
+  border-bottom: 0.1339em solid var(--ink);
+  /* Dotted classic title bar. Pitch and radius are both in em so the texture
+     tracks the adaptive OS box instead of getting denser as it grows. */
+  background-image: radial-gradient(var(--ink) 20%, transparent 22%);
+  background-size: 0.3em 0.3em;
   background-color: #fff;
 }
 .win-close,
 .win-zoom {
   position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
   width: 1.35em;
   height: 1.35em;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   background: #fff;
   padding: 0;
   cursor: pointer;
   flex: 0 0 auto;
 }
 .win-zoom { margin-left: auto; cursor: default; }
-.win-close:hover { background: var(--ink); }
+.win-close:hover { background: var(--ink); color: #fff; }
+.win-close:active { transform: translateY(0.067em); }
+.win-ico { width: 0.78em; height: 0.78em; }
+.menu-eject-ico { width: 0.85em; height: 0.85em; flex: 0 0 auto; }
 .win-full {
   position: relative;
   margin-left: auto;
   min-width: 2em;
   height: 1.35em;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   background: #fff;
   color: var(--ink);
   padding: 0 0.2em;
@@ -405,7 +416,7 @@
   transition: background 0.12s ease, color 0.12s ease;
 }
 .win-full:hover { background: var(--ink); color: #fff; }
-.win-full:active { transform: translateY(1px); }
+.win-full:active { transform: translateY(0.067em); }
 
 /* Window-control tooltips, drawn in the OS's own black-and-white idiom so
    they warp with the screen instead of floating over the page. */
@@ -428,7 +439,7 @@
   transition: opacity 0.14s ease, transform 0.14s ease;
 }
 .win-close:focus-visible,
-.win-full:focus-visible { outline: 2px dashed var(--ink); outline-offset: 2px; }
+.win-full:focus-visible { outline: 0.1339em dashed var(--ink); outline-offset: 0.1339em; }
 .win-close[data-tip]::after { left: 0; }
 .win-full[data-tip]::after { right: 0; }
 .os [data-tip]:hover::after,
@@ -447,14 +458,14 @@
   display: flex;
   gap: 0.25em;
   padding: 0.35em 0.4em 0;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 0.1339em solid var(--ink);
   background: #fff;
 }
 .win-tab {
   display: inline-flex;
   align-items: center;
   gap: 0.3em;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   border-bottom: none;
   background: #fff;
   color: var(--ink);
@@ -463,7 +474,7 @@
   padding: 0.25em 0.5em;
   cursor: pointer;
   position: relative;
-  top: 2px;
+  top: 0.1339em;
 }
 .win-tab-ico { width: 1.1em; height: 1.1em; }
 .win-tab.is-active { background: var(--ink); color: #fff; }
@@ -483,7 +494,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.25em;
-  border: 2px solid transparent;
+  border: 0.1339em solid transparent;
   background: transparent;
   color: var(--ink);
   padding: 0.3em 0.15em;
@@ -501,18 +512,18 @@
 .file-tag {
   font-family: var(--pixel);
   font-size: 0.5em;
-  border: 1.5px solid var(--ink);
+  border: 0.1004em solid var(--ink);
   padding: 0.1em 0.3em;
   text-transform: uppercase;
 }
 .file:hover { border-color: var(--ink); }
 .file:hover .file-name { background: var(--ink); color: #fff; }
-.file-has-link .file-name { text-decoration: underline; text-underline-offset: 2px; }
+.file-has-link .file-name { text-decoration: underline; text-underline-offset: 0.1339em; }
 .file-link { font-size: 0.8em; }
 
 .win-status {
   flex: 0 0 auto;
-  border-top: 2px solid var(--ink);
+  border-top: 0.1339em solid var(--ink);
   padding: 0.25em 0.5em;
   font-family: var(--mono);
   font-size: 0.66em;
@@ -1678,7 +1689,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  border-right: 2px solid var(--ink);
+  border-right: 0.1339em solid var(--ink);
   background: #fff;
   padding-bottom: 0.4em;
   animation: newsSideIn 0.24s cubic-bezier(0.2, 0.85, 0.3, 1);
@@ -1728,7 +1739,7 @@
 .news-cat:active { background: rgba(0, 0, 0, 0.18); }
 .news-cat.is-on { background: var(--ink); color: #fff; }
 .news-cat.is-on .news-cat-count { color: rgba(255, 255, 255, 0.6); }
-.news-cat:focus-visible { outline: 2px dashed var(--ink); outline-offset: -3px; }
+.news-cat:focus-visible { outline: 0.1339em dashed var(--ink); outline-offset: -0.2009em; }
 .news-cat.is-on:focus-visible { outline-color: #fff; }
 
 /* ---------- Screen: toolbar utilities ---------- */
@@ -1745,7 +1756,7 @@
   align-items: center;
   gap: 0.35em;
   min-width: 0;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   background: #fff;
   padding: 0.05em 0.35em;
   animation: newsSearchIn 0.24s cubic-bezier(0.2, 0.85, 0.3, 1);
@@ -1767,7 +1778,7 @@
   padding: 0.15em 0;
 }
 .news-search input::placeholder { color: rgba(0, 0, 0, 0.38); }
-.news-search:focus-within { box-shadow: 0 0 0 2px var(--ink); }
+.news-search:focus-within { box-shadow: 0 0 0 0.1339em var(--ink); }
 .news-search-clear {
   flex: 0 0 auto;
   border: none;
@@ -1784,7 +1795,7 @@
 .news-views {
   display: inline-flex;
   flex: 0 0 auto;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
 }
 .news-view-btn {
   position: relative;
@@ -1799,11 +1810,11 @@
   cursor: pointer;
   transition: background 0.12s ease, color 0.12s ease;
 }
-.news-view-btn + .news-view-btn { border-left: 2px solid var(--ink); }
+.news-view-btn + .news-view-btn { border-left: 0.1339em solid var(--ink); }
 .news-view-btn svg { width: 0.85em; height: 0.85em; }
 .news-view-btn:hover { background: rgba(0, 0, 0, 0.14); }
 .news-view-btn.is-on { background: var(--ink); color: #fff; }
-.news-view-btn:focus-visible { outline: 2px dashed var(--ink); outline-offset: 2px; }
+.news-view-btn:focus-visible { outline: 0.1339em dashed var(--ink); outline-offset: 0.1339em; }
 
 /* ---------- Screen: grid (icon) view ---------- */
 .news-grid {
@@ -1823,7 +1834,7 @@
   flex-direction: column;
   align-items: stretch;
   gap: 0.35em;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   background: #fff;
   color: var(--ink);
   padding: 0.45em 0.5em 0.5em;
@@ -1839,7 +1850,7 @@
   height: 2.1em;
   display: grid;
   place-items: center;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   background: #fff;
   color: var(--ink);
   transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
@@ -1872,7 +1883,7 @@
 .news-card.is-cursor { background: var(--ink); color: #fff; }
 .news-card.is-cursor .news-card-meta { color: rgba(255, 255, 255, 0.72); }
 .news-card.is-cursor .news-card-thumb { background: #fff; color: var(--ink); border-color: #fff; }
-.news-card:focus-visible { outline: 2px dashed var(--ink); outline-offset: 2px; }
+.news-card:focus-visible { outline: 0.1339em dashed var(--ink); outline-offset: 0.1339em; }
 .news-card.is-cursor:focus-visible { outline-color: var(--ink); }
 
 /* ---------- Screen: empty result ---------- */
@@ -1899,7 +1910,7 @@
   align-items: center;
   gap: 0.5em;
   padding: 0.3em 0.5em;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 0.1339em solid var(--ink);
   background: #fff;
   font-family: var(--mono);
   font-size: 0.68em;
@@ -1917,7 +1928,7 @@
 }
 .news-bar-note { margin-left: auto; color: rgba(0, 0, 0, 0.55); }
 .news-back {
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   background: #fff;
   color: var(--ink);
   font: inherit;
@@ -1926,7 +1937,7 @@
   transition: background 0.12s ease, color 0.12s ease;
 }
 .news-back:hover { background: var(--ink); color: #fff; }
-.news-back:active { transform: translateY(1px); }
+.news-back:active { transform: translateY(0.067em); }
 
 /* ---------- Screen: the feed index ---------- */
 .news-index {
@@ -1944,7 +1955,7 @@
   width: 100%;
   padding: 0.42em 0.55em;
   border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.18);
+  border-bottom: 0.067em solid rgba(0, 0, 0, 0.18);
   background: #fff;
   color: var(--ink);
   text-align: left;
@@ -1957,7 +1968,7 @@
   height: 2em;
   display: grid;
   place-items: center;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   background: #fff;
   color: var(--ink);
   transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
@@ -2006,11 +2017,11 @@
 }
 
 /* Classic Finder selection: the whole row inverts. */
-.news-row:focus-visible { outline: 2px dashed var(--ink); outline-offset: -3px; }
+.news-row:focus-visible { outline: 0.1339em dashed var(--ink); outline-offset: -0.2009em; }
 .news-row.is-cursor:focus-visible { outline-color: #fff; }
 .news-back:focus-visible,
 .news-foot-back:focus-visible,
-.news-link:focus-visible { outline: 2px dashed var(--ink); outline-offset: 2px; }
+.news-link:focus-visible { outline: 0.1339em dashed var(--ink); outline-offset: 0.1339em; }
 .news-row:hover { background: rgba(0, 0, 0, 0.08); }
 .news-row:active { background: rgba(0, 0, 0, 0.18); }
 .news-row.is-cursor,
@@ -2028,7 +2039,7 @@
   padding: 0;
   cursor: pointer;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 0.1339em;
 }
 .news-foot-back:hover { background: var(--ink); color: #fff; text-decoration: none; }
 
@@ -2043,7 +2054,7 @@
   animation: newsDocIn 0.28s ease;
 }
 @keyframes newsDocIn {
-  from { opacity: 0; transform: translateY(5px); }
+  from { opacity: 0; transform: translateY(0.3348em); }
   to { opacity: 1; transform: none; }
 }
 
@@ -2054,7 +2065,7 @@
   height: 2.4em;
   display: grid;
   place-items: center;
-  border: 2px solid var(--ink);
+  border: 0.1339em solid var(--ink);
   color: var(--ink);
   background: #fff;
 }
@@ -2086,7 +2097,7 @@
   letter-spacing: -0.015em;
   margin: 0.5em 0 0.4em;
 }
-.news-rule { height: 2px; background: var(--ink); margin-bottom: 0.55em; }
+.news-rule { height: 0.1339em; background: var(--ink); margin-bottom: 0.55em; }
 .news-dek {
   font-family: var(--mono);
   font-weight: 700;
@@ -2107,13 +2118,13 @@
   gap: 0.8em;
   margin-top: 1em;
   padding-top: 0.5em;
-  border-top: 2px solid var(--ink);
+  border-top: 0.1339em solid var(--ink);
   font-family: var(--mono);
   font-size: 0.64em;
 }
 .news-votes { font-weight: 700; }
 .news-pos { color: rgba(0, 0, 0, 0.55); }
-.news-link { margin-left: auto; text-decoration: underline; text-underline-offset: 2px; color: var(--ink); }
+.news-link { margin-left: auto; text-decoration: underline; text-underline-offset: 0.1339em; color: var(--ink); }
 .news-link:hover { background: var(--ink); color: #fff; text-decoration: none; }
 
 /* ---------- Fetching state (classic barber-pole + skeleton) ---------- */
@@ -2126,8 +2137,8 @@
 }
 .news-load-bar {
   height: 0.9em;
-  border: 2px solid var(--ink);
-  padding: 1px;
+  border: 0.1339em solid var(--ink);
+  padding: 0.067em;
   overflow: hidden;
   background: #fff;
 }
@@ -2135,12 +2146,12 @@
   display: block;
   width: 200%;
   height: 100%;
-  background-image: repeating-linear-gradient(-45deg, var(--ink) 0 4px, transparent 4px 8px);
+  background-image: repeating-linear-gradient(-45deg, var(--ink) 0 0.2679em, transparent 0.2679em 0.5357em);
   animation: newsBar 0.42s linear infinite;
 }
 @keyframes newsBar {
   from { transform: translateX(0); }
-  to { transform: translateX(-11.32px); }
+  to { transform: translateX(-0.758em); }
 }
 
 .news-sk-head,

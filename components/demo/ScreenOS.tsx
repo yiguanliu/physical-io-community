@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Disk } from "./disks";
 import NewsScreen, { type NewsState } from "./NewsScreen";
-import { DocIcon, FolderIcon, HappyMac } from "./PixelIcons";
+import { DocIcon, EjectIcon, FolderIcon, HappyMac } from "./PixelIcons";
 
 export type Phase = "idle" | "booting" | "running";
 
@@ -80,7 +80,7 @@ export default function ScreenOS({
           <button className="menu-item menu-disk">{disk.kind}</button>
           <button className="menu-item">Help</button>
           <button className="menu-eject" onClick={onEject}>
-            Eject ⏏
+            Eject <EjectIcon className="menu-eject-ico" />
           </button>
         </div>
 
@@ -92,7 +92,9 @@ export default function ScreenOS({
               onClick={onEject}
               data-tip={`Eject ${disk.file}`}
               aria-label={`Eject ${disk.file}`}
-            />
+            >
+              <EjectIcon className="win-ico" />
+            </button>
             <span className="win-name">{disk.file}</span>
             <button
               className="win-full"

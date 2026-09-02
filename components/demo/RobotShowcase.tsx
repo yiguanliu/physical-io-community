@@ -42,7 +42,7 @@ const ANIM_CONTROLS: [string, string, React.FC<{ className?: string }>][] = [
   ["spin", "Spin", IconSpin],
 ];
 
-const DEFAULT_VIEW = { az: -0.34, elev: 0.14, zoom: 1.35 };
+const DEFAULT_VIEW = { az: -0.36, elev: 0.13, zoom: 1.35 };
 // Zoom-in preset: a near-front close-up filling the frame with the screen.
 const CLOSEUP_VIEW = { az: -0.24, elev: 0.05, zoom: 0.5 };
 type ShelfView = "list" | "grid" | "carousel";
@@ -60,7 +60,7 @@ const SHELF_VIEWS: { id: ShelfView; label: string; icon: string }[] = [
 
 // Camera view presets for the dropdown (azimuth, elevation, zoom).
 const VIEWS: { label: string; az: number; elev: number; zoom: number }[] = [
-  { label: "Default", az: -0.34, elev: 0.14, zoom: 1.35 },
+  { label: "Default", ...DEFAULT_VIEW },
   { label: "Front", az: 0, elev: 0.03, zoom: 1.2 },
   { label: "Left", az: -1.15, elev: 0.12, zoom: 1.35 },
   { label: "Right", az: 1.15, elev: 0.12, zoom: 1.35 },
@@ -69,9 +69,22 @@ const VIEWS: { label: string; az: number; elev: number; zoom: number }[] = [
 ];
 
 // Base pixel box the OS is authored in; a matrix3d transform corner-pins it onto
-// the robot's projected (roughly square) screen glass.
-const BASE_W = 448;
-const BASE_H = 424;
+// the robot's projected (roughly square) screen glass. Render it at 2x so the
+// browser has enough source pixels before the perspective transform scales it.
+const OS_RENDER_SCALE = 2;
+const OS_W = 448;
+const OS_ASPECT = 424 / 448;
+
+// ...and then adapt on top of that floor. A fixed box has to be magnified once
+// the screen fills the viewport, which is what softens the text up close, so
+// the authored box tracks the screen's projected width and the transform stays
+// near 1:1. The 2x box above is the lower cap — quality never drops below what
+// it is today, it only improves as the camera moves in.
+const MIN_BASE_W = OS_W * OS_RENDER_SCALE;
+const MAX_BASE_W = 2688;
+// Quantised, so a slow zoom re-renders the OS a handful of times per sweep
+// rather than on every animation frame.
+const BASE_STEP = 224;
 
 // ---- Homography: map the base box's 4 corners onto the projected quad ----
 type M3 = number[];
@@ -138,7 +151,7 @@ export default function RobotShowcase() {
   const [focus, setFocus] = useState(NEWS_INDEX);
   const [ghost, setGhost] = useState<{ x: number; y: number; over: boolean } | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
-  const [view, setView] = useState({ az: -0.34, elev: 0.14, zoom: 1.35, nonce: 0 });
+  const [view, setView] = useState({ ...DEFAULT_VIEW, nonce: 0 });
   const [powered, setPowered] = useState(true);
   const [scaledUp, setScaledUp] = useState(false);
   const [camOpen, setCamOpen] = useState(false);
@@ -149,6 +162,9 @@ export default function RobotShowcase() {
   const [shelfMinimized, setShelfMinimized] = useState(false);
   const [shelfDock, setShelfDock] = useState<ShelfDock>("bottom");
   const [shelfPos, setShelfPos] = useState<Point | null>(null);
+  // Authored width of the OS box — retargeted from the projected screen size.
+  const [baseW, setBaseW] = useState(MIN_BASE_W);
+  const baseTarget = useRef(MIN_BASE_W);
   const [newsId, setNewsId] = useState(NEWS[0].id);
   const [newsView, setNewsView] = useState<NewsView>("index");
   const [newsLayout, setNewsLayout] = useState<NewsLayout>("list");
@@ -387,8 +403,30 @@ export default function RobotShowcase() {
     el.style.pointerEvents = q.facing > 0.35 ? "auto" : "none";
     if (opacity <= 0) return;
     const [tl, tr, br, bl] = q.corners;
+
+    // Retarget the authored resolution to how large the screen actually is on
+    // screen. Grow eagerly, shrink only once well past a step, so sitting on a
+    // step boundary can't thrash re-renders.
+    const projW = Math.max(
+      Math.hypot(tr.x - tl.x, tr.y - tl.y),
+      Math.hypot(br.x - bl.x, br.y - bl.y)
+    );
+    const want = Math.min(
+      MAX_BASE_W,
+      Math.max(MIN_BASE_W, Math.ceil((projW * window.devicePixelRatio) / BASE_STEP) * BASE_STEP)
+    );
+    const cur = baseTarget.current;
+    if (want !== cur && (want > cur || projW * window.devicePixelRatio < cur - BASE_STEP * 0.75)) {
+      baseTarget.current = want;
+      setBaseW(want);
+    }
+
+    // Project from the box React has actually rendered, not the new target.
+    // Reading the inline style stays in sync without forcing a layout flush.
+    const base = parseFloat(el.style.width) || MIN_BASE_W;
+    const baseH = base * OS_ASPECT;
     const t = projection(
-      [0, 0, BASE_W, 0, BASE_W, BASE_H, 0, BASE_H],
+      [0, 0, base, 0, base, baseH, 0, baseH],
       [tl.x, tl.y, tr.x, tr.y, br.x, br.y, bl.x, bl.y]
     );
     for (let i = 0; i < 9; i++) t[i] = t[i] / t[8];
@@ -709,7 +747,7 @@ export default function RobotShowcase() {
         <div
           className={`screen-overlay${fullscreen ? " is-fullscreen" : ""}`}
           ref={overlayRef}
-          style={{ width: BASE_W, height: BASE_H, fontSize: BASE_W / 30, opacity: 0 }}
+          style={{ width: baseW, height: baseW * OS_ASPECT, fontSize: baseW / 30, opacity: 0 }}
         >
           <ScreenOS
             phase={phase}
@@ -752,7 +790,7 @@ export default function RobotShowcase() {
           </div>
         )}
 
-        <p className="mac-caption">Drag a disk onto the PC to load · drag to rotate · scroll to zoom.</p>
+        <p className="mac-caption">Drag a disk onto the PC to load · left-drag to rotate · right-drag to pan · scroll to zoom.</p>
       </main>
 
       {/* Software shelf */}
