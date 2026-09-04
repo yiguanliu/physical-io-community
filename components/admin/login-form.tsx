@@ -3,6 +3,8 @@
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { requestAdminAccessAction, signInAdminAction } from "@/app/admin/auth-actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Mode = "signin" | "request";
 
@@ -76,23 +78,23 @@ export default function LoginForm({ initialStatus }: { initialStatus?: string })
       <form className="admin-auth-form" onSubmit={onRequest}>
         <label>
           Name
-          <input name="name" required placeholder="Your name" autoComplete="name" />
+          <Input name="name" required placeholder="Your name" autoComplete="name" />
         </label>
         <label>
           Email
-          <input name="email" type="email" required placeholder="you@physical-io.com" autoComplete="email" />
+          <Input name="email" type="email" required placeholder="you@physical-io.com" autoComplete="email" />
         </label>
         <label>
           Password
-          <input name="password" type="password" required minLength={8} placeholder="At least 8 characters" autoComplete="new-password" />
+          <Input name="password" type="password" required minLength={8} placeholder="At least 8 characters" autoComplete="new-password" />
         </label>
         {error ? <p className="admin-auth-error">{error}</p> : null}
-        <button className="admin-primary" type="submit" disabled={pending}>
+        <Button className="admin-primary" type="submit" disabled={pending}>
           {pending ? "Please wait…" : "Request admin access"}
-        </button>
-        <button className="admin-auth-switch" type="button" onClick={() => { setMode("signin"); setError(null); }}>
+        </Button>
+        <Button className="admin-auth-switch h-auto justify-start p-0 no-underline hover:no-underline" variant="link" type="button" onClick={() => { setMode("signin"); setError(null); }}>
           Already have an account? Sign in
-        </button>
+        </Button>
       </form>
     );
   }
@@ -101,20 +103,20 @@ export default function LoginForm({ initialStatus }: { initialStatus?: string })
     <form className="admin-auth-form" onSubmit={onSignIn}>
       <label>
         Email
-        <input name="email" type="email" required placeholder="you@physical-io.com" autoComplete="email" />
+        <Input name="email" type="email" required placeholder="you@physical-io.com" autoComplete="email" />
       </label>
       <label>
         Password
-        <input name="password" type="password" required minLength={8} placeholder="Your password" autoComplete="current-password" />
+        <Input name="password" type="password" required minLength={8} placeholder="Your password" autoComplete="current-password" />
       </label>
       {notice ? <p className="admin-auth-success">{notice}</p> : null}
       {error ? <p className="admin-auth-error">{error}</p> : null}
-      <button className="admin-primary" type="submit" disabled={pending}>
+      <Button className="admin-primary" type="submit" disabled={pending}>
         {pending ? "Please wait…" : "Sign in"}
-      </button>
-      <button className="admin-auth-switch" type="button" onClick={() => { setMode("request"); setError(null); setNotice(null); }}>
+      </Button>
+      <Button className="admin-auth-switch h-auto justify-start p-0 no-underline hover:no-underline" variant="link" type="button" onClick={() => { setMode("request"); setError(null); setNotice(null); }}>
         Don&apos;t have an account? Request admin access
-      </button>
+      </Button>
     </form>
   );
 }

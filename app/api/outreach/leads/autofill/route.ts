@@ -2,6 +2,7 @@ import { openai, type OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth/api";
 import { industryCategories } from "@/lib/outreach/outreach-config";
 
 const autofillSchema = z.object({
@@ -105,6 +106,9 @@ function cleanResult(linkedinUrl: string, result: Partial<AutofillResult>, sourc
 }
 
 export async function POST(request: Request) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const payload = autofillSchema.parse(await request.json());
   const profileText = payload.profileText?.trim() ?? "";
 

@@ -83,6 +83,7 @@ export async function setAdminRole(userId: string, role: string) {
   const { data: userResult, error: getError } = await supabase.auth.admin.getUserById(userId);
   if (getError) throw getError;
   const { data, error } = await supabase.auth.admin.updateUserById(userId, {
+    ...(role === ADMIN_ROLE ? { email_confirm: true } : {}),
     app_metadata: {
       ...userResult.user.app_metadata,
       admin_role: role,

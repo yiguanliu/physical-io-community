@@ -8,6 +8,7 @@ import LogoMark from "@/components/LogoMark";
 import { NAV, labelForPath, parentPath } from "@/components/admin/nav";
 import { Icon, initials } from "@/components/admin/ui";
 import { signOutAdminAction } from "@/app/admin/auth-actions";
+import { Button } from "@/components/ui/button";
 
 type TextSizeOption = "10pt" | "11pt" | "12pt";
 type FontOption = "grotesk" | "system" | "readable";
@@ -137,23 +138,23 @@ export default function AdminShell({
               <small>Members, email, outreach</small>
             </div>
           </div>
-          <button className="admin-profile" onClick={signOut} type="button">
+          <Button className="admin-profile h-auto" variant="ghost" onClick={signOut} type="button">
             <span>{initials(user.name)}</span>
             <div>
               <strong>{user.name}</strong>
               <small>Sign out</small>
             </div>
             <Icon name="dots" />
-          </button>
+          </Button>
         </div>
       </aside>
       <section className="admin-main">
         <header className="admin-topbar">
-          <button className="admin-menu" aria-label="Toggle navigation" onClick={() => setSidebarOpen((open) => !open)}>
+          <Button className="admin-menu" variant="ghost" aria-label="Toggle navigation" onClick={() => setSidebarOpen((open) => !open)}>
             <span />
             <span />
             <span />
-          </button>
+          </Button>
           <div className="admin-breadcrumb">
             {parent ? (
               <Link
@@ -174,8 +175,9 @@ export default function AdminShell({
               <span>Search members</span>
             </Link>
             <div className="admin-preferences">
-              <button
+              <Button
                 className="admin-icon-button admin-preferences-toggle"
+                variant="outline"
                 type="button"
                 aria-label="Text preferences"
                 aria-expanded={preferencesOpen}
@@ -184,22 +186,23 @@ export default function AdminShell({
                 onClick={() => setPreferencesOpen((open) => !open)}
               >
                 <Icon name="settings" size={17} />
-              </button>
+              </Button>
               {preferencesOpen ? (
                 <section className="admin-preferences-panel" id="admin-preferences-panel" aria-label="Text preferences">
                   <div>
                     <strong>Text size</strong>
                     <div className="admin-segmented" role="group" aria-label="Text size">
                       {TEXT_SIZE_OPTIONS.map((option) => (
-                        <button
+                        <Button
                           key={option.value}
                           type="button"
+                          variant="ghost"
                           className={preferences.textSize === option.value ? "active" : ""}
                           aria-pressed={preferences.textSize === option.value}
                           onClick={() => setPreferences((current) => ({ ...current, textSize: option.value }))}
                         >
                           {option.label}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -207,25 +210,28 @@ export default function AdminShell({
                     <strong>Font</strong>
                     <div className="admin-font-options" role="group" aria-label="Font">
                       {FONT_OPTIONS.map((option) => (
-                        <button
+                        <Button
                           key={option.value}
                           type="button"
+                          variant="ghost"
                           className={preferences.font === option.value ? "active" : ""}
                           aria-pressed={preferences.font === option.value}
                           onClick={() => setPreferences((current) => ({ ...current, font: option.value }))}
                         >
                           {option.label}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
                 </section>
               ) : null}
             </div>
-            <Link className="admin-primary" href="/admin/campaigns/new">
-              <Icon name="plus" size={16} />
-              New campaign
-            </Link>
+            <Button asChild className="admin-primary">
+              <Link href="/admin/campaigns/new">
+                <Icon name="plus" size={16} />
+                New campaign
+              </Link>
+            </Button>
           </div>
         </header>
         <div className="admin-content">{children}</div>

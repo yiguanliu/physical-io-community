@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { sendCampaignAction, sendTestCampaignAction } from "@/app/admin/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function CampaignSend({ id, status, email }: { id: string; status: string; email: string }) {
   const [pending, start] = useTransition();
@@ -23,11 +25,11 @@ export default function CampaignSend({ id, status, email }: { id: string; status
         <input type="hidden" name="id" value={id} />
         <label>
           Test send to
-          <input name="testEmail" type="email" defaultValue={email} required />
+          <Input name="testEmail" type="email" defaultValue={email} required />
         </label>
-        <button className="admin-secondary" type="submit" disabled={pending}>
+        <Button className="admin-secondary" variant="outline" type="submit" disabled={pending}>
           Send test
-        </button>
+        </Button>
       </form>
       {canSend ? (
         <form
@@ -42,9 +44,9 @@ export default function CampaignSend({ id, status, email }: { id: string; status
           }}
         >
           <input type="hidden" name="id" value={id} />
-          <button className="admin-primary" type="submit" disabled={pending}>
+          <Button className="admin-primary" type="submit" disabled={pending}>
             Send to audience
-          </button>
+          </Button>
         </form>
       ) : (
         <p>This campaign is {status} and cannot be sent again.</p>

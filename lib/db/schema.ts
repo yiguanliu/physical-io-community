@@ -307,6 +307,183 @@ export const auditLog = sqliteTable(
   (table) => [index("audit_log_created_idx").on(table.createdAt)],
 );
 
+// ---------------------------------------------------------------------------
+// Marketing Content Studio (see docs/marketing-content-studio.md).
+// Reference mirror of the Supabase tables created in
+// supabase/migrations/20260903235607_marketing_content_studio.sql. Persistence
+// goes through lib/admin/content-studio.ts via the Supabase service client;
+// JSON columns are `text` here to match the legacy Drizzle mirror convention.
+// ---------------------------------------------------------------------------
+export const contentItems = sqliteTable(
+  "content_items",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull().default("Untitled"),
+    slug: text("slug").notNull().default(""),
+    status: text("status").notNull().default("idea"),
+    categoryTags: text("category_tags").notNull().default("[]"),
+    viralityScore: integer("virality_score"),
+    summary: text("summary").notNull().default(""),
+    bodyMarkdown: text("body_markdown").notNull().default(""),
+    sourceKind: text("source_kind").notNull().default("manual"),
+    sourceUrl: text("source_url").notNull().default(""),
+    sourceTitle: text("source_title").notNull().default(""),
+    sourceSnippet: text("source_snippet").notNull().default(""),
+    assignedTo: text("assigned_to"),
+    assignedToName: text("assigned_to_name").notNull().default(""),
+    createdByUserId: text("created_by_user_id"),
+    createdByName: text("created_by_name").notNull().default(""),
+    scheduledAt: text("scheduled_at"),
+    publishedAt: text("published_at"),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+    updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
+  },
+  (table) => [
+    index("content_items_status_idx").on(table.status),
+    index("content_items_scheduled_idx").on(table.scheduledAt),
+    index("content_items_updated_idx").on(table.updatedAt),
+  ],
+);
+
+export const contentEvents = sqliteTable(
+  "content_events",
+  {
+    id: text("id").primaryKey(),
+    contentItemId: text("content_item_id")
+      .notNull()
+      .references(() => contentItems.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    fromStatus: text("from_status"),
+    toStatus: text("to_status"),
+    detail: text("detail").notNull().default(""),
+    actorName: text("actor_name").notNull().default(""),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+  },
+  (table) => [index("content_events_item_idx").on(table.contentItemId, table.createdAt)],
+);
+
+export const contentTemplates = sqliteTable(
+  "content_templates",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description").notNull().default(""),
+    previewUrl: text("preview_url").notNull().default(""),
+    layout: text("layout").notNull().default("{}"),
+    platformFormats: text("platform_formats").notNull().default("{}"),
+    editorial: text("editorial").notNull().default("{}"),
+    isShared: integer("is_shared", { mode: "boolean" }).notNull().default(true),
+    createdByName: text("created_by_name").notNull().default(""),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+    updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
+  },
+  (table) => [index("content_templates_shared_idx").on(table.isShared, table.updatedAt)],
+);
+
+export const contentAssets = sqliteTable(
+  "content_assets",
+  {
+    id: text("id").primaryKey(),
+    contentItemId: text("content_item_id").references(() => contentItems.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull().default("upload"),
+    storagePath: text("storage_path").notNull().default(""),
+    publicUrl: text("public_url").notNull().default(""),
+    width: integer("width"),
+    height: integer("height"),
+    mime: text("mime").notNull().default("image/png"),
+    sourceUrl: text("source_url").notNull().default(""),
+    prompt: text("prompt").notNull().default(""),
+    altText: text("alt_text").notNull().default(""),
+    createdByName: text("created_by_name").notNull().default(""),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+  },
+  (table) => [index("content_assets_item_idx").on(table.contentItemId, table.createdAt)],
+);
+
+export const contentPlatformVariants = sqliteTable(
+  "content_platform_variants",
+  {
+    id: text("id").primaryKey(),
+    contentItemId: text("content_item_id")
+      .notNull()
+      .references(() => contentItems.id, { onDelete: "cascade" }),
+    platform: text("platform").notNull(),
+    status: text("status").notNull().default("draft"),
+    body: text("body").notNull().default(""),
+    caption: text("caption").notNull().default(""),
+    hashtags: text("hashtags").notNull().default("[]"),
+    templateId: text("template_id").references(() => contentTemplates.id, { onDelete: "set null" }),
+    renderConfig: text("render_config").notNull().default("{}"),
+    renderedAssetId: text("rendered_asset_id").references(() => contentAssets.id, { onDelete: "set null" }),
+    scheduledAt: text("scheduled_at"),
+    publishedAt: text("published_at"),
+    externalPermalink: text("external_permalink").notNull().default(""),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+    updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
+  },
+  (table) => [
+    uniqueIndex("content_platform_variants_item_platform_idx").on(table.contentItemId, table.platform),
+  ],
+);
+
+export const contentEmailSends = sqliteTable(
+  "content_email_sends",
+  {
+    id: text("id").primaryKey(),
+    contentItemId: text("content_item_id")
+      .notNull()
+      .references(() => contentItems.id, { onDelete: "cascade" }),
+    variantId: text("variant_id").references(() => contentPlatformVariants.id, { onDelete: "set null" }),
+    status: text("status").notNull().default("draft"),
+    subject: text("subject").notNull().default(""),
+    previewText: text("preview_text").notNull().default(""),
+    fromName: text("from_name").notNull().default("Physical I/O"),
+    replyTo: text("reply_to").notNull().default(""),
+    body: text("body").notNull().default(""),
+    audienceFilter: text("audience_filter").notNull().default("{}"),
+    scheduledAt: text("scheduled_at"),
+    sentAt: text("sent_at"),
+    recipientCount: integer("recipient_count").notNull().default(0),
+    skipCount: integer("skip_count").notNull().default(0),
+    createdByName: text("created_by_name").notNull().default(""),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+    updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
+  },
+  (table) => [index("content_email_sends_item_idx").on(table.contentItemId)],
+);
+
+export const contentEmailRecipients = sqliteTable(
+  "content_email_recipients",
+  {
+    id: text("id").primaryKey(),
+    sendId: text("send_id")
+      .notNull()
+      .references(() => contentEmailSends.id, { onDelete: "cascade" }),
+    memberId: text("member_id"),
+    email: text("email").notNull(),
+    name: text("name").notNull().default(""),
+    status: text("status").notNull().default("pending"),
+    skipReason: text("skip_reason"),
+    providerId: text("provider_id"),
+    sentAt: text("sent_at"),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+  },
+  (table) => [index("content_email_recipients_send_idx").on(table.sendId)],
+);
+
+export const contentItemsRelations = relations(contentItems, ({ many }) => ({
+  events: many(contentEvents),
+  assets: many(contentAssets),
+  variants: many(contentPlatformVariants),
+  emailSends: many(contentEmailSends),
+}));
+
+export const contentPlatformVariantsRelations = relations(contentPlatformVariants, ({ one }) => ({
+  item: one(contentItems, { fields: [contentPlatformVariants.contentItemId], references: [contentItems.id] }),
+  template: one(contentTemplates, { fields: [contentPlatformVariants.templateId], references: [contentTemplates.id] }),
+  renderedAsset: one(contentAssets, { fields: [contentPlatformVariants.renderedAssetId], references: [contentAssets.id] }),
+}));
+
 export const membersRelations = relations(members, ({ many }) => ({
   interests: many(memberInterests),
   subscriptions: many(subscriptions),

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth/api";
 import { getPrisma } from "@/lib/outreach/prisma";
 
 const memorySchema = z.object({
@@ -17,6 +18,9 @@ function summarize(content: string) {
 }
 
 export async function GET() {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const memoryDocuments = await prisma.memoryDocument.findMany({
     orderBy: [{ updatedAt: "desc" }],
@@ -26,6 +30,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const payload = memorySchema.parse(await request.json());
 

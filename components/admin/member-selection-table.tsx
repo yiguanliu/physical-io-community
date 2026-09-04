@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { createSelectedCampaignAction } from "@/app/admin/actions";
 import { Badge, formatDate, Icon, initials } from "@/components/admin/ui";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type MemberRow = {
   id: string;
@@ -54,24 +56,23 @@ export default function MemberSelectionTable({
           <span>{total} total members</span>
           <span>{selectedIds.length} selected</span>
           <div />
-          <button className="admin-secondary compact-action" type="button" onClick={() => setSelectedIds([])} disabled={!selectedIds.length}>
+          <Button className="admin-secondary compact-action" variant="outline" type="button" onClick={() => setSelectedIds([])} disabled={!selectedIds.length}>
             Clear
-          </button>
-          <button className="admin-primary compact-action" type="submit" disabled={!selectedIds.length}>
+          </Button>
+          <Button className="admin-primary compact-action" type="submit" disabled={!selectedIds.length}>
             <Icon name="mail" size={14} />
             Email selected
-          </button>
+          </Button>
         </div>
         <div className="admin-table-wrap">
           <table>
             <thead>
               <tr>
                 <th className="member-select-col">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     aria-label="Select all shown members"
                     checked={allVisibleSelected}
-                    onChange={(event) => toggleVisible(event.currentTarget.checked)}
+                    onCheckedChange={(checked) => toggleVisible(checked === true)}
                   />
                 </th>
                 <th className="member-main-col">Member</th>
@@ -87,11 +88,10 @@ export default function MemberSelectionTable({
               {members.map((member) => (
                 <tr key={member.id} className={selected.has(member.id) ? "selected-row" : undefined}>
                   <td className="member-select-col">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       aria-label={`Select ${member.fullName}`}
                       checked={selected.has(member.id)}
-                      onChange={(event) => toggleMember(member.id, event.currentTarget.checked)}
+                      onCheckedChange={(checked) => toggleMember(member.id, checked === true)}
                     />
                   </td>
                   <td className="member-main-col">

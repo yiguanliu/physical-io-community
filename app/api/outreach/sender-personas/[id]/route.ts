@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth/api";
 import { getPrisma } from "@/lib/outreach/prisma";
 
 const senderPersonaSchema = z.object({
@@ -19,6 +20,9 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const { id } = await context.params;
   const payload = senderPersonaSchema.parse(await request.json());

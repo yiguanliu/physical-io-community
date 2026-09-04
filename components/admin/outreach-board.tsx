@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { addLeadNoteAction, completeNextActionAction, saveOutreachDraftAction, updateLeadStatusAction } from "@/app/admin/actions";
 import { Badge, formatMoney, Icon, initials } from "@/components/admin/ui";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/admin/form-select";
 
 type Lead = {
   id: string;
@@ -39,6 +43,16 @@ export default function OutreachBoard({
     return leads.find((lead) => lead.id === leadId) ?? selected;
   }, [leadId, leads, selected]);
 
+  function updateStatus(status: string) {
+    const form = new FormData();
+    form.set("id", current?.id ?? "");
+    form.set("status", status);
+    start(async () => {
+      await updateLeadStatusAction(form);
+      router.refresh();
+    });
+  }
+
   if (!current) return <p>No leads yet. Create one to start outreach.</p>;
 
   return (
@@ -54,10 +68,11 @@ export default function OutreachBoard({
               {leads
                 .filter((lead) => lead.status === stage)
                 .map((lead) => (
-                  <button
+                  <Button
                     key={lead.id}
                     type="button"
-                    className={lead.id === current.id ? "lead-card selected" : "lead-card"}
+                    variant="ghost"
+                    className={lead.id === current.id ? "lead-card selected h-auto" : "lead-card h-auto"}
                     onClick={() => {
                       setLeadId(lead.id);
                       router.push(`/admin/outreach?lead=${lead.id}`);
@@ -75,7 +90,7 @@ export default function OutreachBoard({
                       <span>{formatMoney(lead.estimatedValueGbp)}</span>
                       <span>{lead.nextAction || "No next action"}</span>
                     </footer>
-                  </button>
+                  </Button>
                 ))}
             </div>
           ))}
@@ -106,16 +121,15 @@ export default function OutreachBoard({
           </div>
           <div>
             <span>Stage</span>
-            <form action={updateLeadStatusAction}>
-              <input type="hidden" name="id" value={current.id} />
-              <select name="status" defaultValue={current.status} onChange={(event) => event.currentTarget.form?.requestSubmit()}>
-                {["research", "contacted", "meeting", "proposal", "agreement", "won", "lost", "nurture"].map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </form>
+            <FormSelect
+              defaultValue={current.status}
+              aria-label="Lead stage"
+              onValueChange={updateStatus}
+              options={["research", "contacted", "meeting", "proposal", "agreement", "won", "lost", "nurture"].map((status) => ({
+                value: status,
+                label: status,
+              }))}
+            />
           </div>
         </div>
         <form
@@ -133,16 +147,16 @@ export default function OutreachBoard({
           <input type="hidden" name="toName" value={current.contactName} />
           <label>
             Subject
-            <input name="subject" required defaultValue={`${current.company} × Physical I/O`} />
+            <Input name="subject" required defaultValue={`${current.company} × Physical I/O`} />
           </label>
           <label>
             Message
-            <textarea name="body" rows={6} required defaultValue={`Hi ${current.contactName.split(" ")[0] || current.contactName},\n\n`} />
+            <Textarea name="body" rows={6} required defaultValue={`Hi ${current.contactName.split(" ")[0] || current.contactName},\n\n`} />
           </label>
-          <button className="admin-primary" type="submit" disabled={pending}>
+          <Button className="admin-primary" type="submit" disabled={pending}>
             <Icon name="mail" size={16} />
             Send outreach email
-          </button>
+          </Button>
         </form>
         <div className="lead-timeline">
           {"activities" in current && Array.isArray((current as { activities?: unknown }).activities)
@@ -165,18 +179,18 @@ export default function OutreachBoard({
             <span>NEXT ACTION</span>
             <strong>{current.nextAction}</strong>
             <input type="hidden" name="id" value={current.id} />
-            <button type="submit">Mark complete</button>
+            <Button type="submit" variant="outline" size="xs">Mark complete</Button>
           </form>
         ) : null}
         <form className="compose-mini" action={addLeadNoteAction}>
           <input type="hidden" name="id" value={current.id} />
           <label>
             Internal note
-            <textarea name="note" rows={3} required />
+            <Textarea name="note" rows={3} required />
           </label>
-          <button className="admin-secondary" type="submit">
+          <Button className="admin-secondary" variant="outline" type="submit">
             Add note
-          </button>
+          </Button>
         </form>
       </aside>
     </div>

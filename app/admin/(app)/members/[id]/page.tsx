@@ -3,6 +3,10 @@ import { updateMemberAction } from "@/app/admin/actions";
 import { PageHeading } from "@/components/admin/shell";
 import { Badge } from "@/components/admin/ui";
 import { getMember } from "@/lib/admin/store";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/admin/form-select";
 
 export default async function MemberDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,74 +25,82 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
         <input type="hidden" name="id" value={member.id} />
         <label>
           Full name
-          <input name="fullName" defaultValue={member.fullName} required />
+          <Input name="fullName" defaultValue={member.fullName} required />
         </label>
         <label>
           Email
-          <input name="email" type="email" defaultValue={member.email} required />
+          <Input name="email" type="email" defaultValue={member.email} required />
         </label>
         <label>
           City
-          <input name="city" defaultValue={member.city} />
+          <Input name="city" defaultValue={member.city} />
         </label>
         <label>
           Professional role
-          <input name="professionalRole" defaultValue={member.professionalRole} />
+          <Input name="professionalRole" defaultValue={member.professionalRole} />
         </label>
         <label>
           Experience
-          <input name="experienceRange" defaultValue={member.experienceRange} />
+          <Input name="experienceRange" defaultValue={member.experienceRange} />
         </label>
         <label>
           Website / GitHub
-          <input name="websiteUrl" defaultValue={member.websiteUrl} />
+          <Input name="websiteUrl" defaultValue={member.websiteUrl} />
         </label>
         <label>
           LinkedIn
-          <input name="linkedinUrl" defaultValue={member.linkedinUrl} />
+          <Input name="linkedinUrl" defaultValue={member.linkedinUrl} />
         </label>
         <label>
           Status
-          <select name="status" defaultValue={member.status}>
-            <option value="active">Active</option>
-            <option value="review">Review</option>
-            <option value="paused">Paused</option>
-            <option value="archived">Archived</option>
-          </select>
+          <FormSelect
+            name="status"
+            defaultValue={member.status}
+            options={[
+              { value: "active", label: "Active" },
+              { value: "review", label: "Review" },
+              { value: "paused", label: "Paused" },
+              { value: "archived", label: "Archived" },
+            ]}
+          />
         </label>
         <label className="admin-form-wide">
           Work areas
-          <input name="interests" defaultValue={member.interests.join(", ")} />
+          <Input name="interests" defaultValue={member.interests.join(", ")} />
         </label>
         <label className="admin-form-wide">
           Community goals
-          <input name="communityGoals" defaultValue={member.communityGoals.join(", ")} />
+          <Input name="communityGoals" defaultValue={member.communityGoals.join(", ")} />
         </label>
         <label className="admin-form-wide">
           Preferred formats
-          <input name="eventFormats" defaultValue={member.eventFormats.join(", ")} />
+          <Input name="eventFormats" defaultValue={member.eventFormats.join(", ")} />
         </label>
         <label className="admin-form-wide">
           Community suggestions
-          <textarea name="suggestions" rows={3} defaultValue={member.suggestions} />
+          <Textarea name="suggestions" rows={3} defaultValue={member.suggestions} />
         </label>
         <label className="admin-form-wide">
           Notes
-          <textarea name="notes" rows={4} defaultValue={member.notes} />
+          <Textarea name="notes" rows={4} defaultValue={member.notes} />
         </label>
         {member.subscriptions.map((subscription) => (
           <label key={subscription.id}>
             {subscription.topic}
-            <select name={`sub_${subscription.topic}`} defaultValue={subscription.status}>
-              <option value="subscribed">Subscribed</option>
-              <option value="consent_unknown">Consent unknown</option>
-              <option value="unsubscribed">Unsubscribed</option>
-            </select>
+            <FormSelect
+              name={`sub_${subscription.topic}`}
+              defaultValue={subscription.status}
+              options={[
+                { value: "subscribed", label: "Subscribed" },
+                { value: "consent_unknown", label: "Consent unknown" },
+                { value: "unsubscribed", label: "Unsubscribed" },
+              ]}
+            />
           </label>
         ))}
-        <button className="admin-primary" type="submit">
+        <Button className="admin-primary" type="submit">
           Save changes
-        </button>
+        </Button>
       </form>
     </>
   );

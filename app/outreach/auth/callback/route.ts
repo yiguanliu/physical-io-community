@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get("code");
 
   if (!code) {
-    return NextResponse.redirect(new URL("/admin/login?next=/outreach", requestUrl.origin));
+    return NextResponse.redirect(new URL("/admin/login?next=/admin/outreach", requestUrl.origin));
   }
 
   const cookieStore = await cookies();
@@ -16,9 +16,9 @@ export async function GET(request: Request) {
 
   if (error) {
     return NextResponse.redirect(
-      new URL("/admin/login?next=/outreach&error=invalid_link", requestUrl.origin),
+      new URL("/admin/login?next=/admin/outreach&error=invalid_link", requestUrl.origin),
     );
   }
 
-  return NextResponse.redirect(new URL("/outreach", requestUrl.origin));
+  return NextResponse.redirect(new URL("/admin/outreach", requestUrl.origin));
 }

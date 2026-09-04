@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function AdminError({
   error,
@@ -20,12 +21,12 @@ export default function AdminError({
         </p>
         {error.digest ? <small>Digest: {error.digest}</small> : null}
         <div>
-          <button className="admin-primary" type="button" onClick={reset}>
+          <Button className="admin-primary" type="button" onClick={reset}>
             Try again
-          </button>
-          <Link className="admin-secondary" href="/admin/login">
-            Back to sign in
-          </Link>
+          </Button>
+          <Button asChild className="admin-secondary" variant="outline">
+            <Link href="/admin/login">Back to sign in</Link>
+          </Button>
         </div>
       </section>
     </main>

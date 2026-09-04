@@ -48,7 +48,7 @@ export const updateSession = async (request: NextRequest) => {
   if (isOutreachPage && !isOutreachLogin && !isLegacyOutreachCallback && !hasOutreachAccess) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/admin/login";
-    loginUrl.searchParams.set("next", pathname);
+    loginUrl.searchParams.set("next", "/admin/outreach");
     const redirectResponse = NextResponse.redirect(loginUrl);
     supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
     return redirectResponse;
@@ -56,9 +56,9 @@ export const updateSession = async (request: NextRequest) => {
 
   if (isOutreachLogin) {
     const destinationUrl = request.nextUrl.clone();
-    destinationUrl.pathname = hasOutreachAccess ? "/outreach" : "/admin/login";
+    destinationUrl.pathname = hasOutreachAccess ? "/admin/outreach" : "/admin/login";
     destinationUrl.search = "";
-    if (!hasOutreachAccess) destinationUrl.searchParams.set("next", "/outreach");
+    if (!hasOutreachAccess) destinationUrl.searchParams.set("next", "/admin/outreach");
     const redirectResponse = NextResponse.redirect(destinationUrl);
     supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
     return redirectResponse;

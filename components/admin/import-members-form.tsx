@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { importMembersAction } from "@/app/admin/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function ImportMembersForm() {
   const router = useRouter();
@@ -22,10 +24,10 @@ export default function ImportMembersForm() {
         });
       }}
     >
-      <input type="file" name="file" accept=".csv,text/csv" required />
-      <button className="admin-secondary" type="submit" disabled={pending}>
+      <Input type="file" name="file" accept=".csv,text/csv" required />
+      <Button className="admin-secondary" variant="outline" type="submit" disabled={pending}>
         {pending ? "Importing…" : "Import CSV"}
-      </button>
+      </Button>
       {result ? <small>{result}</small> : null}
     </form>
   );

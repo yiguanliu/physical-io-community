@@ -2,6 +2,10 @@ import { saveEventAction } from "@/app/admin/actions";
 import { PageHeading } from "@/components/admin/shell";
 import { Badge, Icon } from "@/components/admin/ui";
 import { listEvents } from "@/lib/admin/store";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/admin/form-select";
 
 export default async function EventsPage() {
   const events = await listEvents();
@@ -43,40 +47,44 @@ export default async function EventsPage() {
         <form className="admin-form" action={saveEventAction}>
           <label>
             Title
-            <input name="title" required />
+            <Input name="title" required />
           </label>
           <label>
             Starts at
-            <input name="startsAt" type="datetime-local" required />
+            <Input name="startsAt" type="datetime-local" required />
           </label>
           <label>
             Venue
-            <input name="venue" />
+            <Input name="venue" />
           </label>
           <label>
             Status
-            <select name="status" defaultValue="draft">
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="completed">Completed</option>
-            </select>
+            <FormSelect
+              name="status"
+              defaultValue="draft"
+              options={[
+                { value: "draft", label: "Draft" },
+                { value: "published", label: "Published" },
+                { value: "completed", label: "Completed" },
+              ]}
+            />
           </label>
           <label className="admin-form-wide">
             Description
-            <textarea name="description" rows={3} />
+            <Textarea name="description" rows={3} />
           </label>
           <label>
             Registration URL
-            <input name="registrationUrl" />
+            <Input name="registrationUrl" />
           </label>
           <label>
             Registered count
-            <input name="registeredCount" type="number" defaultValue="0" />
+            <Input name="registeredCount" type="number" defaultValue="0" />
           </label>
-          <button className="admin-primary" type="submit">
+          <Button className="admin-primary" type="submit">
             <Icon name="plus" size={16} />
             Save event
-          </button>
+          </Button>
         </form>
       </section>
     </>

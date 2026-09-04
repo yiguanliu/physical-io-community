@@ -2,6 +2,7 @@ import { PageHeading } from "@/components/admin/shell";
 import { Badge, formatDate, initials } from "@/components/admin/ui";
 import { listAccessUsers } from "@/lib/admin/access";
 import { approveAccessAction, declineAccessAction } from "@/app/admin/actions";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -51,15 +52,15 @@ export default async function AccessPage() {
                       <div className="admin-inline-form">
                         <form action={approveAccessAction}>
                           <input type="hidden" name="userId" value={row.id} />
-                          <button className="admin-primary" type="submit">
+                          <Button className="admin-primary" type="submit">
                             Add as admin
-                          </button>
+                          </Button>
                         </form>
                         <form action={declineAccessAction}>
                           <input type="hidden" name="userId" value={row.id} />
-                          <button className="admin-secondary" type="submit">
+                          <Button className="admin-secondary" variant="outline" type="submit">
                             Decline
-                          </button>
+                          </Button>
                         </form>
                       </div>
                     </td>

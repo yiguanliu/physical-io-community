@@ -1,3 +1,8 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
 /* ============================================
    Physical I/O — globals.css
    Palette: white · paprika orange · black (only)
@@ -15,6 +20,49 @@
   --radius: 14px;
   --nav-h: 64px;
   --font: "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --background: #ffffff;
+  --foreground: #171714;
+  --card: #ffffff;
+  --card-foreground: #171714;
+  --popover: #ffffff;
+  --popover-foreground: #171714;
+  --primary: #171714;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f2ed;
+  --secondary-foreground: #171714;
+  --muted: #f3f2ed;
+  --muted-foreground: #77766f;
+  --accent-foreground: #ffffff;
+  --destructive: #b42318;
+  --border: #deddd6;
+  --input: #deddd6;
+  --ring: #ee4b1a;
+}
+
+@theme inline {
+  --font-sans: "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
