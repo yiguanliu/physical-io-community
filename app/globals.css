@@ -19,7 +19,7 @@
   --accent-deep: #ee4b1a;
   --radius: 14px;
   --nav-h: 64px;
-  --font: "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --background: #ffffff;
   --foreground: #171714;
   --card: #ffffff;
@@ -40,7 +40,7 @@
 }
 
 @theme inline {
-  --font-sans: "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -142,6 +142,9 @@ h1, h2, h3 {
 .btn-primary .arrow { transition: transform 0.15s ease; }
 .btn-primary:hover .arrow { transform: translateX(3px); }
 
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: #d63f12; transform: translateY(-1px); }
+
 .btn-ghost {
   background: transparent;
   border: 1.5px solid rgba(0, 0, 0, 0.22);
@@ -152,7 +155,8 @@ h1, h2, h3 {
 .btn-lg { padding: 16px 32px; font-size: 16px; }
 
 /* Calendar (Luma) button in the header — primary pill with a leading icon. */
-.nav-calendar {
+.nav-calendar,
+.nav-community {
   gap: 7px;
 }
 
@@ -166,8 +170,7 @@ h1, h2, h3 {
   stroke-linejoin: round;
 }
 
-/* Floating icon buttons, pinned bottom-right on the home page, clear of the
-   carousel: Ask Us Anything (?) stacked above the Luma events (calendar). */
+/* Floating Ask Us Anything button, pinned bottom-right on the home page. */
 .home-fab-stack {
   position: fixed;
   right: clamp(18px, 3vw, 32px);
@@ -250,11 +253,43 @@ h1, h2, h3 {
 .nav-links a:not(.btn):hover { color: var(--ink); }
 
 .nav-social {
+  --social-icon-bg: #000;
+  --social-icon-cutout: #fff;
+  position: relative;
   display: inline-grid;
   place-items: center;
   width: 24px;
   height: 24px;
   color: var(--ink-soft);
+}
+
+.nav-social[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translate(-50%, -4px);
+  z-index: 100;
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: #000;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+}
+
+.nav-social[data-tooltip]:hover::after,
+.nav-social[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
 }
 
 .nav-social-icon {
@@ -267,6 +302,93 @@ h1, h2, h3 {
   stroke-linejoin: round;
 }
 
+.whatsapp-icon {
+  fill: var(--social-icon-bg);
+  stroke: none;
+}
+
+.brand-social-icon {
+  fill: none;
+  stroke: none;
+}
+
+.mobile-nav { display: none; }
+
+.mobile-nav-toggle {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+}
+
+.mobile-nav-toggle span {
+  width: 18px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.mobile-nav.is-open .mobile-nav-toggle span:first-child { transform: translateY(6.5px) rotate(45deg); }
+.mobile-nav.is-open .mobile-nav-toggle span:nth-child(2) { opacity: 0; }
+.mobile-nav.is-open .mobile-nav-toggle span:last-child { transform: translateY(-6.5px) rotate(-45deg); }
+
+.mobile-nav-menu {
+  --social-icon-bg: #000;
+  --social-icon-cutout: #fff;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(260px, calc(100vw - 32px));
+  display: grid;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+}
+
+.mobile-nav.is-open .mobile-nav-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.mobile-nav-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mobile-nav-menu a:hover { background: rgba(0, 0, 0, 0.06); }
+.mobile-nav-menu svg { width: 18px; height: 18px; }
+.mobile-nav-menu .nav-social-icon { color: currentColor; }
+
+.home-topbar .mobile-nav-toggle {
+  background: #fff;
+  color: #000;
+}
+
+.home-topbar .nav-social {
+  --social-icon-bg: #fff;
+  --social-icon-cutout: #000;
+}
+
 /* ============================================
    HOME — carousel over the auditorium screen
    ============================================ */
@@ -276,6 +398,7 @@ h1, h2, h3 {
   height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
+  touch-action: none;
   background: #000 url("/assets/home_bg_portrait.png") center 42% / cover no-repeat;
 }
 
@@ -344,10 +467,12 @@ h1, h2, h3 {
 }
 
 .carousel {
-  position: relative;
+  position: absolute;
+  top: 45%;
+  left: 50%;
   width: min(790px, 58vw, calc(100vw - 56px));
   min-height: clamp(300px, 42vh, 470px);
-  transform: translateY(-1vh);
+  transform: translate(-50%, -50%);
 }
 
 .slide {
@@ -644,6 +769,9 @@ h1, h2, h3 {
   }
 
   .carousel {
+    position: relative;
+    top: auto;
+    left: auto;
     width: min(340px, calc(100vw - 40px));
     /* Fixed height sized to the tallest slide; the absolutely-positioned
        slides centre within it and never push past its bounds. */
@@ -673,7 +801,6 @@ h1, h2, h3 {
   }
   .brand-lockup { gap: clamp(36px, 14vw, 72px); }
   .brand-word { font-size: clamp(25px, 8.4vw, 39px); }
-
   /* Slide 4's stacked buttons are the tallest content — keep them tight. */
   .slide-community-builders .s-title { font-size: clamp(21px, 5.9vw, 27px); }
 }
@@ -1063,15 +1190,12 @@ h1, h2, h3 {
 
 @media (max-width: 900px) {
   .footer-top { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .mobile-nav { display: block; position: relative; }
+  .brand-name { display: none; }
 }
 
 @media (max-width: 600px) {
-  .nav-links { gap: 12px; }
-  /* Logo-only brand on mobile so the nav items never crowd the wordmark. */
-  .brand-name { display: none; }
-  .home-topbar .nav-links a:not(.btn) { display: inline; }
-  .home-topbar .nav-links .nav-social { display: inline-grid; }
-  .nav-links .btn { padding: 10px 14px; font-size: 14px; white-space: nowrap; }
   .roadmap-item { grid-template-columns: 1fr; gap: 6px; }
   .tier { grid-template-columns: 1fr; gap: 8px; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }

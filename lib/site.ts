@@ -2,10 +2,13 @@
 
 export const SITE_URL = "https://www.physical-io.com";
 export const JOIN_URL = "https://forms.gle/DTY4AZDd56FWPmo76";
+export const COMMUNITY_FORM_URL =
+  "https://docs.google.com/forms/d/1f5TOvkiWgC_6yn_OgeuKFjmxvWXFot2WpHoy7sDQMBc/viewform?edit_requested=true";
 export const DECK_URL =
   "https://docs.google.com/presentation/d/e/2PACX-1vSBwgQYv0gIZAM3iQnur81MkS8DAHTXaeRbBfS1TNteIxN2EDNamDlxGa3tZ2eAdIsNR6DO4OkbS1sn/pub?start=false&loop=false&delayms=5000";
 export const INSTAGRAM_URL = "https://www.instagram.com/physical.io/";
 export const LINKEDIN_URL = "https://www.linkedin.com/company/physical-i-o/";
+export const WHATSAPP_URL = "https://chat.whatsapp.com/DoR1MYEm1yU2VKG8ETmQys?mode=gi_t";
 export const LUMA_URL = "https://luma.com/phyiscal-io";
 
 export const SITE_NAME = "Physical I/O";

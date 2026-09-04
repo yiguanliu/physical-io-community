@@ -5,8 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import LogoMark from "./LogoMark";
-import { CalendarIcon, InstagramIcon, LinkedInIcon } from "./SocialIcons";
-import { INSTAGRAM_URL, LINKEDIN_URL, LUMA_URL } from "@/lib/site";
+import HeaderActions from "./HeaderActions";
 import { useSiteStore } from "@/lib/store";
 
 // WebGL light-rays overlay — client only (uses WebGL/window).
@@ -75,6 +74,7 @@ export default function HomeStage() {
   const [introGone, setIntroGone] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
   const startX = useRef<number | null>(null);
+  const startY = useRef<number | null>(null);
   const didSwipe = useRef(false);
   const wheelDelta = useRef(0);
   const wheelLocked = useRef(false);
@@ -164,35 +164,36 @@ export default function HomeStage() {
       className="page-home"
       onPointerDown={(e) => {
         startX.current = e.clientX;
+        startY.current = e.clientY;
         didSwipe.current = false;
       }}
       onPointerUp={(e) => {
-        if (startX.current == null) return;
+        if (startX.current == null || startY.current == null) return;
         const dx = e.clientX - startX.current;
-        if (Math.abs(dx) > 50) {
+        const dy = e.clientY - startY.current;
+        const isHorizontalSwipe = Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 50;
+        const isVerticalSwipe = Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 50;
+
+        if (isHorizontalSwipe) {
           didSwipe.current = true;
           go(dx < 0 ? 1 : -1);
+        } else if (isVerticalSwipe) {
+          didSwipe.current = true;
+          go(dy < 0 ? 1 : -1);
         }
         startX.current = null;
+        startY.current = null;
+      }}
+      onPointerCancel={() => {
+        startX.current = null;
+        startY.current = null;
       }}
     >
       <div className="home-topbar">
         <Link className="home-brand" href="/" aria-label="Physical I/O home">
           <LogoMark />
         </Link>
-        <nav className="nav-links" aria-label="Main">
-          <Link href="/about">About</Link>
-          <Link href="/demo">Demo</Link>
-          <a className="nav-social" href={INSTAGRAM_URL} target="_blank" rel="noopener" aria-label="Instagram @physical.io">
-            <InstagramIcon />
-          </a>
-          <a className="nav-social" href={LINKEDIN_URL} target="_blank" rel="noopener" aria-label="LinkedIn Physical I/O">
-            <LinkedInIcon />
-          </a>
-          <a className="btn btn-primary nav-calendar" href={LUMA_URL} target="_blank" rel="noopener" aria-label="Physical I/O events calendar on Luma">
-            <CalendarIcon /> Calendar
-          </a>
-        </nav>
+        <HeaderActions />
       </div>
 
       <main
@@ -298,15 +299,6 @@ export default function HomeStage() {
         <Link className="home-fab" href="/askusanything" aria-label="Ask us anything">
           <span className="fab-glyph" aria-hidden="true">?</span>
         </Link>
-        <a
-          className="home-fab"
-          href={LUMA_URL}
-          target="_blank"
-          rel="noopener"
-          aria-label="See upcoming Physical I/O events on Luma"
-        >
-          <CalendarIcon />
-        </a>
       </div>
 
       <div className="home-rays" aria-hidden="true">
