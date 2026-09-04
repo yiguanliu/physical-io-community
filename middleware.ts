@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
       if (pathname === "/outreach" || pathname.startsWith("/outreach/")) {
         const url = request.nextUrl.clone();
         url.pathname = "/admin/login";
-        url.searchParams.set("next", "/outreach");
+        url.searchParams.set("next", "/admin/outreach");
         url.searchParams.set("error", "authentication_unavailable");
         return NextResponse.redirect(url);
       }

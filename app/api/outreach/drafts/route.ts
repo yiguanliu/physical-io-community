@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth/api";
 import { outreachTypes } from "@/lib/outreach/outreach-config";
 import { generateDraft } from "@/lib/outreach/drafting";
 import { rankMemoryDocuments } from "@/lib/outreach/memory";
@@ -17,6 +18,9 @@ const draftSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const payload = draftSchema.parse(await request.json());
 

@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { PageHeading } from "@/components/admin/shell";
-import { Badge, formatMoney, Icon, initials } from "@/components/admin/ui";
+import { Badge, Icon, initials } from "@/components/admin/ui";
 import { overviewStats } from "@/lib/admin/store";
 
 export default async function AdminOverviewPage() {
   const stats = await overviewStats();
   const greeting = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
   const stages = [
-    ["research", "Research"],
-    ["contacted", "Contacted"],
-    ["meeting", "Meeting"],
-    ["proposal", "Proposal"],
-    ["agreement", "Agreement"],
+    ["NEW_RESEARCH", "Research"],
+    ["DRAFTED", "Drafted"],
+    ["SENT", "Sent"],
+    ["FOLLOW_UP", "Follow-up"],
+    ["REPLIED", "Replied"],
+    ["MEETING_BOOKED", "Meeting"],
   ] as const;
   const maxPipeline = Math.max(1, ...stages.map(([key]) => stats.pipeline[key] ?? 0));
 
@@ -61,9 +62,9 @@ export default async function AdminOverviewPage() {
           <small className="up">+{stats.monthCount} this month</small>
         </article>
         <article className="admin-metric">
-          <span>Open sponsor leads</span>
+          <span>Sponsor CRM leads</span>
           <strong>{stats.leadCount}</strong>
-          <small>{formatMoney(stats.pipelineValue)} pipeline</small>
+          <small>Active outreach records</small>
         </article>
         <article className="admin-metric">
           <span>Newsletter subscribers</span>
@@ -81,7 +82,7 @@ export default async function AdminOverviewPage() {
           <header className="panel-head">
             <div>
               <h3>Sponsor pipeline</h3>
-              <span>{formatMoney(stats.pipelineValue)} estimated</span>
+              <span>{stats.leadCount} active records</span>
             </div>
             <Link href="/admin/outreach">
               View outreach

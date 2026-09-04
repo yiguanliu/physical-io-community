@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth/api";
 import { getPrisma } from "@/lib/outreach/prisma";
 
 const memorySchema = z.object({
@@ -21,6 +22,9 @@ export async function GET(
   _request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const { id } = await context.params;
   const memoryDocument = await prisma.memoryDocument.findUniqueOrThrow({
@@ -34,6 +38,9 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const { id } = await context.params;
   const payload = memorySchema.parse(await request.json());

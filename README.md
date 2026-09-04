@@ -27,6 +27,7 @@ Open `/admin`. Sign in with an administrator email and password. People without 
 | --- | --- |
 | Members | Search, filter, edit, CSV import, consent/suppression |
 | Communications | Draft campaigns, count eligible recipients, test send, mass send, delivery log |
+| Marketing | Content studio: discover news, draft (markdown), per-platform variants, visual studio, approve/publish, newsletter send. See `docs/marketing-content-studio.md` |
 | Outreach | Sponsor pipeline, notes, status changes, 1:1 email |
 | Events | Event records used by campaign targeting |
 | Access | Approve or decline administrator requests |

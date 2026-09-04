@@ -6,6 +6,8 @@ export type SendEmailInput = {
   toName?: string;
   subject: string;
   text: string;
+  /** Pre-rendered body HTML. When omitted, `text` is escaped into paragraphs. */
+  html?: string;
   fromName?: string;
   replyTo?: string;
   campaignId?: string;
@@ -17,7 +19,7 @@ export type SendEmailResult = {
   id: string;
 };
 
-function escapeHtml(value: string) {
+export function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -28,14 +30,18 @@ function escapeHtml(value: string) {
 export function renderEmailHtml(input: {
   previewText?: string;
   body: string;
+  /** Already-rendered, already-escaped body markup (e.g. from Markdown). */
+  bodyHtml?: string;
   unsubscribeUrl?: string;
 }) {
-  const paragraphs = escapeHtml(input.body)
-    .split(/\n{2,}/)
-    .map((block) => `<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#171714;">${block.replaceAll("\n", "<br/>")}</p>`)
-    .join("");
+  const paragraphs =
+    input.bodyHtml ??
+    escapeHtml(input.body)
+      .split(/\n{2,}/)
+      .map((block) => `<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#171714;">${block.replaceAll("\n", "<br/>")}</p>`)
+      .join("");
   const unsubscribe = input.unsubscribeUrl
-    ? `<p style="margin:24px 0 0;font-size:12px;color:#77766f;">If you no longer want these emails, <a href="${input.unsubscribeUrl}" style="color:#ee4b1a;">unsubscribe</a>.</p>`
+    ? `<p style="margin:24px 0 0;font-size:12px;color:#77766f;">If you no longer want these emails, <a href="${input.unsubscribeUrl}" style="color:#b83c12;">unsubscribe</a>.</p>`
     : "";
   return `<!doctype html>
 <html>
@@ -66,6 +72,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   const html = renderEmailHtml({
     previewText: input.subject,
     body: input.text,
+    bodyHtml: input.html,
     unsubscribeUrl: input.unsubscribeUrl,
   });
   if (!process.env.RESEND_API_KEY) {

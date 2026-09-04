@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth/api";
 import { outreachTypes } from "@/lib/outreach/outreach-config";
 import { getPrisma } from "@/lib/outreach/prisma";
 
@@ -14,6 +15,9 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const { id } = await context.params;
   const payload = templateSchema.parse(await request.json());

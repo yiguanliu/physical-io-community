@@ -1,5 +1,10 @@
 import { PageHeading } from "@/components/admin/shell";
 import { createMemberAction } from "@/app/admin/actions";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/admin/form-select";
 
 export default function NewMemberPage() {
   return (
@@ -8,68 +13,72 @@ export default function NewMemberPage() {
       <form className="admin-form" action={createMemberAction}>
         <label>
           Full name
-          <input name="fullName" required />
+          <Input name="fullName" required />
         </label>
         <label>
           Email
-          <input name="email" type="email" required />
+          <Input name="email" type="email" required />
         </label>
         <label>
           City
-          <input name="city" />
+          <Input name="city" />
         </label>
         <label>
           Professional role
-          <input name="professionalRole" />
+          <Input name="professionalRole" />
         </label>
         <label>
           Experience
-          <input name="experienceRange" />
+          <Input name="experienceRange" />
         </label>
         <label>
           Website / GitHub
-          <input name="websiteUrl" />
+          <Input name="websiteUrl" />
         </label>
         <label>
           LinkedIn
-          <input name="linkedinUrl" />
+          <Input name="linkedinUrl" />
         </label>
         <label>
           Status
-          <select name="status" defaultValue="active">
-            <option value="active">Active</option>
-            <option value="review">Review</option>
-            <option value="paused">Paused</option>
-            <option value="archived">Archived</option>
-          </select>
+          <FormSelect
+            name="status"
+            defaultValue="active"
+            options={[
+              { value: "active", label: "Active" },
+              { value: "review", label: "Review" },
+              { value: "paused", label: "Paused" },
+              { value: "archived", label: "Archived" },
+            ]}
+          />
         </label>
         <label className="admin-form-wide">
           Work areas
-          <input name="interests" placeholder="Robotics, AI/ML Training" />
+          <Input name="interests" placeholder="Robotics, AI/ML Training" />
         </label>
         <label className="admin-form-wide">
           Community goals
-          <input name="communityGoals" placeholder="Meeting collaborators / co-founders" />
+          <Input name="communityGoals" placeholder="Meeting collaborators / co-founders" />
         </label>
         <label className="admin-form-wide">
           Preferred formats
-          <input name="eventFormats" placeholder="Talks / panels, Hands-on workshops" />
+          <Input name="eventFormats" placeholder="Talks / panels, Hands-on workshops" />
         </label>
         <label className="admin-form-wide">
           Community suggestions
-          <textarea name="suggestions" rows={3} />
+          <Textarea name="suggestions" rows={3} />
         </label>
         <label className="admin-form-wide">
           Notes
-          <textarea name="notes" rows={4} />
+          <Textarea name="notes" rows={4} />
         </label>
         <label className="admin-check">
-          <input type="checkbox" name="newsletterConsent" />
+          <Checkbox name="newsletterConsent" />
           Opt in to newsletter (only if they have given explicit consent)
         </label>
-        <button className="admin-primary" type="submit">
+        <Button className="admin-primary" type="submit">
           Save member
-        </button>
+        </Button>
       </form>
     </>
   );

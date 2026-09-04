@@ -11,6 +11,7 @@ import {
 } from "@/lib/admin/audience";
 import { createId, createToken, nowIso } from "@/lib/db/ids";
 import { isResendConfigured } from "@/lib/email/send";
+import { getDashboardData } from "@/lib/outreach/dashboard-data";
 import { getSupabaseAdminClient } from "@/utils/supabase/admin";
 
 type Row = Record<string, any>;
@@ -728,13 +729,13 @@ function requestErrorMessage(error: unknown) {
 }
 
 export async function overviewStats() {
-  const [membersResult, subscriptionsResult, leadsResult, campaignsResult, auditResult, eventsResult] = await Promise.all([
+  const [membersResult, subscriptionsResult, campaignsResult, auditResult, eventsResult, outreachResult] = await Promise.all([
     sb().from("members").select("*"),
     sb().from("subscriptions").select("*"),
-    sb().from("leads").select("*"),
     sb().from("campaigns").select("*").order("updated_at", { ascending: false }),
     sb().from("audit_log").select("*").order("created_at", { ascending: false }).limit(8),
     sb().from("community_events").select("*").eq("status", "published").order("starts_at", { ascending: true }).limit(1),
+    getDashboardData(),
   ]).catch((error) => {
     return [
       { data: null, error: { message: requestErrorMessage(error) } },
@@ -742,19 +743,19 @@ export async function overviewStats() {
       { data: null, error: null },
       { data: null, error: null },
       { data: null, error: null },
-      { data: null, error: null },
+      { dbReady: false, error: requestErrorMessage(error), leads: [], templates: [], memoryDocuments: [], senderPersonas: [] },
     ];
   });
-  for (const result of [membersResult, subscriptionsResult, leadsResult, campaignsResult, auditResult, eventsResult]) {
-    if (result.error) return emptyOverviewStats(result.error.message);
+  for (const result of [membersResult, subscriptionsResult, campaignsResult, auditResult, eventsResult]) {
+    if (result.error) return emptyOverviewStats(typeof result.error === "string" ? result.error : result.error.message);
   }
   const memberRows = membersResult.data ?? [];
   const subscriptionRows = subscriptionsResult.data ?? [];
-  const leadRows = leadsResult.data ?? [];
+  const leadRows: Array<{ stage: string }> = outreachResult.dbReady ? outreachResult.leads : [];
   const campaignRows = campaignsResult.data ?? [];
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-  const openLeads = leadRows.filter((lead) => !["won", "lost"].includes(lead.status));
+  const openLeads = leadRows.filter((lead) => lead.stage !== "CLOSED");
   const sentCampaigns = campaignRows.filter((campaign) => campaign.status === "sent");
   let recipients = 0;
   let delivered = 0;
@@ -768,7 +769,7 @@ export async function overviewStats() {
     opened += rows.filter((row) => ["opened", "clicked"].includes(row.status)).length;
   }
   const pipeline = openLeads.reduce<Record<string, number>>((memo, lead) => {
-    memo[lead.status] = (memo[lead.status] ?? 0) + 1;
+    memo[lead.stage] = (memo[lead.stage] ?? 0) + 1;
     return memo;
   }, {});
   return {
@@ -777,7 +778,7 @@ export async function overviewStats() {
     monthCount: memberRows.filter((row) => Date.parse(row.signed_up_at) >= monthAgo).length,
     subscribed: subscriptionRows.filter((row) => row.topic === "newsletter" && row.status === "subscribed").length,
     leadCount: openLeads.length,
-    pipelineValue: openLeads.reduce((sum, lead) => sum + (lead.estimated_value_gbp ?? 0), 0),
+    pipelineValue: 0,
     pipeline,
     recentCampaigns: campaignRows.slice(0, 5).map(camelCampaign),
     recentAudit: (auditResult.data ?? []).map(camelAudit),

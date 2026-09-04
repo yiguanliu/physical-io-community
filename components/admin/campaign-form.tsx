@@ -3,6 +3,11 @@
 import { useState, useTransition } from "react";
 import { previewAudienceAction, saveCampaignAction } from "@/app/admin/actions";
 import type { AudienceFilter } from "@/lib/admin/audience";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/admin/form-select";
 
 export default function CampaignForm({
   campaign,
@@ -62,58 +67,61 @@ export default function CampaignForm({
       <input type="hidden" name="memberIds" value={audience.memberIds?.join(",") ?? ""} />
       <label>
         Campaign name
-        <input name="name" required defaultValue={campaign?.name} disabled={locked} />
+        <Input name="name" required defaultValue={campaign?.name} disabled={locked} />
       </label>
       <label>
         Type
-        <select name="type" defaultValue={campaign?.type ?? "newsletter"} disabled={locked}>
-          <option value="newsletter">Newsletter</option>
-          <option value="event_update">Event update</option>
-          <option value="announcement">Announcement</option>
-        </select>
+        <FormSelect
+          name="type"
+          defaultValue={campaign?.type ?? "newsletter"}
+          disabled={locked}
+          options={[
+            { value: "newsletter", label: "Newsletter" },
+            { value: "event_update", label: "Event update" },
+            { value: "announcement", label: "Announcement" },
+          ]}
+        />
       </label>
       <label>
         Subject
-        <input name="subject" required defaultValue={campaign?.subject} disabled={locked} />
+        <Input name="subject" required defaultValue={campaign?.subject} disabled={locked} />
       </label>
       <label>
         Preview text
-        <input name="previewText" defaultValue={campaign?.previewText} disabled={locked} />
+        <Input name="previewText" defaultValue={campaign?.previewText} disabled={locked} />
       </label>
       <label>
         From name
-        <input name="fromName" defaultValue={campaign?.fromName ?? "Physical I/O"} disabled={locked} />
+        <Input name="fromName" defaultValue={campaign?.fromName ?? "Physical I/O"} disabled={locked} />
       </label>
       <label>
         Reply-to
-        <input name="replyTo" type="email" defaultValue={campaign?.replyTo} disabled={locked} />
+        <Input name="replyTo" type="email" defaultValue={campaign?.replyTo} disabled={locked} />
       </label>
       <label>
         Linked event
-        <select name="eventId" defaultValue={campaign?.eventId ?? ""} disabled={locked}>
-          <option value="">None</option>
-          {events.map((event) => (
-            <option key={event.id} value={event.id}>
-              {event.title}
-            </option>
-          ))}
-        </select>
+        <FormSelect
+          name="eventId"
+          defaultValue={campaign?.eventId ?? ""}
+          disabled={locked}
+          options={[{ value: "", label: "None" }, ...events.map((event) => ({ value: event.id, label: event.title }))]}
+        />
       </label>
       <label>
         Cities
-        <input name="cities" defaultValue={audience.cities?.join(", ") ?? ""} placeholder="London" disabled={locked} />
+        <Input name="cities" defaultValue={audience.cities?.join(", ") ?? ""} placeholder="London" disabled={locked} />
       </label>
       <label>
         Roles
-        <input name="roles" defaultValue={audience.roles?.join(", ") ?? ""} placeholder="Engineer, Designer" disabled={locked} />
+        <Input name="roles" defaultValue={audience.roles?.join(", ") ?? ""} placeholder="Engineer, Designer" disabled={locked} />
       </label>
       <label>
         Interests
-        <input name="interests" defaultValue={audience.interests?.join(", ") ?? ""} disabled={locked} />
+        <Input name="interests" defaultValue={audience.interests?.join(", ") ?? ""} disabled={locked} />
       </label>
       <label>
         Statuses
-        <input name="statuses" defaultValue={audience.statuses?.join(", ") ?? "active"} disabled={locked} />
+        <Input name="statuses" defaultValue={audience.statuses?.join(", ") ?? "active"} disabled={locked} />
       </label>
       {audience.memberIds?.length ? (
         <p className="admin-selected-audience">
@@ -121,17 +129,18 @@ export default function CampaignForm({
         </p>
       ) : null}
       <label className="admin-check">
-        <input type="checkbox" name="requireConsent" value="on" defaultChecked={audience.requireConsent !== false} disabled={locked} />
+        <Checkbox name="requireConsent" value="on" defaultChecked={audience.requireConsent !== false} disabled={locked} />
         Only send to members subscribed to this topic
       </label>
       <label className="admin-form-wide">
         Body
-        <textarea name="body" rows={12} required defaultValue={campaign?.body ?? "Hi {{first_name}},\n\n"} disabled={locked} />
+        <Textarea name="body" rows={12} required defaultValue={campaign?.body ?? "Hi {{first_name}},\n\n"} disabled={locked} />
         <small>Personalise with {"{{first_name}}"}, {"{{full_name}}"}, {"{{city}}"}.</small>
       </label>
       <div className="admin-form-actions">
-        <button
+        <Button
           className="admin-secondary"
+          variant="outline"
           type="button"
           disabled={pending}
           onClick={(event) => {
@@ -144,11 +153,11 @@ export default function CampaignForm({
           }}
         >
           {pending ? "Counting…" : count === null ? "Count recipients" : `${count} eligible`}
-        </button>
+        </Button>
         {locked ? null : (
-          <button className="admin-primary" type="submit">
+          <Button className="admin-primary" type="submit">
             Save draft
-          </button>
+          </Button>
         )}
       </div>
     </form>

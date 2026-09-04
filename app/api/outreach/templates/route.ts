@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth/api";
 import { outreachTypes } from "@/lib/outreach/outreach-config";
 import { getPrisma } from "@/lib/outreach/prisma";
 
@@ -11,6 +12,9 @@ const templateSchema = z.object({
 });
 
 export async function GET() {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const templates = await prisma.outreachTemplate.findMany({
     orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
@@ -20,6 +24,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const payload = templateSchema.parse(await request.json());
 

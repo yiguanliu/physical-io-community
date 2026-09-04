@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth/api";
 import { getPrisma } from "@/lib/outreach/prisma";
 
 const leadSchema = z.object({
@@ -32,6 +33,9 @@ function inferredNameFromUrl(linkedinUrl: string) {
 }
 
 export async function GET() {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const leads = await prisma.lead.findMany({
     orderBy: [{ priority: "asc" }, { updatedAt: "desc" }],
@@ -48,6 +52,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const guard = await requireAdminApi();
+  if (guard) return guard;
+
   const prisma = getPrisma();
   const payload = leadSchema.parse(await request.json());
 

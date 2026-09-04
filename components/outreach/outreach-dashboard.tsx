@@ -147,6 +147,7 @@ type DashboardProps = {
   templates: Template[];
   memoryDocuments: MemoryDocument[];
   senderPersonas: SenderPersona[];
+  embedded?: boolean;
 };
 
 const priorityLabels: Record<number, string> = {
@@ -237,6 +238,7 @@ export function OutreachDashboard({
   templates: initialTemplates,
   memoryDocuments: initialMemoryDocuments,
   senderPersonas: initialSenderPersonas,
+  embedded = false,
 }: DashboardProps) {
   const [leads, setLeads] = useState(initialLeads);
   const [templates, setTemplates] = useState(initialTemplates);
@@ -364,7 +366,7 @@ export function OutreachDashboard({
       priority: Number(formData.get("priority") ?? 2),
     };
 
-    const response = await fetch(`/api/leads/${editingLead.id}`, {
+    const response = await fetch(`/api/outreach/leads/${editingLead.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -387,7 +389,7 @@ export function OutreachDashboard({
     const previous = leads;
     setLeads((current) => current.map((lead) => (lead.id === leadId ? { ...lead, stage } : lead)));
 
-    const response = await fetch(`/api/leads/${leadId}`, {
+    const response = await fetch(`/api/outreach/leads/${leadId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ stage }),
@@ -495,7 +497,7 @@ export function OutreachDashboard({
 
   async function saveTemplate(templateId: string, formData: FormData) {
     const payload = templatePayload(formData);
-    const response = await fetch(`/api/templates/${templateId}`, {
+    const response = await fetch(`/api/outreach/templates/${templateId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -556,7 +558,7 @@ export function OutreachDashboard({
     setIsSavingSender(true);
     setStatusMessage(null);
 
-    const response = await fetch(`/api/sender-personas/${senderPersonaId}`, {
+    const response = await fetch(`/api/outreach/sender-personas/${senderPersonaId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(senderPersonaPayload(formData)),
@@ -611,7 +613,7 @@ export function OutreachDashboard({
   async function openMemoryDocument(document: MemoryDocument) {
     setSelectedMemoryDocument(document);
 
-    const response = await fetch(`/api/memory-documents/${document.id}`, { cache: "no-store" });
+    const response = await fetch(`/api/outreach/memory-documents/${document.id}`, { cache: "no-store" });
 
     if (!response.ok) {
       setStatusMessage("Memory document could not be opened.");
@@ -631,7 +633,7 @@ export function OutreachDashboard({
       .map((tag) => tag.trim())
       .filter(Boolean);
 
-    const response = await fetch(`/api/memory-documents/${documentId}`, {
+    const response = await fetch(`/api/outreach/memory-documents/${documentId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -659,7 +661,7 @@ export function OutreachDashboard({
 
   return (
     <TooltipProvider>
-      <main className="min-h-screen bg-background">
+      <div className={cn("bg-background", embedded ? "min-h-0" : "min-h-screen")}>
       <div className="flex w-full flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
@@ -741,7 +743,10 @@ export function OutreachDashboard({
 
           <TabsContent
             value="board"
-            className="relative left-1/2 mt-0 w-screen -translate-x-1/2 px-4 sm:px-6 lg:px-8"
+            className={cn(
+              "mt-0",
+              embedded ? "" : "relative left-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 lg:px-8",
+            )}
           >
             <KanbanBoard
               leads={leads}
@@ -1122,7 +1127,7 @@ export function OutreachDashboard({
           ) : null}
         </div>
       ) : null}
-      </main>
+      </div>
     </TooltipProvider>
   );
 }
