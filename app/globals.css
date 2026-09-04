@@ -1190,13 +1190,12 @@ h1, h2, h3 {
 
 @media (max-width: 900px) {
   .footer-top { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .mobile-nav { display: block; position: relative; }
+  .brand-name { display: none; }
 }
 
 @media (max-width: 600px) {
-  .nav-links { display: none; }
-  .mobile-nav { display: block; position: relative; }
-  /* Logo-only brand on mobile so the nav items never crowd the wordmark. */
-  .brand-name { display: none; }
   .roadmap-item { grid-template-columns: 1fr; gap: 6px; }
   .tier { grid-template-columns: 1fr; gap: 8px; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
