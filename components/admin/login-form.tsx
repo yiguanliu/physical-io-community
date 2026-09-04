@@ -2,14 +2,42 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { requestAdminAccessAction, signInAdminAction } from "@/app/admin/auth-actions";
+import { requestAdminAccessAction, signInAdminAction, type AdminAuthActionResult } from "@/app/admin/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type Mode = "signin" | "request";
 
+const AUTH_ACTION_TIMEOUT_MS = 20000;
+
 function goToAdmin(path: string) {
   window.location.assign(path);
+}
+
+function timeoutMessage(mode: Mode) {
+  return mode === "signin"
+    ? "Sign in is taking longer than expected. Check your connection and try again."
+    : "Access request is taking longer than expected. Check your connection and try again.";
+}
+
+async function runAuthAction(
+  action: Promise<AdminAuthActionResult>,
+  mode: Mode,
+): Promise<AdminAuthActionResult> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<AdminAuthActionResult>((resolve) => {
+    timeoutId = setTimeout(() => {
+      resolve({ ok: false, error: timeoutMessage(mode) });
+    }, AUTH_ACTION_TIMEOUT_MS);
+  });
+
+  try {
+    return await Promise.race([action, timeout]);
+  } catch {
+    return { ok: false, error: "Authentication request failed. Check your connection and try again." };
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
 }
 
 export default function LoginForm({ initialStatus }: { initialStatus?: string }) {
@@ -29,7 +57,7 @@ export default function LoginForm({ initialStatus }: { initialStatus?: string })
     setError(null);
     setNotice(null);
     const form = new FormData(event.currentTarget);
-    const result = await signInAdminAction(form);
+    const result = await runAuthAction(signInAdminAction(form), "signin");
     if (!result.ok) {
       setPending(false);
       setError(result.error);
@@ -48,7 +76,7 @@ export default function LoginForm({ initialStatus }: { initialStatus?: string })
     setPending(true);
     setError(null);
     setNotice(null);
-    const result = await requestAdminAccessAction(new FormData(event.currentTarget));
+    const result = await runAuthAction(requestAdminAccessAction(new FormData(event.currentTarget)), "request");
     if (!result.ok) {
       setPending(false);
       setError(result.error);
