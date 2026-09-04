@@ -5,9 +5,14 @@ import { sendCampaignAction, sendTestCampaignAction } from "@/app/admin/actions"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Email send failed.";
+}
+
 export default function CampaignSend({ id, status, email }: { id: string; status: string; email: string }) {
   const [pending, start] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
   const canSend = ["draft", "failed"].includes(status);
 
   return (
@@ -17,8 +22,15 @@ export default function CampaignSend({ id, status, email }: { id: string; status
           event.preventDefault();
           const form = new FormData(event.currentTarget);
           start(async () => {
-            await sendTestCampaignAction(form);
-            setMessage("Test email queued.");
+            setMessage(null);
+            setIsError(false);
+            try {
+              await sendTestCampaignAction(form);
+              setMessage("Test email sent.");
+            } catch (error) {
+              setIsError(true);
+              setMessage(errorMessage(error));
+            }
           });
         }}
       >
@@ -38,8 +50,15 @@ export default function CampaignSend({ id, status, email }: { id: string; status
             if (!confirm("Send this campaign to the resolved audience? This cannot be undone.")) return;
             const form = new FormData(event.currentTarget);
             start(async () => {
-              const result = await sendCampaignAction(form);
-              setMessage(`Sent ${result.sent}. Skipped ${result.skipped}. Failed ${result.failed}.`);
+              setMessage(null);
+              setIsError(false);
+              try {
+                const result = await sendCampaignAction(form);
+                setMessage(`Sent ${result.sent}. Skipped ${result.skipped}. Failed ${result.failed}.`);
+              } catch (error) {
+                setIsError(true);
+                setMessage(errorMessage(error));
+              }
             });
           }}
         >
@@ -51,7 +70,11 @@ export default function CampaignSend({ id, status, email }: { id: string; status
       ) : (
         <p>This campaign is {status} and cannot be sent again.</p>
       )}
-      {message ? <p>{message}</p> : null}
+      {message ? (
+        <p className={isError ? "admin-send-message error" : "admin-send-message"} role={isError ? "alert" : "status"}>
+          {message}
+        </p>
+      ) : null}
     </div>
   );
 }

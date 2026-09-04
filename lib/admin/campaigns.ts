@@ -12,7 +12,7 @@ import {
   writeAudit,
 } from "@/lib/admin/store";
 import { createId, nowIso } from "@/lib/db/ids";
-import { renderMemberEmail, sendEmail } from "@/lib/email/send";
+import { renderMemberEmail, requireResendConfigured, sendEmail } from "@/lib/email/send";
 
 const SEND_LOCKS = new Set<string>();
 
@@ -74,6 +74,7 @@ export async function sendCampaign(campaignId: string, actor: { id?: string; nam
     const people = await getAllAudienceMembers();
     const { eligible, skipped } = resolveAudience(people, filter);
     if (!eligible.length) throw new Error("No eligible recipients. Check consent and filters.");
+    requireResendConfigured();
 
     await updateCampaignRows("campaigns", {
       status: "sending",

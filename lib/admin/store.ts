@@ -10,11 +10,13 @@ import {
   type ParsedMemberRow,
 } from "@/lib/admin/audience";
 import { createId, createToken, nowIso } from "@/lib/db/ids";
+import { checkResendHealth, type ResendHealth } from "@/lib/email/health";
 import { isResendConfigured } from "@/lib/email/send";
 import { getDashboardData } from "@/lib/outreach/dashboard-data";
 import { getSupabaseAdminClient } from "@/utils/supabase/admin";
 
 type Row = Record<string, any>;
+type SupabaseReadResult = { error: null | { message?: string } };
 
 function sb() {
   return getSupabaseAdminClient();
@@ -720,6 +722,7 @@ function emptyOverviewStats(databaseError: string | null = null) {
     upcomingEvent: null as ReturnType<typeof camelEvent> | null,
     ephemeral: false,
     resendConfigured: isResendConfigured(),
+    resendHealth: null as ResendHealth | null,
     databaseError,
   };
 }
@@ -729,25 +732,15 @@ function requestErrorMessage(error: unknown) {
 }
 
 export async function overviewStats() {
-  const [membersResult, subscriptionsResult, campaignsResult, auditResult, eventsResult, outreachResult] = await Promise.all([
-    sb().from("members").select("*"),
-    sb().from("subscriptions").select("*"),
-    sb().from("campaigns").select("*").order("updated_at", { ascending: false }),
-    sb().from("audit_log").select("*").order("created_at", { ascending: false }).limit(8),
-    sb().from("community_events").select("*").eq("status", "published").order("starts_at", { ascending: true }).limit(1),
-    getDashboardData(),
-  ]).catch((error) => {
-    return [
-      { data: null, error: { message: requestErrorMessage(error) } },
-      { data: null, error: null },
-      { data: null, error: null },
-      { data: null, error: null },
-      { data: null, error: null },
-      { dbReady: false, error: requestErrorMessage(error), leads: [], templates: [], memoryDocuments: [], senderPersonas: [] },
-    ];
-  });
-  for (const result of [membersResult, subscriptionsResult, campaignsResult, auditResult, eventsResult]) {
-    if (result.error) return emptyOverviewStats(typeof result.error === "string" ? result.error : result.error.message);
+  let results: Awaited<ReturnType<typeof overviewQueries>>;
+  try {
+    results = await overviewQueries();
+  } catch (error) {
+    return emptyOverviewStats(requestErrorMessage(error));
+  }
+  const [membersResult, subscriptionsResult, campaignsResult, auditResult, eventsResult, outreachResult, resendHealth] = results;
+  for (const result of [membersResult, subscriptionsResult, campaignsResult, auditResult, eventsResult] as SupabaseReadResult[]) {
+    if (result.error) return emptyOverviewStats(result.error.message ?? "Supabase request failed.");
   }
   const memberRows = membersResult.data ?? [];
   const subscriptionRows = subscriptionsResult.data ?? [];
@@ -787,8 +780,21 @@ export async function overviewStats() {
     upcomingEvent: eventsResult.data?.[0] ? camelEvent(eventsResult.data[0]) : null,
     ephemeral: false,
     resendConfigured: isResendConfigured(),
+    resendHealth,
     databaseError: null,
   };
+}
+
+function overviewQueries() {
+  return Promise.all([
+    sb().from("members").select("*"),
+    sb().from("subscriptions").select("*"),
+    sb().from("campaigns").select("*").order("updated_at", { ascending: false }),
+    sb().from("audit_log").select("*").order("created_at", { ascending: false }).limit(8),
+    sb().from("community_events").select("*").eq("status", "published").order("starts_at", { ascending: true }).limit(1),
+    getDashboardData(),
+    checkResendHealth(),
+  ]);
 }
 
 export async function updateCampaignRows(

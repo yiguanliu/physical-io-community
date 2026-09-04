@@ -24,6 +24,10 @@ type Lead = {
 
 const STAGES = ["research", "contacted", "meeting", "proposal"] as const;
 
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Email send failed.";
+}
+
 export default function OutreachBoard({
   leads,
   selected,
@@ -38,6 +42,7 @@ export default function OutreachBoard({
   const router = useRouter();
   const [leadId, setLeadId] = useState(selected?.id ?? leads[0]?.id ?? "");
   const [pending, start] = useTransition();
+  const [sendStatus, setSendStatus] = useState<{ message: string; error: boolean } | null>(null);
   const current = useMemo(() => {
     if (selected?.id === leadId) return selected;
     return leads.find((lead) => lead.id === leadId) ?? selected;
@@ -138,7 +143,14 @@ export default function OutreachBoard({
             event.preventDefault();
             const form = new FormData(event.currentTarget);
             start(async () => {
-              await saveOutreachDraftAction(form);
+              setSendStatus(null);
+              try {
+                await saveOutreachDraftAction(form);
+                setSendStatus({ message: "Outreach email sent.", error: false });
+                router.refresh();
+              } catch (error) {
+                setSendStatus({ message: errorMessage(error), error: true });
+              }
             });
           }}
         >
@@ -157,6 +169,11 @@ export default function OutreachBoard({
             <Icon name="mail" size={16} />
             Send outreach email
           </Button>
+          {sendStatus ? (
+            <p className={sendStatus.error ? "outreach-send-status error" : "outreach-send-status"} role={sendStatus.error ? "alert" : "status"}>
+              {sendStatus.message}
+            </p>
+          ) : null}
         </form>
         <div className="lead-timeline">
           {"activities" in current && Array.isArray((current as { activities?: unknown }).activities)

@@ -28,7 +28,7 @@ export default async function AdminOverviewPage() {
           </Link>
         }
       />
-      {stats.databaseError || stats.ephemeral || !stats.resendConfigured ? (
+      {stats.databaseError || stats.ephemeral || !stats.resendHealth?.ok ? (
         <div className="admin-stage-banner">
           <div className="stage-index">01</div>
           <div>
@@ -38,7 +38,7 @@ export default async function AdminOverviewPage() {
                 ? "Supabase database unavailable"
                 : stats.ephemeral
                   ? "Supabase admin key missing"
-                  : "Connect sending to go live"}
+                  : "Check email sending"}
             </h2>
             <p>
               {stats.databaseError
@@ -47,9 +47,8 @@ export default async function AdminOverviewPage() {
               {stats.ephemeral
                 ? "Admin roles and workspace data are stored in Supabase. Set SUPABASE_SECRET_KEY, then redeploy. "
                 : ""}
-              {stats.resendConfigured
-                ? "Resend is configured — production sends will go out."
-                : "Campaigns still run and are tracked without RESEND_API_KEY; they are delivered locally until a sending domain is connected."}
+              {stats.resendHealth?.message ??
+                "Email sending is disabled until RESEND_API_KEY and a verified RESEND_FROM sender are configured."}
             </p>
           </div>
           <Link href="/admin/campaigns">Open campaigns</Link>

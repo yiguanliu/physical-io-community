@@ -179,7 +179,7 @@ Auth:
 Email:
 
 - Resend is optional in development.
-- Without `RESEND_API_KEY`, campaign sends are recorded locally for workflow testing.
+- Without `RESEND_API_KEY`, campaign sends are blocked with an explicit setup error.
 - Resend webhook handling lives at `app/api/webhooks/resend/route.ts`.
 
 State:
