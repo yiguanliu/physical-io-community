@@ -32,7 +32,7 @@ Open `/admin`. Sign in with an administrator email and password. People without 
 | Events | Event records used by campaign targeting |
 | Access | Approve or decline administrator requests |
 
-Emails honour newsletter/event consent. Members with `consent_unknown`, bounces, complaints or unsubscribes are skipped. Without `RESEND_API_KEY`, sends are recorded locally so you can still practise the workflow.
+Emails honour newsletter/event consent. Members with `consent_unknown`, bounces, complaints or unsubscribes are skipped. Email sending requires `RESEND_API_KEY` and a `RESEND_FROM` address on a verified Resend domain.
 
 ### Environment
 

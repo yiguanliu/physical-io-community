@@ -19,6 +19,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormSelect } from "@/components/admin/form-select";
 
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Request failed.";
+}
+
 export default function PlatformTabs({
   id,
   variants,
@@ -166,9 +170,13 @@ function NewsletterPanel({ id, defaultSubject, defaultPreview }: { id: string; d
     formData.set("id", id);
     setStatus("Preparing…");
     start(async () => {
-      const newSendId = await prepareNewsletterAction(formData);
-      setSendId(newSendId);
-      setStatus("Prepared. Send a test, then send to subscribers.");
+      try {
+        const newSendId = await prepareNewsletterAction(formData);
+        setSendId(newSendId);
+        setStatus("Prepared. Send a test, then send to subscribers.");
+      } catch (error) {
+        setStatus(errorMessage(error));
+      }
     });
   }
 
@@ -179,8 +187,12 @@ function NewsletterPanel({ id, defaultSubject, defaultPreview }: { id: string; d
     form.set("toEmail", testEmail);
     setStatus("Sending test…");
     start(async () => {
-      await newsletterTestAction(form);
-      setStatus(`Test sent to ${testEmail}.`);
+      try {
+        await newsletterTestAction(form);
+        setStatus(`Test sent to ${testEmail}.`);
+      } catch (error) {
+        setStatus(errorMessage(error));
+      }
     });
   }
 
@@ -192,8 +204,12 @@ function NewsletterPanel({ id, defaultSubject, defaultPreview }: { id: string; d
     form.set("id", id);
     setStatus("Sending to subscribers…");
     start(async () => {
-      await newsletterSendAction(form);
-      setStatus("Newsletter sent.");
+      try {
+        await newsletterSendAction(form);
+        setStatus("Newsletter sent.");
+      } catch (error) {
+        setStatus(errorMessage(error));
+      }
     });
   }
 

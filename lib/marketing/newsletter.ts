@@ -7,7 +7,7 @@ import { getAllAudienceMembers, getRawMember, writeAudit } from "@/lib/admin/sto
 import { addContentNote, getEmailSend, insertEmailRecipients, updateEmailSend } from "@/lib/admin/content-studio";
 import { createId, nowIso } from "@/lib/db/ids";
 import { markdownToHtml, markdownToPlainText } from "@/lib/marketing/markdown";
-import { renderMemberEmail, sendEmail } from "@/lib/email/send";
+import { renderMemberEmail, requireResendConfigured, sendEmail } from "@/lib/email/send";
 import { SITE_URL } from "@/lib/site";
 
 const SEND_LOCKS = new Set<string>();
@@ -69,6 +69,7 @@ export async function sendNewsletter(sendId: string, actor: { id?: string; name:
     const people = await getAllAudienceMembers();
     const { eligible, skipped } = resolveAudience(people, filter);
     if (!eligible.length) throw new Error("No eligible recipients. Check consent and suppression.");
+    requireResendConfigured();
 
     await updateEmailSend(sendId, {
       status: "sending",

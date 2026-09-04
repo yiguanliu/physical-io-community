@@ -19,6 +19,9 @@ export type SendEmailResult = {
   id: string;
 };
 
+export const RESEND_CONFIGURATION_ERROR =
+  "Email sending is not configured. Set RESEND_API_KEY and RESEND_FROM to a verified Resend sender, then redeploy.";
+
 export function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -68,6 +71,13 @@ export function isResendConfigured() {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
+export function requireResendConfigured() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error(RESEND_CONFIGURATION_ERROR);
+  }
+  return process.env.RESEND_API_KEY;
+}
+
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
   const html = renderEmailHtml({
     previewText: input.subject,
@@ -75,11 +85,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     bodyHtml: input.html,
     unsubscribeUrl: input.unsubscribeUrl,
   });
-  if (!process.env.RESEND_API_KEY) {
-    console.info(`[email:local] to=${input.to} subject=${input.subject}`);
-    return { provider: "local", id: `local_${crypto.randomUUID()}` };
-  }
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = new Resend(requireResendConfigured());
   const { data, error } = await resend.emails.send({
     from: getFromAddress(input.fromName),
     to: input.to,

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { RESEND_CONFIGURATION_ERROR } from "@/lib/email/send";
 
 // Physical I/O team inboxes that receive "Ask Us Anything" submissions.
 // Kept server-side only so the addresses are never shipped to the browser.
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
-    console.error("RESEND_API_KEY is not set — cannot send Ask Us Anything email.");
+    console.error(RESEND_CONFIGURATION_ERROR);
     return NextResponse.json(
       { error: "We couldn't send your message right now. Please try again later." },
       { status: 500 },
