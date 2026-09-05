@@ -1,7 +1,7 @@
 // Paste into a standalone project at script.google.com; the sheet stays read-only.
 const MEMBER_SHEET_ID = '1c-_QhErVJrSDMo0kYyYoGTYETtYLJ0fxJmgIebCAukU';
 const MEMBER_TAB_ID = 1208179166;
-const MEMBER_SYNC_URL = 'https://physical-io.com/api/integrations/google-sheets/members';
+const MEMBER_SYNC_URL = 'https://www.physical-io.com/api/integrations/google-sheets/members';
 
 function installMemberSync() {
   if (!PropertiesService.getScriptProperties().getProperty('GOOGLE_SHEETS_SYNC_SECRET')) {

@@ -1,7 +1,7 @@
 # Google Sheets → Members
 
 Source: [Physical I/O Signup Questionnaire](https://docs.google.com/spreadsheets/d/1c-_QhErVJrSDMo0kYyYoGTYETtYLJ0fxJmgIebCAukU/edit#gid=1208179166), tab `Form Responses 1`.
-Destination: `https://physical-io.com/api/integrations/google-sheets/members`.
+Destination: `https://www.physical-io.com/api/integrations/google-sheets/members`.
 
 ## Activation
 
