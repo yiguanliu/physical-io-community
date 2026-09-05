@@ -20,3 +20,8 @@ database, or external service — everything runs in one Next.js process.
 - Routes: `/` (home stage — GSAP intro + PlayCanvas 3D), `/about` (long-form + FAQ accordion),
   `/admin` (interactive CRM-style admin UI mockup, `noindex`). The admin page is a pure
   client-side mockup with in-memory data — no persistence.
+
+
+## Current admin UI
+
+The admin is now database-backed; earlier mockup/static-export descriptions above are historical. New UI must follow `workspace-ui/skills/ohi-design-system/SKILL.md`, using the `/admin` workspace as the example. Preserve existing server actions, authorization, consent and detailed admin workflows.

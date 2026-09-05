@@ -107,3 +107,8 @@ lib/site.ts           Public content data + JOIN_URL / SITE_URL
 - The logo uses the official vector path (source: `~/Physical-IO/Resources/logo/logo.svg`) via `components/LogoMark.tsx` — never redraw it.
 - All motion respects `prefers-reduced-motion` (GSAP matchMedia + static 3D scene).
 - Roadmap quarters interpreted as Q3/Q4 **2026** (following the "Summer 2026" launch).
+
+
+## ohi admin workspace
+
+The redesigned workspace is at `/admin`; reusable UI, tokens, gallery and design rules are in `workspace-ui/`. See `workspace-ui/README.md` and `workspace-ui/design.md`. Existing detailed admin tools remain at `/admin/members`, `/admin/campaigns`, `/admin/marketing`, `/admin/events`, `/admin/access`, `/admin/outreach`, and `/admin/overview`. The established login/access-request flow is preserved. No member data or credentials are included in this change.
