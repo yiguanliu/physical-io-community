@@ -108,6 +108,9 @@ lib/site.ts           Public content data + JOIN_URL / SITE_URL
 - All motion respects `prefers-reduced-motion` (GSAP matchMedia + static 3D scene).
 - Roadmap quarters interpreted as Q3/Q4 **2026** (following the "Summer 2026" launch).
 
+## Automatic member sync
+
+The signup Google Sheet can sync into Members on form submissions, edits, and a five-minute reconciliation. See [setup and data rules](docs/google-sheets-member-sync.md). Deployment and Google authorization are required before it is active.
 
 ## ohi admin workspace
 
