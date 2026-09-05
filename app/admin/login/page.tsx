@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import LogoMark from "@/components/LogoMark";
+import "@/workspace-ui/src/styles.css";
+import "../ohi.css";
 import LoginForm from "@/components/admin/login-form";
 import { getAdminSession, sessionRole } from "@/lib/auth/session";
 import { canAccessAdmin } from "@/lib/auth/allowlist";
@@ -28,27 +29,8 @@ export default async function AdminLoginPage({
     params.status === "pending" ||
     (sessionRole(session) === "pending" && !canAccessAdmin(session?.user?.email ?? "", sessionRole(session)));
   return (
-    <main className="admin-app admin-auth">
-      <section className="admin-auth-card">
-        <div className="admin-auth-brand">
-          <LogoMark />
-          <span>PHYSICAL I/O</span>
-        </div>
-        <h1>Sign in to admin</h1>
-        <p>Use your administrator email and password. New users can request access.</p>
-        {!hasAdminConfig ? (
-          <div className="admin-auth-warning">
-            <strong>Supabase admin key missing</strong>
-            <span>
-              Admin roles and workspace data are stored in Supabase. Set <code>SUPABASE_SECRET_KEY</code>,
-              then redeploy.
-            </span>
-          </div>
-        ) : null}
-        <Suspense>
-          <LoginForm initialStatus={pending ? "pending" : undefined} />
-        </Suspense>
-      </section>
-    </main>
+    <Suspense>
+      <LoginForm initialStatus={pending ? "pending" : undefined} hasAdminConfig={hasAdminConfig} />
+    </Suspense>
   );
 }
