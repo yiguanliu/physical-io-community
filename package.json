@@ -12,7 +12,8 @@
     "postinstall": "prisma generate",
     "outreach:db:generate": "prisma generate",
     "supabase:local": "supabase start",
-    "supabase:reset": "supabase db reset"
+    "supabase:reset": "supabase db reset",
+    "test:workspace": "node --import tsx --test lib/admin/contracts.test.ts lib/email/webhook.test.ts workspace-ui/src/theme.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.41",
