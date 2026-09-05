@@ -1,0 +1,5 @@
+import { NextResponse } from 'next/server';
+import { database } from '@/lib/admin/database';
+export const dynamic='force-dynamic';
+function token(req:Request){const value=new URL(req.url).searchParams.get('token')??'';return /^[a-zA-Z0-9_-]{24,200}$/.test(value)?value:null;}
+export async function POST(req:Request){const value=token(req);if(!value)return new Response('Invalid unsubscribe link.',{status:400});const db=await database().connect();try{await db.query('BEGIN');const r=await db.query("update public.members set email_status='unsubscribed',updated_at=now() where unsubscribe_token=$1 returning id",[value]);if(r.rowCount)await db.query("update public.subscriptions set status='unsubscribed',unsubscribed_at=now(),updated_at=now() where member_id=$1 and channel='email'",[r.rows[0].id]);await db.query('COMMIT');return new Response('You have been unsubscribed from Physical I/O emails.',{headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'}});}catch{await db.query('ROLLBACK');return NextResponse.json({error:'Could not update preferences. Please retry.'},{status:503});}finally{db.release();}}

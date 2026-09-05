@@ -111,3 +111,7 @@ lib/site.ts           Public content data + JOIN_URL / SITE_URL
 ## Automatic member sync
 
 The signup Google Sheet can sync into Members on form submissions, edits, and a five-minute reconciliation. See [setup and data rules](docs/google-sheets-member-sync.md). Deployment and Google authorization are required before it is active.
+
+## ohi admin workspace
+
+The redesigned workspace is at `/admin`; reusable UI, tokens, gallery and design rules are in `workspace-ui/`. See `workspace-ui/README.md` and `workspace-ui/design.md`. Existing detailed admin tools remain at `/admin/members`, `/admin/campaigns`, `/admin/marketing`, `/admin/events`, `/admin/access`, `/admin/outreach`, and `/admin/overview`. The established login/access-request flow is preserved. No member data or credentials are included in this change.
