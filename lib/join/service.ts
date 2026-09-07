@@ -7,7 +7,7 @@ export async function saveSignup(db:PoolClient,input:JoinInput,requestKey:string
  await db.query("delete from private.join_rate_limits where started_at<now()-interval '1 day'");
  const limit=await db.query("insert into private.join_rate_limits(key) values($1) on conflict(key) do update set attempts=case when join_rate_limits.started_at<now()-interval '1 hour' then 1 else join_rate_limits.attempts+1 end, started_at=case when join_rate_limits.started_at<now()-interval '1 hour' then now() else join_rate_limits.started_at end returning attempts",[requestKey]);
  if(limit.rows[0].attempts>8)throw new JoinRateLimit();
- const result=await db.query("insert into public.members(email,email_normalized,full_name,first_name,city,professional_role,experience_range,website_url,linkedin_url,suggestions,status,source) values($1,$1,$2,$3,$4,$5,$6,$7,$8,$9,'active','website_join') on conflict(email_normalized) do nothing returning id",[input.email,input.fullName,input.fullName.split(/\s+/)[0],input.city,input.role,input.experience,input.website,input.linkedin,input.suggestions]);
+ const result=await db.query("insert into public.members(email,email_normalized,full_name,first_name,city,professional_role,experience_range,website_url,linkedin_url,suggestions,status,source) values($1,$1,$2,$3,$4,$5,$6,$7,$8,$9,'active','website_join') on conflict(email_normalized) do nothing returning id",[input.email,`${input.firstName} ${input.lastName}`,input.firstName,input.city,input.role,input.experience,input.website,input.linkedin,input.suggestions]);
  const id=result.rows[0]?.id;
  // Never overwrite an existing person's profile or subscription through a public form.
  if(!id)return;

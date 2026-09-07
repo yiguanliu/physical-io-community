@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import HomeCommunity from "@/components/HomeCommunity";
-import { INSTAGRAM_URL, LINKEDIN_URL, SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
+import { INSTAGRAM_URL, LINKEDIN_URL, YOUTUBE_URL, X_URL, SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Physical I/O | London's Physical AI Community",
@@ -11,18 +11,20 @@ export const metadata: Metadata = {
     description:
       "London's community for Physical AI, Robotics, Spatial Intelligence, Wearables, Intelligent Hardware and Embodied AI.",
     url: "/",
+    images: [{url:"/opengraph-image",width:1200,height:630}],
   },
 };
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": SITE_URL+"/#organization",
   name: "Physical I/O",
   url: `${SITE_URL}/`,
   logo: `${SITE_URL}/assets/favicon.svg`,
   description:
     "Physical I/O is an independent London community connecting founders, engineers, designers, researchers, investors and builders exploring Physical AI, Robotics, Spatial Intelligence, Wearables and Intelligent Hardware.",
-  sameAs: [INSTAGRAM_URL, LINKEDIN_URL],
+  sameAs: [INSTAGRAM_URL, LINKEDIN_URL, YOUTUBE_URL, X_URL],
   address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
   knowsAbout: [
     "Physical AI",
@@ -40,6 +42,9 @@ const organizationJsonLd = {
 const webSiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": SITE_URL+"/#website",
+  alternateName: ["Physical IO", "Physical I/O Community"],
+  publisher: {"@id":SITE_URL+"/#organization"},
   name: "Physical I/O",
   url: `${SITE_URL}/`,
   description:

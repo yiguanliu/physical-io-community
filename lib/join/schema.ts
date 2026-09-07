@@ -2,9 +2,9 @@ import {z} from 'zod';
 const short=z.string().trim().min(1,'Please answer this question.').max(160);
 const optionalUrl=z.string().trim().max(500).transform(value=>value&&!/^https?:\/\//i.test(value)?'https://'+value:value).refine(value=>{if(!value)return true;try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)&&u.hostname.includes('.')&&!u.username&&!u.password;}catch{return false;}},'Enter a valid website link.');
 export const joinSchema=z.object({
- fullName:short,email:z.email('Enter a valid email address.').trim().toLowerCase().max(254),city:short,
+ firstName:short,lastName:short,email:z.email('Enter a valid email address.').trim().toLowerCase().max(254),city:short,
  role:short,experience:short,work:z.string().trim().min(1,'Tell us a little about your work.').max(2000),
- website:optionalUrl,linkedin:optionalUrl,
+ website:optionalUrl,linkedin:optionalUrl.refine(value=>{if(!value)return false;try{const u=new URL(value);return (u.hostname==='linkedin.com'||u.hostname.endsWith('.linkedin.com'))&&/^\/in\/[^/]+/.test(u.pathname);}catch{return false;}},'Enter your LinkedIn profile link (linkedin.com/in/your-name).'),
  goals:z.array(short).min(1,'Choose at least one.').max(10),formats:z.array(short).min(1,'Choose at least one.').max(10),
  suggestions:z.string().trim().max(2000),consent:z.literal(true,{error:'Please confirm before joining.'}),
  updates:z.boolean(),websiteTrap:z.string().max(0).optional()

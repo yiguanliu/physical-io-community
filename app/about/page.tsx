@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     "Physical I/O builds the community behind Physical AI in London — through meetups, demo nights, technical talks, founder panels and workshops.",
   alternates: { canonical: "/about" },
   openGraph: {
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     title: "About Physical I/O",
     description: "Building the community behind Physical AI in London.",
     url: "/about",

@@ -12,8 +12,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_GB",
     siteName: "Physical I/O",
+    images: [{url:"/opengraph-image",width:1200,height:630,alt:"Physical I/O — London’s Physical AI community"}],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary_large_image", site: "@physical_io", images: ["/opengraph-image"] },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

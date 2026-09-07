@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import type {PoolClient} from 'pg';
 import {joinSchema} from './schema';
 import {saveSignup,deliverJoinNotifications} from './service';
-const valid={fullName:'Test Visitor',email:'test@example.invalid',city:'London',role:'Engineer / Developer',experience:'Less than a year',work:'Robotics',website:'example.com',linkedin:'',goals:['Meeting collaborators / co-founders'],formats:['Talks / panels'],suggestions:'',consent:true,updates:false};
+const valid={firstName:'Test',lastName:'Visitor',email:'test@example.invalid',city:'London',role:'Engineer / Developer',experience:'Less than a year',work:'Robotics',website:'example.com',linkedin:'https://www.linkedin.com/in/test-visitor',goals:['Meeting collaborators / co-founders'],formats:['Talks / panels'],suggestions:'',consent:true,updates:false};
 test('validates consent, addresses, links and selections',()=>{
  assert.equal(joinSchema.parse(valid).website,'https://example.com');
- for(const patch of [{email:'bad'},{consent:false},{goals:[]},{website:'javascript:alert(1)'},{websiteTrap:'spam'}])assert.equal(joinSchema.safeParse({...valid,...patch}).success,false);
+ assert.equal(joinSchema.parse({...valid,linkedin:'linkedin.com/in/test-visitor'}).linkedin,'https://linkedin.com/in/test-visitor');
+ for(const patch of [{firstName:''},{lastName:'   '},{linkedin:''},{linkedin:'https://example.com/in/test'},{linkedin:'https://linkedin.com.evil.invalid/in/test'},{email:'bad'},{consent:false},{goals:[]},{website:'javascript:alert(1)'},{websiteTrap:'spam'}])assert.equal(joinSchema.safeParse({...valid,...patch}).success,false);
 });
 test('duplicate signup never overwrites an existing membership',async()=>{
  const queries:string[]=[];const db={query:async(sql:string)=>{queries.push(sql);return {rows:sql.startsWith('insert into private.join_rate_limits')?[{attempts:1}]:[]};}} as unknown as PoolClient;

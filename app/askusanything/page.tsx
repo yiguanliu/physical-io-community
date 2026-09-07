@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     "Have a question for Physical I/O? Ask us anything — about collaborating, the community, joining, or co-hosting — and we'll get back to you within a day.",
   alternates: { canonical: "/askusanything" },
   openGraph: {
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     title: "Ask Us Anything | Physical I/O",
     description:
       "Ask the Physical I/O team anything about collaborating, the community, joining or co-hosting. We reply within a day.",
