@@ -108,3 +108,7 @@ Use shared `TextArea` for longer notes and messages. It follows `Field` label/he
 ## Neutral dark foundations
 
 Both Brand and Minimal dark modes use the same neutral gray foundations: #111111 canvas, #1b1b1b surface, #262626 hover surface, #f5f5f5 text, #b5b5b5 secondary text and #383838 structural borders. Controls use #858585 boundaries and #e5e5e5 focus. Overlays use translucent black. Never introduce blue or purple tint into dark surfaces, navigation, fields, drawers or shadows. Brand actions and semantic status colors remain purposeful accents; Minimal statuses remain monochrome. The admin and workspace example consume these shared tokens without page-specific palettes.
+
+## Active switches
+
+Checked switches use the action background and white on-action thumb, matching filled primary buttons. Never use a black thumb or border on an orange checked switch.

@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import {createPortal} from 'react-dom';
 import { Dialog as D, Popover as P, Tabs as T, Switch as S, Tooltip as Tip, Select as Dropdown, DropdownMenu as Menu } from 'radix-ui';
 import { X, LoaderCircle, Search, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { defaultTheme, themeColors, type Theme } from './theme';
@@ -68,7 +69,7 @@ export function SearchField(props: React.ComponentProps<'input'> & { label: stri
 export function Switch({ label, ...props }: React.ComponentProps<typeof S.Root> & { label: string }) { const id = React.useId(); return <div className="ui-switch-field"><label htmlFor={id}>{label}</label><S.Root {...props} id={id} className="ui-switch"><S.Thumb className="ui-switch-thumb"/></S.Root></div>; }
 export function Tooltip({ label, children }: { label: string; children: React.ReactElement }) { return <Tip.Provider delayDuration={350}><Tip.Root><Tip.Trigger asChild>{children}</Tip.Trigger><Tip.Content className="ui-tooltip" sideOffset={6}>{label}<Tip.Arrow/></Tip.Content></Tip.Root></Tip.Provider>; }
 export function Tabs({ value, onValueChange, items, label }: { value: string; onValueChange: (value: string) => void; label: string; items: { value: string; label: React.ReactNode; content: React.ReactNode }[] }) { return <T.Root value={value} onValueChange={onValueChange}><T.List className="ui-tabs" aria-label={label}>{items.map(i => <T.Trigger className="ui-tab" value={i.value} key={i.value}>{i.label}</T.Trigger>)}</T.List>{items.map(i => <T.Content className="ui-tab-content" value={i.value} key={i.value}>{i.content}</T.Content>)}</T.Root>; }
-export function Popover({ trigger, title, children }: { trigger: React.ReactElement; title: string; children: React.ReactNode }) { return <P.Root><P.Trigger asChild>{trigger}</P.Trigger><P.Content aria-label={title} className="ui-popover" sideOffset={8} align="start"><div className="ui-popover-heading"><strong>{title}</strong><P.Close asChild><IconButton label="Close filters" variant="ghost"><X size={17}/></IconButton></P.Close></div>{children}</P.Content></P.Root>; }
+export function Popover({ trigger, title, children, closeLabel = "Close filters", side = "bottom", align = "start" }: { trigger: React.ReactElement; title: string; children: React.ReactNode; closeLabel?: string; side?: "top" | "right" | "bottom" | "left"; align?: "start" | "center" | "end" }) { return <P.Root><P.Trigger asChild>{trigger}</P.Trigger><P.Content aria-label={title} className="ui-popover" sideOffset={8} side={side} align={align}><div className="ui-popover-heading"><strong>{title}</strong><P.Close asChild><IconButton label={closeLabel} variant="ghost"><X size={17}/></IconButton></P.Close></div>{children}</P.Content></P.Root>; }
 export function Dialog({ open, onOpenChange, title, description, children, kind = 'dialog' }: { open: boolean; onOpenChange: (open: boolean) => void; title: string; description: string; children: React.ReactNode; kind?: 'dialog' | 'drawer' }) {
   const container = React.useContext(PortalContext);
   const returnFocus = React.useRef<HTMLElement | null>(null);
@@ -138,4 +139,23 @@ export function PageTransition({ page, pendingPage, children }: {
     {pendingPage && <div className="ui-page-loading" aria-hidden="true"><span/></div>}
     <div key={page} className="ui-page-scene" data-pending={!!pendingPage} data-enter={hasNavigated.current} inert={!!pendingPage}>{children}</div>
   </div>;
+}
+
+
+const NotificationContext=React.createContext<(message:string)=>void>(()=>{});
+export const useNotification=()=>React.useContext(NotificationContext);
+export function NotificationProvider({children}:{children:React.ReactNode}){
+ const container=React.useContext(PortalContext);
+ const [notices,setNotices]=React.useState<{id:number;message:string}[]>([]);
+ const timers=React.useRef(new Map<number,ReturnType<typeof setTimeout>>());
+ const sequence=React.useRef(0);
+ const dismiss=React.useCallback((id:number)=>{clearTimeout(timers.current.get(id));timers.current.delete(id);setNotices(items=>items.filter(item=>item.id!==id));},[]);
+ const notify=React.useCallback((message:string)=>{
+  if(!message)return;
+  const id=++sequence.current;
+  setNotices(items=>[...items.filter(item=>item.message!==message).slice(-2),{id,message}]);
+  timers.current.set(id,setTimeout(()=>dismiss(id),8000));
+ },[dismiss]);
+ React.useEffect(()=>()=>{timers.current.forEach(clearTimeout);timers.current.clear();},[]);
+ return <NotificationContext.Provider value={notify}>{children}{container&&createPortal(<div className="ui-notifications" aria-live="polite" aria-relevant="additions">{notices.map(item=><div className="ui-notification" key={item.id}><span>{item.message}</span><IconButton label="Dismiss notification" variant="ghost" onClick={()=>dismiss(item.id)}><X size={16}/></IconButton></div>)}</div>,container)}</NotificationContext.Provider>;
 }

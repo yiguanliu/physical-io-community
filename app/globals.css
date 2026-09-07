@@ -1434,3 +1434,10 @@ input[type="submit"] {
     grid-template-columns: 1fr;
   }
 }
+
+::view-transition-group(ohi-chat),::view-transition-group(ohi-robot){animation-duration:400ms;animation-timing-function:cubic-bezier(.22,1,.36,1)}
+::view-transition-old(ohi-chat),::view-transition-new(ohi-chat),::view-transition-old(ohi-robot),::view-transition-new(ohi-robot){animation-duration:400ms}
+@media(prefers-reduced-motion:reduce){::view-transition-group(*){animation-duration:0s}}
+/* Preserve the same stacking order in browser-generated transition snapshots. */
+::view-transition-group(ohi-robot){z-index:1}
+::view-transition-group(ohi-chat){z-index:2}

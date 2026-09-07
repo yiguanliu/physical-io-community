@@ -95,3 +95,9 @@ Choose **Appearance → Theme → Minimal · Black & white**, or pass the export
 ## Multiline fields
 
 `TextArea` shares the `Field` label, hint, error and generated-ID contract and accepts native textarea props (including `rows`, `required`, `value`, and `onChange`). Use it for messages and longer notes; it inherits typography, theme, and focus styles. The Components example includes an editable Notes field.
+
+Popover accepts an optional `closeLabel` for context-specific accessible dismissal text; its default remains “Close filters”.
+
+Popover also accepts `side` (top/right/bottom/left, default bottom) and `align` (start/center/end, default start) to anchor contextual tools beside their trigger.
+
+Use `NotificationProvider` inside `ThemeProvider` and `useNotification()(message)` for dismissible bottom-right issue notices. Notices expire after eight seconds, deduplicate matching messages, and show at most three at once.

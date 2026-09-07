@@ -1,0 +1,247 @@
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(340px,.9fr) minmax(0,1.3fr);gap:24px;padding:4px 3% 16px}
+.panel{display:flex;flex-direction:column;align-self:center;min-width:0;min-height:0;max-height:100%}
+.transcript{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 12px}
+.panel[data-started=false] .transcript{display:none}
+.user,.reply{margin-bottom:16px;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.user{margin-left:12%;background:rgb(255 255 255 / 45%);padding:10px 14px;border-radius:15px}
+.user>span,.reply>span{font-size:12px;font-weight:600;color:var(--ui-muted)}
+.reply p,.user p{margin:4px 0 0!important;white-space:pre-wrap}
+.reply a{color:var(--ui-action);text-decoration:underline;text-underline-offset:3px}
+.waiting{font-size:13px;color:var(--ui-muted)}
+.quick{display:flex;flex-wrap:nowrap;overflow-x:auto;flex-shrink:0;gap:4px;margin:8px 0}
+.panel .quick button{font-size:12px;white-space:nowrap;min-height:32px;padding:4px 8px;flex-shrink:0;border-radius:999px;background:rgb(255 255 255 / 38%)}
+.composer{flex-shrink:0;margin:0;padding:12px;background:var(--ui-surface);border-radius:24px;box-shadow:0 8px 32px rgb(0 0 0 / 5%)}
+.composer :global(.ui-field)>label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.composer textarea{border:0;outline:none;background:transparent;resize:none;min-height:110px;padding:16px;border-radius:10px;font-size:14px;box-shadow:none}
+.composer textarea:focus-visible{outline:2px solid var(--ui-focus);outline-offset:2px}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.panel .actions button{width:40px;height:40px;min-height:40px;padding:0;flex-shrink:0;border-radius:50%;font-size:13px}
+.options{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;font-size:12px;color:var(--ui-muted);flex-shrink:0}
+.options>span{text-align:right}
+.error{font-size:13px;color:#9c341c;margin:6px 0!important;flex-shrink:0}
+.robot{position:relative;min-height:0;height:100%}
+.workspace .robotTitle{position:absolute;top:12px;left:48px;right:48px;z-index:3;text-align:center;pointer-events:none;font-family:Manrope,sans-serif;font-size:clamp(14px,1.6vw,20px)!important;font-weight:500;line-height:1.2!important;letter-spacing:-.045em!important;margin:0!important;white-space:nowrap}
+.robotTitle span{color:var(--ui-action)}
+.robotIntro{position:absolute;top:46px;left:48px;right:48px;text-align:center;z-index:3;pointer-events:none}
+.robotIntro h2{font-size:20px!important;line-height:1.2!important;letter-spacing:-.04em!important;margin:0 0 4px!important}
+.robotIntro p{font-size:12px;color:var(--ui-muted)}
+@media(max-width:760px){.workspace{grid-template-columns:1fr;grid-template-rows:minmax(160px,36%) minmax(0,1fr);gap:8px;padding:0 4% 10px}.robot{grid-row:1;padding-top:80px}.panel{grid-row:2;align-self:end}.transcript{padding:0 8px}.composer{padding:10px}.composer textarea{min-height:88px;padding:14px}.panel .actions button{width:44px;height:44px}.robotIntro{top:40px;left:12px;right:12px}.robotIntro h2{font-size:17px!important}.workspace .robotTitle{font-size:14px!important;top:14px;left:12px;right:12px}.options{margin-top:5px}}
+
+.reply .replyAvatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--ui-text);color:var(--ui-surface);margin-bottom:4px}.replyAvatar svg{width:18px;height:auto}
+
+/* Keep the writing position stable while messages scroll above it. */
+.panel{align-self:stretch;height:100%;max-height:100%;justify-content:flex-end}
+.transcript{flex:1 1 0;min-height:0;scrollbar-width:none}
+.transcript::-webkit-scrollbar,.composer textarea::-webkit-scrollbar,.quick::-webkit-scrollbar{display:none}
+.composer textarea,.quick{scrollbar-width:none}
+.composer textarea:focus,.composer textarea:focus-visible{outline:none;box-shadow:none}
+.composer:focus-within{box-shadow:0 8px 32px rgb(0 0 0 / 5%),0 0 0 1px rgb(0 0 0 / 12%)}
+.user{width:fit-content;max-width:88%;margin-left:auto;background:#000;color:#fff;padding:12px 18px;border-radius:22px}
+.user p{margin:0!important}
+.user a{color:inherit}
+@media(max-width:760px){.panel{align-self:stretch;height:100%}}
+/* Stronger reading weight and a clear identity above the 3D stage. */
+.user,.reply,.composer textarea,.quick button,.options{font-weight:500}
+.workspace .robotTitle{font-size:clamp(22px,2.5vw,34px)!important;font-weight:500;z-index:10;top:10px}
+.robotIntro{top:58px;z-index:10}
+.robotIntro h2{font-size:clamp(24px,2.8vw,36px)!important;font-weight:500}
+.robotIntro p{font-size:14px;font-weight:500}
+.robot{isolation:isolate}
+@media(max-width:760px){.robot{padding-top:112px}.workspace .robotTitle{font-size:22px!important;top:8px;left:0;right:0}.robotIntro{top:43px}.robotIntro h2{font-size:25px!important}.robotIntro p{font-size:12px}}
+/* A shorter conversation column, centered alongside the robot. */
+.panel{height:80%;max-height:80%;align-self:center}
+
+.linkIcon{display:inline-block;vertical-align:-2px;margin-left:2px}
+
+:global(.wui[data-mode=dark]) .quick button{background:var(--ui-subtle)}
+:global(.wui[data-mode=dark]) .error{color:var(--ui-danger)}
+:global(.wui[data-mode=dark]) .composer:focus-within{box-shadow:0 0 0 1px var(--ui-control)}
+
+.composer textarea{color:var(--ui-text)}.composer textarea::placeholder{color:var(--ui-muted);opacity:1}
+/* A dedicated reading surface for the conversation. */
+.panel{padding:20px;background:var(--ui-surface);border-radius:24px;box-shadow:0 12px 40px rgb(0 0 0 / 8%),0 2px 8px rgb(0 0 0 / 3%)}
+.composer{background:var(--ui-bg);box-shadow:none}
+:global(.wui[data-mode=dark]) .panel{box-shadow:0 16px 48px rgb(0 0 0 / 32%),0 2px 10px rgb(0 0 0 / 18%)}
+@media(max-width:760px){.panel{padding:14px;border-radius:20px}}
+
+.panel{position:relative}
+.workspace .chatTitle{position:absolute;top:-48px;left:0;margin:0;font-size:clamp(20px,2.3vw,30px);font-weight:500;line-height:1.2;letter-spacing:-.045em;white-space:nowrap;cursor:default}
+.titleSizer{visibility:hidden}.titleDisplay{position:absolute;left:0;top:0}.titleDisplay>span{color:var(--ui-action)}
+.robotIntro{top:18px}
+@media(max-width:760px){.workspace .chatTitle{top:-34px;font-size:20px}.robotIntro{top:12px}.robot{padding-top:80px}}
+/* Match the heading to the reply avatar: panel inset plus transcript inset. */
+.workspace .chatTitle{left:32px}
+@media(max-width:760px){.workspace .chatTitle{left:22px}}
+
+.robotIntro .robotGlitchTitle{position:relative;display:inline-block;pointer-events:auto;cursor:default}
+
+.callHeader{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-shrink:0;margin-bottom:12px;position:relative;z-index:15;font-size:12px;color:var(--ui-muted)}
+.callHeader>button{border-radius:50%;width:40px;height:40px;min-width:40px;padding:0}
+.callChoices{display:flex;flex-direction:column;gap:8px}.callChoices button{justify-content:flex-start}.callChoices p{font-size:12px;line-height:1.5;color:var(--ui-muted)}
+.callPreview{position:absolute;right:0;top:48px;width:120px;border-radius:12px;transform:scaleX(-1)}
+.callPreview[hidden]{display:none}.callError{font-size:12px;color:var(--ui-danger);max-width:240px}
+
+.chatIdentity{margin-right:auto;display:flex;flex-direction:column;gap:2px;text-align:left;color:var(--ui-text);padding-left:12px}.chatIdentity strong{font-size:18px;font-weight:500;line-height:1.3}.chatIdentity span{font-size:12px;color:var(--ui-muted);line-height:1.4}
+@media(max-width:760px){.chatIdentity{padding-left:8px}}
+
+.panel{height:calc(100% - 48px);max-height:calc(100% - 48px);align-self:end}
+@media(max-width:760px){.panel{height:calc(100% - 34px);max-height:calc(100% - 34px)}}
+/* Balance the conversation surface against the robot's visible silhouette. */
+@media(min-width:761px){.panel{height:72%;max-height:72%;align-self:center;transform:translateY(3%)}.workspace .chatTitle{top:-64px}}
+
+.windowControls{display:flex;gap:2px;flex-shrink:0}
+.windowControls button{position:relative;width:26px;height:28px;min-height:28px;padding:0;border:0!important;background:transparent!important;box-shadow:none;color:#fff}
+.windowControls button::before{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#d78c00}
+.windowControls .expandControl::before{background:#16833b}
+.windowControls button svg{position:relative;z-index:1;opacity:0}.windowControls:hover svg,.windowControls button:focus-visible svg{opacity:1}
+.callHeader .chatIdentity{padding-left:0}
+.panel[data-window=minimized]{height:auto;max-height:none;transform:none;align-self:end;margin-bottom:16px}
+.panel[data-window=minimized] .callHeader{margin-bottom:0}
+.panel[data-window=minimized] .transcript,.panel[data-window=minimized] .quick,.panel[data-window=minimized] .composer,.panel[data-window=minimized] .options,.panel[data-window=minimized]>.error{display:none}
+.workspace[data-window=expanded]{grid-template-columns:1fr;grid-template-rows:1fr}
+.workspace[data-window=expanded]>.robot{display:none}
+.workspace[data-window=expanded]>.panel{height:calc(100% - 64px);max-height:calc(100% - 64px);align-self:end;transform:none;grid-row:1}
+
+.panel[data-window=minimized]{display:none}
+.workspace{position:relative}
+.chatLauncher{position:absolute;left:3%;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0!important;border-radius:50%!important;background:var(--ui-surface)!important;color:var(--ui-text);box-shadow:0 3px 12px rgb(0 0 0 / 8%);z-index:12}
+.workspace[data-window=minimized]>.robot{grid-column:2}
+@media(max-width:760px){.workspace[data-window=minimized]>.robot{grid-column:1}.chatLauncher{top:auto;bottom:16px;transform:none;left:4%}}
+/* Compact macOS-style window header. */
+.callHeader{gap:12px;min-height:36px;margin-bottom:12px}
+.windowControls{gap:6px;align-items:center}
+.windowControls button{width:14px;height:24px;min-width:14px;min-height:24px}
+.windowControls button::before{width:12px;height:12px}
+.callHeader .chatIdentity{gap:0;padding:0}
+.chatIdentity strong{font-size:16px;line-height:1.25}
+.chatIdentity span{font-size:12px;line-height:1.35}
+.callHeader>button{width:32px;height:32px;min-width:32px;min-height:32px;padding:0}
+.callHeader>button svg{width:16px;height:16px}
+@media(max-width:760px){.callHeader{gap:10px}.windowControls button{height:28px;min-height:28px}.callHeader>button{width:36px;height:36px;min-width:36px}}
+.windowControls{margin-left:-8px}
+@media(max-width:760px){.windowControls{margin-left:-4px}}
+.windowControls{transform:translateY(-6px)}
+/* Match the dots' top inset to their 12px left inset (10px on mobile). */
+.windowControls{align-self:flex-start;transform:translateY(-14px)}
+@media(max-width:760px){.windowControls{transform:translateY(-12px)}}
+
+.callHeader :global(.ui-popover-heading){display:none}
+/* Separate window chrome from the identity row and align it with replies. */
+.callHeader{position:relative;min-height:64px;padding-top:20px;align-items:center}
+.callHeader .windowControls{position:absolute;top:-8px;left:-8px;margin:0;transform:none}
+.callHeader .chatIdentity{padding-left:12px}
+.callHeader>button{align-self:flex-start;margin-top:0}
+@media(max-width:760px){.callHeader{min-height:64px;padding-top:20px}.callHeader .windowControls{top:-4px;left:-4px;transform:none}.callHeader .chatIdentity{padding-left:8px}}
+.callHeader>button{position:absolute;top:0;right:0;margin:0}
+.callHeader{padding-right:44px}
+/* Match call and send action sizing. */
+.callHeader>button{width:40px;height:40px;min-width:40px;min-height:40px;border-radius:50%;padding:0}
+.callHeader>button svg{width:20px;height:20px}
+@media(max-width:760px){.callHeader>button{width:44px;height:44px;min-width:44px;min-height:44px}}
+
+.workspace[data-window=minimized]{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+.workspace[data-window=minimized]>.robot{grid-column:1;grid-row:1;padding-top:0}
+
+.panel{view-transition-name:ohi-chat}
+.robot{view-transition-name:ohi-robot}
+
+.mobileNav,.mobileBack{display:none!important}
+@media(max-width:760px){
+ .workspace,.workspace[data-window=expanded],.workspace[data-window=minimized]{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:12px;padding:0 12px max(12px,env(safe-area-inset-bottom))}
+ .workspace>.robot,.workspace[data-window=minimized]>.robot{display:block;grid-column:1;grid-row:1;padding-top:0;height:100%;min-height:0}
+ .workspace .robotIntro{top:16px}
+ .workspace>.panel,.workspace[data-window=expanded]>.panel,.workspace[data-window=minimized]>.panel{display:none}
+ .workspace[data-mobile-view=chat]>.robot{display:none}
+ .workspace[data-mobile-view=chat]>.panel{display:flex;grid-column:1;grid-row:1;height:100%;max-height:100%;align-self:stretch;transform:none;margin:0;padding:16px;min-height:0}
+ .workspace .chatTitle,.workspace .windowControls,.workspace .chatLauncher{display:none}
+ .workspace .callHeader{padding:0;min-height:48px;margin-bottom:16px;gap:12px;justify-content:flex-start}
+ .workspace .callHeader .chatIdentity{padding:0}
+ .workspace .mobileBack{display:inline-flex!important;position:static;align-self:center;flex-shrink:0;width:40px;height:40px;margin:0}
+ .workspace .composer textarea{min-height:72px;font-size:16px}
+ .mobileNav{display:flex!important;grid-row:2;align-items:center;justify-content:center;gap:12px;padding:8px;background:var(--ui-surface);border-radius:999px;box-shadow:0 6px 24px rgb(0 0 0 / 8%);justify-self:center;width:min(100%,320px);z-index:30}
+ .mobileNav>button,.mobileCallDock>button{flex:1;min-height:48px;border-radius:999px;gap:8px;justify-content:center}
+ .mobileNav>button[aria-pressed=true]{background:var(--ui-subtle)}
+ .mobileCallDock{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-width:0;gap:8px}
+ .mobileCallDock>span{position:absolute;bottom:64px;right:0;padding:8px 12px;border-radius:12px;background:var(--ui-surface);font-size:12px;white-space:nowrap}
+ .mobileCallDock .callPreview{top:auto;bottom:72px;right:0}
+ .mobileCallDock .callError{position:absolute;bottom:72px;right:0;width:240px;padding:12px;border-radius:12px;background:var(--ui-surface)}
+ .mobileCallDock :global(.ui-popover-heading){display:none}
+}
+
+.joinRow{position:absolute;bottom:20px;left:0;right:0;z-index:12;display:flex;justify-content:center;pointer-events:none}.joinRow>a{pointer-events:auto}
+.joinRow .joinButton{min-height:44px;min-width:220px;padding:10px 24px;border-radius:999px;gap:10px;text-decoration:none;color:#fff}
+@media(max-width:760px){.joinRow{bottom:12px}.joinRow .joinButton{min-width:210px;max-width:100%;font-size:14px}}
+
+@media(min-width:761px){
+ .workspace>.chatTitle{top:22px;left:calc(3% + 32px);z-index:10}
+ .workspace[data-window=minimized]>.chatTitle{display:none}
+}
+
+/* Keep the community action directly beneath the shared heading line. */
+.workspace>.joinRow{top:70px;bottom:auto;left:calc(3% + 32px);right:auto;justify-content:flex-start}
+.workspace[data-window=minimized]>.joinRow{display:none}
+@media(min-width:761px){
+ .workspace[data-window=expanded]>.panel{height:calc(100% - 128px);max-height:calc(100% - 128px);margin-bottom:0}
+}
+@media(max-width:760px){
+ .workspace>.joinRow{display:none}
+}
+
+.workspace .robot>.chatTitle{display:block;position:absolute;top:auto;bottom:24px;left:50%;transform:translateX(-50%);z-index:10;text-align:center;max-width:calc(100% - 32px)}
+@media(max-width:760px){.workspace .robot>.chatTitle{display:block;top:auto;bottom:16px;left:50%;font-size:20px}}
+@media(min-width:761px){.workspace>.joinRow{top:22px}}
+
+.robotIntro>.joinRow{position:static;display:flex;justify-content:center;margin:12px 0;pointer-events:auto}
+@media(max-width:760px){.robotIntro>.joinRow{display:flex;margin:10px 0}.robotIntro .joinButton{min-height:40px}}
+/* Increase the normal desktop conversation height by 10% (72% × 1.1). */
+@media(min-width:761px){.workspace[data-window=normal]>.panel{height:79.2%;max-height:79.2%}}
+
+.robotIntro>.chatTitle{position:relative;display:inline-block;top:auto;bottom:auto;left:auto;transform:none;margin:12px 0 0;font-size:clamp(20px,2.3vw,30px);pointer-events:auto}
+.robot>.joinRow{position:absolute;top:auto;bottom:24px;left:0;right:0;display:flex;justify-content:center;margin:0}
+@media(max-width:760px){.workspace .robotIntro>.chatTitle{display:inline-block;position:relative;top:auto;left:auto;font-size:20px}.robot>.joinRow{bottom:16px}}
+/* Center the chat beside Ohi in the original desktop order. */
+@media(min-width:761px){
+ .workspace[data-window=normal]>.panel{align-self:center;margin-top:0;transform:none}
+}
+/* Expanded chat fills the available stage directly below the header. */
+@media(min-width:761px){
+ .workspace[data-window=expanded]{padding-top:0}
+ .workspace[data-window=expanded]>.panel{height:100%;max-height:100%;align-self:stretch;margin:0;transform:none}
+}
+
+/* Morph the empty surface first, then reveal its contents at their final size. */
+.panel>*,.chatLauncher>svg{transition:opacity 220ms ease}
+.workspace[data-morphing=true] .panel>*,.workspace[data-morphing=true] .chatLauncher>svg{opacity:0;transition:none;pointer-events:none}
+.chatLauncher{view-transition-name:ohi-chat}
+@media(prefers-reduced-motion:reduce){.panel>*,.chatLauncher>svg{transition:none}}
+
+.transitionSkeleton{position:absolute;inset:20px;display:flex;flex-direction:column;gap:24px;opacity:0;pointer-events:none!important;transition:opacity 220ms ease;z-index:1}
+.skeletonHeading{display:flex;align-items:center;gap:12px;height:48px}
+.skeletonHeading i{width:30px;height:30px;border-radius:50%;background:var(--ui-subtle)}
+.skeletonHeading span{height:12px;width:100px;border-radius:999px;background:var(--ui-subtle)}
+.skeletonLines{display:grid;gap:12px}.skeletonLines span{height:10px;width:88%;border-radius:999px;background:var(--ui-subtle)}.skeletonLines span:nth-child(2){width:70%}.skeletonLines span:nth-child(3){width:48%}
+.skeletonComposer{margin-top:auto;height:150px;border-radius:24px;background:var(--ui-bg)}
+.workspace[data-morphing=true] .panel>.transitionSkeleton{opacity:1;transition:none}
+@media(max-width:760px){.transitionSkeleton{inset:16px}}
+@media(prefers-reduced-motion:reduce){.transitionSkeleton{display:none}}
+/* The restore-chat control sits above the complete 3D stacking context. */
+.workspace{isolation:isolate;overflow:visible}
+.workspace>.robot{z-index:0}
+.workspace>.chatLauncher{z-index:50;overflow:visible;pointer-events:auto}
+.workspace[data-morphing=true]>.chatLauncher>svg{opacity:0}
+
+@media(min-width:761px){
+ .workspace .panel>.chatTitle{position:absolute;top:-52px;bottom:auto;left:0;transform:none;margin:0;text-align:left;z-index:10}
+ .workspace[data-window=expanded] .panel>.chatTitle{display:none}
+}
+@media(min-width:761px){.workspace .panel>.chatTitle{left:50%;transform:translateX(-50%);text-align:center}}
+
+.quick{flex-wrap:wrap;gap:6px;max-height:114px;overflow-y:auto}
+.panel .quick button{gap:6px;padding:6px 10px}
+.quick svg{flex-shrink:0}
+
+:global(.ui-dialog.ui-dialog):has(.eventsCalendar){width:min(760px,calc(100vw - 32px));max-height:calc(100dvh - 32px)}
+.eventsCalendar{display:flex;flex-direction:column;gap:12px;min-height:0}
+.eventsCalendar iframe{display:block;width:100%;height:min(560px,calc(100dvh - 200px));min-height:240px;border:0;border-radius:16px;background:var(--ui-bg)}
+.eventsCalendar>a{display:inline-flex;align-items:center;gap:6px;color:var(--ui-muted);font-size:13px;text-decoration:none;align-self:flex-end}
+.eventsCalendar>a:hover{color:var(--ui-text)}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import HomeStage from "@/components/HomeStage";
+import HomeCommunity from "@/components/HomeCommunity";
 import { INSTAGRAM_URL, LINKEDIN_URL, SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -51,7 +51,7 @@ export default function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }} />
-      <HomeStage />
+      <HomeCommunity />
     </>
   );
 }
