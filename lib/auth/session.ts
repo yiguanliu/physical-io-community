@@ -39,6 +39,7 @@ export async function requireAdmin() {
   return {
     id: session.user.id,
     name: session.user.name,
+    avatarUrl: session.user.avatarUrl,
     email: session.user.email,
     role: ADMIN_ROLE,
   };

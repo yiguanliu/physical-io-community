@@ -101,3 +101,17 @@ Popover accepts an optional `closeLabel` for context-specific accessible dismiss
 Popover also accepts `side` (top/right/bottom/left, default bottom) and `align` (start/center/end, default start) to anchor contextual tools beside their trigger.
 
 Use `NotificationProvider` inside `ThemeProvider` and `useNotification()(message)` for dismissible bottom-right issue notices. Notices expire after eight seconds, deduplicate matching messages, and show at most three at once.
+
+`ContextMenu` accepts optional `tooltip` text for icon-only triggers. The tooltip shares the menu trigger, including hover/focus and keyboard activation.
+
+`ViewSwitch` renders a rounded icon-only single-selection group. Pass `value`, `onValueChange`, an accessible group `label`, and `items` containing `value`, `label`, and `icon`. Labels also appear as tooltips; arrow keys move through the group and the selected view cannot be cleared.
+
+Colour fields use the shared `ColorField` (`label`, `value`, `onValueChange`): a compact circular picker beside a hex input. Three- or six-digit hex values commit on blur or Enter; invalid values show a correction hint, and Escape restores the saved value. Touch targets expand on coarse pointers.
+
+Transient status messages use shared `Toast` (`message`, `onDismiss`, optional `duration`, default 6000ms). ThemeProvider hosts a fixed bottom-right stack outside page flow. Notifications pause on hover/focus and offer dismissal; persistent validation errors remain beside the relevant workflow.
+
+`Field type="range"` uses the shared minimal slider appearance. Supply `min`, `max`, `step` and either `value`/`onChange` or `defaultValue`; track progress updates automatically.
+
+`Disclosure` groups independently collapsible settings with a keyboard-accessible heading button. Props: `title`, `children`, and optional `defaultOpen` (true). Children remain mounted while hidden to preserve input state.
+
+`Avatar` accepts `name` and optional `src`. It displays a circular headshot when available and falls back to uppercase initials if absent or the image fails to load.

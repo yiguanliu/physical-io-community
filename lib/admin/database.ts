@@ -1,4 +1,6 @@
 import { Pool, type PoolClient } from 'pg';
+import {mutateEvent} from '@/lib/events/database';
+import {emptyStudio} from '@/lib/events/model';
 import { parseMemberCsv } from './audience';
 import type { Command, WorkspaceData } from './contracts';
 const singleton=globalThis as unknown as {adminPool?:Pool};
@@ -15,14 +17,14 @@ export async function readWorkspace():Promise<WorkspaceData>{
  from public.members m order by m.created_at desc limit 1001`),
  db.query(`select l.*,o.name company,c.name contact,c.email,c.role from public.leads l join public.organisations o on o.id=l.organisation_id left join public.contacts c on c.id=l.contact_id order by l.updated_at desc limit 1001`),
  db.query('select id,name,type,status,body,audience_filter,updated_at,sent_at,recipient_count from public.campaigns order by updated_at desc limit 1001'),
- db.query('select id,title,starts_at,venue,description from public.community_events order by starts_at desc limit 1001'),
+ db.query('select e.*,i.stage,i.studio,i.archived,i.version,i.history from public.community_events e left join public.event_initiatives i on i.event_id=e.id order by e.starts_at asc nulls last limit 1001'),
  db.query('select id,action,summary,entity_type,created_at from public.audit_log order by created_at desc limit 100')
  ]);
  return {truncated:[members,leads,campaigns,events].some(r=>r.rows.length>1000),
  members:members.rows.slice(0,1000).map(m=>({id:m.id,name:m.full_name,email:m.email,role:m.professional_role,city:m.city,joined:new Date(m.signed_up_at).toLocaleDateString('en-GB'),status:title(m.status),topics:m.topics,notes:m.notes,website:m.website_url,linkedin:m.linkedin_url,emailStatus:m.email_status,subscriptions:m.subscriptions})),
  leads:leads.rows.slice(0,1000).map(l=>({id:l.id,company:l.company,contact:l.contact??'',email:l.email??'',role:l.role??'',stage:title(l.status),value:String(l.estimated_value_gbp),score:l.fit_score,next:l.next_action,last:l.last_activity_at?new Date(l.last_activity_at).toLocaleString('en-GB'):'No activity recorded',tone:'neutral'})),
  campaigns:campaigns.rows.slice(0,1000).map(c=>({id:c.id,name:c.name,type:title(c.type),status:title(c.status),body:c.body,audience:c.audience_filter?.leadId??(Object.keys(c.audience_filter??{}).length&&c.audience_filter?.kind!=='subscribed'?'Saved audience':'All opted-in'),date:new Date(c.updated_at).toLocaleString('en-GB'),delivery:c.sent_at?`${c.recipient_count} recipients`:'Not sent'})),
- events:events.rows.slice(0,1000).map(e=>({id:e.id,name:e.title,date:new Date(e.starts_at).toISOString(),location:e.venue,description:e.description})),
+ events:events.rows.slice(0,1000).map(e=>({id:e.id,name:e.title,date:e.starts_at?new Date(e.starts_at).toISOString():'',location:e.venue,description:e.description,studio:{...emptyStudio(),...e.studio},stage:e.stage??'proposed',archived:e.archived??false,version:e.version??0,history:e.history??[]})),
  runs:activity.rows.map(a=>({id:a.id,name:a.summary||title(a.action),status:'Recorded',detail:`${title(a.entity_type)} · ${new Date(a.created_at).toLocaleString('en-GB')}`}))};
 }
 export class NotFound extends Error{}
@@ -30,7 +32,8 @@ export class RecordConflict extends Error{}
 // Caller owns the transaction so data and audit always commit together.
 export async function mutate(db:PoolClient,c:Command,actor:{id:string;name:string;requestId?:string}){
  let entityId:string|undefined;
- if(c.action==='member.import'){
+ if(c.action==='event.feature'||c.action==='event.work.create'||c.action==='event.initiative.save'||c.action==='event.advance'||c.action==='event.archive'||c.action==='event.delete'){entityId=(await mutateEvent(db,c,actor)).id;
+ }else if(c.action==='member.import'){
   const parsed=parseMemberCsv(c.csv);if(parsed.errors.length)throw new RecordConflict(parsed.errors.slice(0,5).join('; '));if(parsed.rows.length>1000)throw new RecordConflict('Import at most 1,000 rows at a time.');
   let added=0;for(const m of parsed.rows){if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.email))throw new RecordConflict('CSV contains an invalid email.');const r=await db.query("insert into public.members(email,email_normalized,full_name,first_name,city,professional_role,status,source) values($1,$1,$2,$3,$4,$5,'review','csv') on conflict(email_normalized) do nothing returning id",[m.email,m.fullName,m.fullName.split(' ')[0],m.city,m.professionalRole]);if(r.rowCount){added++;for(const interest of new Set(m.interests))await db.query("insert into public.member_interests(member_id,kind,interest) values($1,'work_area',$2)",[r.rows[0].id,interest]);}}
   entityId=undefined;

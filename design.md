@@ -276,3 +276,126 @@ Before a production handoff, align these docs around the actual intended archite
 - Configure persistent production database credentials.
 - Configure Supabase admin secret and administrator approval workflow.
 - Verify Resend sending domain, webhook secret, bounce/complaint handling, and unsubscribe path.
+
+## Content workspace editor (September 2026)
+
+- Content types are named, shared categories, distinct from topic tags. New stories default to Editorial. News and Quotes are also provided; custom categories receive unique stored colours. Category badges always include their name; Minimal uses monochrome markers.
+- The content table exposes Edit and a contextual Feature / Archive / Delete menu. Deletion requires confirmation; archived records remain available through the Stage filter.
+- Schedule uses a navigable month/week calendar with Today, local time labels, an unscheduled list, and accessible date forms. Dragging proposes a date in the same form. Planning never bypasses publishing approval or triggers delivery.
+- Visuals use a three-column composition: layers/presets, an aspect-correct canvas, and contextual properties. Preview/Edit and format selection sit outside the artwork. Narrow screens stack the canvas and controls; only the calendar/zoomed canvas scrolls horizontally.
+- Text, images, official brand marks and shapes share explicit positions, dimensions, rotation, opacity and stacking. The editor includes keyboard movement, drag resizing, hide/lock, duplication, undo/redo, typography, alignment, crop/fit, shadow and image overlays.
+- Layouts and shared presets persist through the authenticated, audited content API. Saving a changed visual returns approved content to review. Browser recovery drafts are versioned and never override a newer saved layout automatically.
+- Instagram, LinkedIn, X, square post, website, email and custom dimensions are visual formats. A format choice does not add a publishing integration. PNG export uses the same SVG composition and embeds images and the bundled brand font.
+
+### Workspace search appearance
+
+Search fields use the semantic subtle grey background in their default, hover and focused states, with a transparent border and the existing visible keyboard-focus outline. Apply this consistently across admin collections; grey adapts to the selected light/dark palette.
+
+### Collapsible admin navigation
+
+The sidebar edge control toggles between full labels and a 64px icon rail. Keep all navigation targets accessible by name, show hover/focus labels, and retain the active-page indicator and workspace menu. Remember the user's choice on this device. Use the shared motion durations for width and label transitions and disable motion under reduced-motion preferences. Small screens keep the existing horizontal navigation.
+
+The workspace menu lives at the far right of the top bar, alongside appearance controls and an icon-only Refresh action. Keep accessible names on all icon buttons.
+
+### Event initiatives
+
+Events are episodes with a proposal → planning → action plan → in action → completed → retrospective → improved lifecycle. Approval decisions record the administrator and time; approved proposal/planning edits require reapproval. Episode work uses a dedicated detail workspace with brief, linear task timeline, linked work, reminders and retrospective tabs. Checklists show owners, workstreams and dates, with fixed-date overrides for event-relative deadlines. Unsaved changes are explicit. Existing content, campaign and outreach workflows remain responsible for delivery and consent; creating a linked campaign only creates a draft. Event reminders appear in the workspace until completion, with optional independent calendar export. Recap learnings can seed the next episode. The Episode 02 starting plan is based on the supplied campaign reference and keeps unconfirmed logistics and prospective sponsors unconfirmed.
+
+Content rows begin with a single pencil icon and an “Edit and more actions” tooltip. Its menu contains Edit content, Feature/Unfeature, Archive/Restore and Delete; no separate trailing action controls.
+
+Content Board/List/Schedule views use the shared rounded `ViewSwitch`: three icon-only buttons bundled in a subtle pill, with tooltips, a visible selected state and arrow-key navigation. Preserve the existing view data and behavior.
+
+All admin workspace inputs, textareas and select triggers use the same semantic subtle-grey filled surface and transparent resting border as search. Retain visible focus outlines, error borders, persistent labels and muted placeholders; autofill must retain the filled surface. These colours follow light/dark and Brand/Minimal themes.
+
+Events and Content collection toolbars share the same search + ghost Filters pattern. Event visibility (Active/Archived/All) lives in the Filters popover, with a badge for a non-default selection and a Clear filters action. Episode templates remain available alongside these tools.
+
+Content collection tabs and the view selector share one row. Use a compact dropdown at the right for Board/List/Schedule; hide it on Templates and preserve the chosen view when returning. On narrow screens the tabs scroll within their own region.
+
+Episode cards place a round pencil action menu immediately to the right of Open episode. It includes Edit episode, Feature/Unfeature, Archive/Restore and confirmed Delete. Featured episodes show a named star indicator; the flag persists with the episode's versioned metadata.
+
+Workspace secondary and icon actions are text/icon-only at rest with transparent borders; a subtle grey surface appears on hover. Destructive actions retain their danger-coloured text. Primary actions retain their filled emphasis, selected controls retain their state indicators, and all buttons keep visible keyboard focus.
+
+Every episode card includes a cover thumbnail in the same 3:1 frame. When no cover is specified, display a semantic grey placeholder with an image icon and “Event cover” label.
+
+Episode collection cards are compact: a shallow 4:1 cover (up to 120px), stage, optional episode number, title, short date and open/edit actions. Keep descriptions, venue, owner and checklist counts inside the episode; omit empty episode labels and placeholder cover text.
+
+Episode cards use a 4:3 overall frame and a full-card keyboard-accessible open target, with an independent edit menu. Hover/focus and press tint the card using a darkened average of its cover, blended with the theme surface to preserve readability. Cover sampling is cached and neutral fallback applies when images are missing or do not allow cross-origin sampling. Minimal stays monochrome.
+
+Episode cards have no visible resting border. Pointer hover scales them to 1.025, press to 0.99, and exit smoothly returns to normal using the shared motion tokens. Reduced-motion preferences disable scaling; keyboard focus stays visible.
+
+Content collection tabs sit one control-space above the collection, without a full-width separator. The active-tab underline remains visible.
+
+Episode lifecycle progress uses seven slim, equal-width segments with muted stage labels and an emphasized current stage. Each line smoothly doubles in thickness when its stage is hovered, without moving the layout. It fits the available width without scrolling, and exposes the current stage through accessible progress semantics. Reduced motion disables the transition.
+
+Episode stage labels are single words and use shared buttons spanning both label and line. Clicking requests a confirmed, audited stage change; backward moves are allowed and forward moves validate every crossed approval gate. Unsaved and archived episodes must be saved or restored first.
+
+Episode stages use numbered text buttons with no progress bars. The current stage has a subtle filled background; other stages use the shared text-button hover and focus states. Buttons wrap on narrow screens and retain confirmed stage changes and approval checks.
+
+Event lifecycle colours: purple Proposal, blue Planning, amber Actions, orange Live, green Completed, teal Review and rose Improvement. Shared labels stay readable on subtle tints; Minimal remains monochrome. Action statuses use neutral To-do, amber Doing and green Done. Status is editable in action details and stays in sync with completion checkboxes.
+
+Visual editor layout is bounded to the viewport with independently scrolling layers and properties; scrollbars are hidden while scrolling stays available. Below 960px of editor width, shared text buttons open the existing drawer for Layers, Presets or Properties. The canvas retains fit-to-frame proportions, explicit zoom scrolls within the canvas region, and drawers preserve keyboard focus and Escape dismissal. Tools never expand into a full-width properties grid beneath the canvas.
+
+Format switches calculate fit from the current canvas dimensions and measured viewport in the same render, reset zoom to Fit, and show a neutral placeholder until the new layout has painted. The canvas then fades in using the shared motion token; reduced motion skips the fade. Logo proportions remain fixed across aspect ratios.
+
+Colour fields use the shared `ColorField` (`label`, `value`, `onValueChange`): a compact circular picker beside a hex input. Three- or six-digit hex values commit on blur or Enter; invalid values show a correction hint, and Escape restores the saved value. Touch targets expand on coarse pointers.
+
+Sliders have no surrounding field border, grey input box or shadow. Keep the native track and thumb, with a neutral accent and visible keyboard focus.
+
+Transient status messages use shared `Toast` (`message`, `onDismiss`, optional `duration`, default 6000ms). ThemeProvider hosts a fixed bottom-right stack outside page flow. Notifications pause on hover/focus and offer dismissal; persistent validation errors remain beside the relevant workflow.
+
+Visual layer rows use a grey selection fill without outlines on click or hover. Keyboard focus uses a subtle fill and underline instead of a surrounding ring.
+
+Dropdown and context-menu items use a subtle grey hover/focus fill without inset borders or rings. Keyboard focus adds an underline. Open select triggers use the same subtle fill instead of a coloured outline.
+
+Event cover thumbnails and empty placeholders always use a 4:3 frame at every collection width. Card height follows the thumbnail and caption; images crop with object-fit cover rather than stretching.
+
+Episode stage buttons stay on one line at every width, with horizontal scrolling and a hidden scrollbar. Buttons keep their natural width and remain keyboard accessible.
+
+Access management lives at /admin/access using the current workspace shell and saved appearance preferences. Requests and Administrators use shared tabs, search, avatars, badges and tables. Approve/decline retains authenticated server actions, self-access protection and audit logging; outcomes use temporary notifications. Empty and search states are explicit, and wide data tables scroll inside the page.
+
+Episode stage selection uses one compact single-select dropdown showing the current numbered stage and its colour. Changing the selection retains the existing confirmation and approval checks.
+
+Access rows begin with a compact edit action. Access levels are Admin, Pending and No access; removed accounts remain available for restoration. Invite admin accepts a new email and sends a Supabase invitation with password setup. Own-account and allowlisted administrator changes are disabled and enforced on the server. Rights rely on server-managed metadata, not editable profile fields; role changes never bypass email verification.
+
+The breadcrumb begins with Back and Forward icon buttons, with tooltips and disabled end states. They navigate workspace page history, including Access management, preserve the unsaved-event guard, and clear forward history after a new destination is chosen.
+
+The episode stage dropdown and next-action panel share a single row. Stage options use a period after the number, such as “2. Planning”; next-action content wraps within its panel on narrow screens.
+
+The next episode action is a single text button aligned with the stage dropdown. Readiness details and approval requirements appear in its hover/focus tooltip; unavailable actions remain focusable so the reason is accessible.
+
+Shared tooltips render through a portal at the theme root, above menus, dialogs and notifications. They avoid viewport edges and wrap long text so workspace panels cannot clip them.
+
+Content editor tab forms are centred within the available workspace width, capped at 850px. Field labels and copy remain left-aligned; the visual editor continues to use the full available width.
+
+### Poster typography and existing photography
+Episode 02 visual presets use existing Physical I/O photographs, editable Manrope headlines, an episode label and a supporting line. Presets are composed for the selected canvas dimensions. Format resizing scales type and tracking with text-box height, avoiding repeated min-axis shrinkage on round trips. Only the exact generated Episode 02 starter is upgraded automatically; its previous layout remains available through Undo. Custom artwork is preserved.
+
+### Episode 02 reference composition
+Poster presets now follow the supplied reference: official mark top left, brand name top right, centred supporting question in the upper fifth, large left-aligned three-line headline near the centre, and centred episode label near the bottom. Keep photography full bleed and darkened for white typography.
+
+### Independent visual layouts per format
+Each story retains a separate saved composition for every named format. Save acts only on the selected format and names it explicitly. First use of a format seeds an editable copy; subsequent switches restore its own draft, including Undo/Redo history. Local recovery preserves all format drafts. The existing version-checked, locked save merges only the submitted format into the stored JSON and retains legacy single-format documents. Custom represents one independently sized layout.
+
+### Visual layer effects
+Effects includes Rough edges for text and Blur for every layer, both adjustable from 0–30 and off by default. Rough edges uses deterministic SVG turbulence/displacement; blur softens the result before any shadow. Preview and PNG export share the same SVG filter chain, with room for expanded edges. Effect values persist in each format’s document and support Undo; older documents default to zero.
+
+### Projector colour separation
+Effects includes RGB shift (0–30) per layer. It offsets isolated red and blue channels around green and recombines them additively, following roughness/blur and preceding shadows. Zero bypasses the effect. Existing documents default to zero; per-format saves, Undo and PNG export preserve the value.
+
+### Background grunge
+Canvas & image overlay provides Background grain (0–100%) and Grain size (1–8). Deterministic monochrome turbulence textures the canvas background and image layers beneath text. Defaults preserve older artwork; settings save independently per format and carry through PNG export and Undo.
+
+### Default text treatment
+New text layers—including newly generated poster text—start with RGB shift 1, Rough edges 4 and Blur 1.5, matching the supplied reference. Existing saved layers retain their values. Images, logos and shapes remain clean by default, and explicit text-effect overrides are preserved.
+
+### Visual inspector disclosure
+Layer properties, Typography, Appearance, Effects, Canvas, Background grain and Image overlay each fold independently using the shared Disclosure component. Sections initially open and retain control values while collapsed; the same inspector is used in the narrow-screen drawer.
+
+### Content owners
+Owner is a shared Select populated from current administrators through the authenticated content endpoint. Mark the signed-in administrator with “(you)”, offer Unassigned, and retain existing owner names even when they are no longer in the directory. Ownership remains descriptive assignment and does not grant account permissions.
+
+### User details
+The owl menu links to /admin/profile in the current workspace shell. Show the signed-in administrator’s name, read-only sign-in email and role. Name edits use a validated, session-scoped Supabase update without accepting a user ID or changing permissions. Save errors remain actionable and success uses the shared toast.
+
+### Personal headshots
+Replace the shared owl account image with each signed-in person’s headshot or initials. User details supports PNG/JPEG/WebP uploads up to 750 KB and restoring the name placeholder. Uploads use authenticated user-scoped storage paths; profile updates change only the current user’s headshot metadata. Header identity refreshes after profile updates.
