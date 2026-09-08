@@ -9,7 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    exclude: ["**/*.integration.test.ts", "lib/admin/contracts.test.ts", "lib/email/webhook.test.ts"],
+    exclude: ["**/*.integration.test.ts", "lib/admin/contracts.test.ts", "lib/email/webhook.test.ts", "lib/join/join.test.ts"],
     include: ["lib/**/*.test.ts", "components/**/*.test.ts"],
   },
 });

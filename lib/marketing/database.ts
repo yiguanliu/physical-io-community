@@ -1,20 +1,40 @@
 import type { PoolClient } from 'pg';
 import { database,RecordConflict,NotFound } from '@/lib/admin/database';
+import {readVisualLayouts,mergeVisualLayout,FORMATS} from './visual-model';
 import type { MarketingCommand } from './contracts';
 const parse=(x:unknown,fallback:unknown)=>{if(typeof x==='string'){try{return JSON.parse(x);}catch{return fallback;}}return x??fallback;};
-const item=(r:Record<string,any>)=>({...r,category_tags:parse(r.category_tags,[]),variants:r.variants??[]});
+const item=(r:Record<string,any>)=>({...r,category_tags:parse(r.category_tags,[]),variants:r.variants??[],visual_layouts:readVisualLayouts(parse(r.visual_document,null))});
 export async function readMarketing(id?:string){
  const db=database();
  if(id){const found=await db.query('select * from public.content_items where id=$1',[id]);if(!found.rowCount)throw new NotFound();const [variants,assets,events]=await Promise.all([db.query('select * from public.content_platform_variants where content_item_id=$1 order by platform',[id]),db.query('select id,public_url,alt_text,kind from public.content_assets where content_item_id=$1 order by created_at desc',[id]),db.query('select id,detail,actor_name,created_at from public.content_events where content_item_id=$1 order by created_at desc limit 100',[id])]);return {...item(found.rows[0]),variants:variants.rows,assets:assets.rows,events:events.rows};}
- const [items,templates]=await Promise.all([db.query(`select i.*,coalesce((select json_agg(v) from public.content_platform_variants v where v.content_item_id=i.id),'[]') variants from public.content_items i order by i.updated_at desc limit 1001`),db.query('select id,name,description,editorial,layout from public.content_templates order by updated_at desc')]);
- return {items:items.rows.slice(0,1000).map(item),truncated:items.rows.length>1000,templates:templates.rows.map(t=>({...t,editorial:parse(t.editorial,{}),layout:parse(t.layout,{})}))};
+ const [items,templates,categories]=await Promise.all([db.query(`select i.*,coalesce((select json_agg(v) from public.content_platform_variants v where v.content_item_id=i.id),'[]') variants from public.content_items i order by i.updated_at desc limit 1001`),db.query('select id,name,description,editorial,layout from public.content_templates order by updated_at desc'),db.query('select id,name,color from public.content_categories order by created_at,name')]);
+ return {categories:categories.rows,items:items.rows.slice(0,1000).map(item),truncated:items.rows.length>1000,templates:templates.rows.map(t=>({...t,editorial:parse(t.editorial,{}),layout:parse(t.layout,{})}))};
 }
 export async function mutateMarketing(db:PoolClient,c:MarketingCommand,actor:{id:string;name:string;requestId:string}){
- let id='id' in c&&c.id?c.id:crypto.randomUUID();let detail='';let from:string|null=null;
- if(c.action!=='template'&&('id' in c&&c.id)){const current=await db.query('select * from public.content_items where id=$1 for update',[id]);if(!current.rowCount)throw new NotFound();from=current.rows[0].status;if(c.action==='save'&&c.version&&new Date(current.rows[0].updated_at).toISOString()!==c.version)throw new RecordConflict('This story changed in another session. Reopen it before saving.');}
- if(c.action==='save'){
+ let id='id' in c&&c.id?c.id:crypto.randomUUID();let detail='';let from:string|null=null;let previousVisual:unknown=null;
+ if(c.action!=='template'&&('id' in c&&c.id)){const current=await db.query('select * from public.content_items where id=$1 for update',[id]);if(!current.rowCount)throw new NotFound();from=current.rows[0].status;previousVisual=parse(current.rows[0].visual_document,null);if((c.action==='save'||c.action==='visual'||c.action==='delete')&&c.version&&new Date(current.rows[0].updated_at).toISOString()!==c.version)throw new RecordConflict('This story changed in another session. Reopen it before saving.');}
+ if(c.action==='category'){
+  await db.query("select pg_advisory_xact_lock(hashtext('content_categories'))");
+  const existing=await db.query('select id,color,lower(name) name from public.content_categories');
+  if(existing.rows.some(r=>r.name===c.name.toLowerCase()))throw new RecordConflict('A category with this name already exists.');
+  const used=new Set(existing.rows.map(r=>r.color));
+  // Deterministic distinct sRGB swatches; labels carry meaning in every theme.
+  let n=existing.rows.length;let color='';do{color='#'+((0x536bce+ (++n)*0x9e3779)&0xffffff).toString(16).padStart(6,'0');}while(used.has(color));
+  await db.query('insert into public.content_categories(id,name,color) values($1,$2,$3)',[id,c.name,color]);detail=`Created category ${c.name}`;
+ }else if(c.action==='metadata'){
+  await db.query('update public.content_items set category_id=coalesce($2,category_id),featured=coalesce($3,featured),updated_at=now() where id=$1',[id,c.categoryId??null,c.featured??null]);detail='Updated content category / feature';
+ }else if(c.action==='delete'){
+  await db.query('delete from public.content_items where id=$1',[id]);detail='Deleted content story';
+ }else if(c.action==='schedule'){
+  await db.query("update public.content_items set scheduled_at=$2,status=case when $2::timestamptz is null and status='scheduled' then 'approved' else status end,updated_at=now() where id=$1",[id,c.scheduledAt]);detail=c.scheduledAt?`Planned for ${c.scheduledAt}`:'Cleared planned date';
+ }else if(c.action==='visual'){
+  await db.query("update public.content_items set visual_document=$2,status=case when status in ('approved','scheduled','published') then 'review' else status end,updated_at=now() where id=$1",[id,JSON.stringify(mergeVisualLayout(previousVisual,c.document))]);detail=`Saved ${FORMATS[c.document.format].label} visual layout`;
+ }else if(c.action==='preset'){
+  await db.query('insert into public.content_templates(id,name,description,layout,created_by_name) values($1,$2,$3,$4,$5)',[id,c.name,'Visual preset',JSON.stringify({document:c.document}),actor.name]);detail=`Saved visual preset ${c.name}`;
+ }else if(c.action==='save'){
   const values=[c.title,c.summary,c.body,JSON.stringify(c.tags),c.sourceUrl,c.owner,id];
   if(c.id){await db.query('update public.content_items set title=$1,summary=$2,body_markdown=$3,category_tags=$4,source_url=$5,assigned_to_name=$6,status=case when status in (\'approved\',\'scheduled\',\'published\') then \'review\' else status end,updated_at=now() where id=$7',values);}else{await db.query('insert into public.content_items(title,summary,body_markdown,category_tags,source_url,assigned_to_name,id,created_by_user_id,created_by_name) values($1,$2,$3,$4,$5,$6,$7,$8,$9)',[...values,actor.id,actor.name]);}
+  if(c.categoryId)await db.query('update public.content_items set category_id=$2 where id=$1',[id,c.categoryId]);
   detail=c.id?'Saved master draft':'Created content idea';
  }else if(c.action==='stage'){
   const variants=await db.query('select platform,status,body,external_permalink from public.content_platform_variants where content_item_id=$1',[id]);
@@ -30,6 +50,6 @@ export async function mutateMarketing(db:PoolClient,c:MarketingCommand,actor:{id
   await db.query("update public.content_items set status=case when status in ('approved','scheduled','published') then 'review' else status end,updated_at=now() where id=$1",[id]);detail=`Saved ${c.platform} copy (${c.status})`;
  }else if(c.action==='note'){detail=c.detail;
  }else if(c.action==='template'){await db.query('insert into public.content_templates(id,name,description,editorial,created_by_name) values($1,$2,$3,$4,$5)',[id,c.name,c.description,JSON.stringify({tone:c.tone}),actor.name]);detail=`Created template ${c.name}`;}
- if(c.action!=='template')await db.query('insert into public.content_events(id,content_item_id,type,from_status,to_status,detail,actor_name) values($1,$2,$3,$4,$5,$6,$7)',[crypto.randomUUID(),id,c.action==='stage'?'stage_change':'note',from,c.action==='stage'?c.stage:null,detail,actor.name]);
- await db.query('insert into public.audit_log(id,actor_user_id,actor_name,action,entity_type,entity_id,summary) values($1,$2,$3,$4,$5,$6,$7)',[actor.requestId,actor.id,actor.name,`content.${c.action}`,c.action==='template'?'content_template':'content_item',id,detail]);return {id};
+ if(!['template','preset','category','delete'].includes(c.action))await db.query('insert into public.content_events(id,content_item_id,type,from_status,to_status,detail,actor_name) values($1,$2,$3,$4,$5,$6,$7)',[crypto.randomUUID(),id,c.action==='stage'?'stage_change':'note',from,c.action==='stage'?c.stage:null,detail,actor.name]);
+ await db.query('insert into public.audit_log(id,actor_user_id,actor_name,action,entity_type,entity_id,summary) values($1,$2,$3,$4,$5,$6,$7)',[actor.requestId,actor.id,actor.name,`content.${c.action}`,['template','preset'].includes(c.action)?'content_template':c.action==='category'?'content_category':'content_item',id,detail]);return {id};
 }

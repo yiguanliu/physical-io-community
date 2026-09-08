@@ -1,0 +1,39 @@
+'use client';
+import { forwardRef,useEffect,useState } from 'react';
+import { PHYSICAL_IO_MARK_PATH } from '@/workspace-ui/app/LogoMark';
+import type { VisualDocument,VisualLayer } from '@/lib/marketing/visual-model';
+function wrapText(layer:VisualLayer,measure:CanvasRenderingContext2D|null){
+ const lines:string[]=[];if(measure)measure.font=`${layer.weight} ${layer.fontSize}px ${layer.fontFamily}`;
+ const width=(s:string)=>(measure?.measureText(s).width??s.length*layer.fontSize*.55)+Math.max(0,s.length-1)*layer.letterSpacing;
+ for(const paragraph of layer.text.split('\n')){let line='';for(const word of paragraph.split(/\s+/)){const candidate=line?`${line} ${word}`:word;if(line&&width(candidate)>layer.width){lines.push(line);line='';}for(const char of (line?' ':'' )+word){if(line&&width(line+char)>layer.width){lines.push(line);line='';}line+=char;}}lines.push(line);}
+ return lines;
+}
+export const MarketingCanvas=forwardRef<SVGSVGElement,{document:VisualDocument}>(function MarketingCanvas({document:doc},ref){
+ const [measure,setMeasure]=useState<CanvasRenderingContext2D|null>(null);
+ useEffect(()=>{let live=true;void document.fonts.ready.then(()=>{if(live)setMeasure(document.createElement('canvas').getContext('2d'));});return()=>{live=false;};},[]);
+ return <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${doc.width} ${doc.height}`} width={doc.width} height={doc.height} aria-label="Visual composition" role="img"><defs><linearGradient id="visual-overlay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={doc.overlay} stopOpacity="0"/><stop offset="1" stopColor={doc.overlay} stopOpacity={doc.overlayOpacity}/></linearGradient>{(doc.grain??0)>0&&<filter id="visual-grain" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB"><feTurbulence type="fractalNoise" baseFrequency={.7/(doc.grainSize??2)} numOctaves={3} seed={23} stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope={3} intercept={-1}/><feFuncG type="linear" slope={3} intercept={-1}/><feFuncB type="linear" slope={3} intercept={-1}/></feComponentTransfer></filter>}</defs><rect width={doc.width} height={doc.height} fill={doc.background}/>{(doc.grain??0)>0&&<rect width={doc.width} height={doc.height} filter="url(#visual-grain)" opacity={(doc.grain??0)*.65} pointerEvents="none"/>}{doc.layers.filter(l=>!l.hidden).map(l=><g key={l.id} transform={`translate(${l.x} ${l.y}) rotate(${l.rotation} ${l.width/2} ${l.height/2})`} opacity={l.opacity}><defs><clipPath id={`clip-${l.id}`}><rect width={l.width} height={l.height} rx={l.radius}/></clipPath>{(l.shadow>0||(l.rgbShift??0)>0||(l.blur??0)>0||(l.type==='text'&&(l.roughness??0)>0))&&<filter id={`effects-${l.id}`} x={-100-l.shadow*3} y={-100-l.shadow*3} width={l.width+200+l.shadow*6} height={l.height+200+l.shadow*6} filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+{l.type==='text'&&(l.roughness??0)>0&&<><feTurbulence type="fractalNoise" baseFrequency="0.12" numOctaves={3} seed={7} result="edgeNoise"/><feDisplacementMap in="SourceGraphic" in2="edgeNoise" scale={l.roughness} xChannelSelector="R" yChannelSelector="G" result="roughText"/></>}
+{(l.blur??0)>0&&<feGaussianBlur in={l.type==='text'&&(l.roughness??0)>0?'roughText':'SourceGraphic'} stdDeviation={l.blur} result="softened"/>}
+{(l.rgbShift??0)>0&&<>
+<feColorMatrix in={(l.blur??0)>0?'softened':l.type==='text'&&(l.roughness??0)>0?'roughText':'SourceGraphic'} type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red"/>
+<feOffset in="red" dx={-l.rgbShift!} result="redShift"/>
+<feColorMatrix in={(l.blur??0)>0?'softened':l.type==='text'&&(l.roughness??0)>0?'roughText':'SourceGraphic'} type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green"/>
+<feColorMatrix in={(l.blur??0)>0?'softened':l.type==='text'&&(l.roughness??0)>0?'roughText':'SourceGraphic'} type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue"/>
+<feOffset in="blue" dx={l.rgbShift} result="blueShift"/>
+<feComposite in="redShift" in2="green" operator="arithmetic" k2={1} k3={1} result="redGreen"/>
+<feComposite in="redGreen" in2="blueShift" operator="arithmetic" k2={1} k3={1} result="projected"/>
+</>}
+{l.shadow>0&&<feDropShadow dx="0" dy={l.shadow/3} stdDeviation={l.shadow/2} floodOpacity=".5"/>}
+</filter>}</defs><g filter={l.shadow>0||(l.rgbShift??0)>0||(l.blur??0)>0||(l.type==='text'&&(l.roughness??0)>0)?`url(#effects-${l.id})`:undefined}>{l.type==='text'?<text fill={l.color} fontFamily={l.fontFamily} fontSize={l.fontSize} fontWeight={l.weight} letterSpacing={l.letterSpacing} textAnchor={l.align==='center'?'middle':l.align==='right'?'end':'start'} clipPath={`url(#clip-${l.id})`}>{wrapText(l,measure).map((line,i)=><tspan key={i} x={l.align==='center'?l.width/2:l.align==='right'?l.width:0} y={l.fontSize+i*l.fontSize*l.lineHeight}>{line||' '}</tspan>)}</text>:l.type==='logo'?<svg width={l.width} height={l.height} viewBox="0 0 460 271"><path d={PHYSICAL_IO_MARK_PATH} fill={l.color}/></svg>:l.type==='shape'?<rect width={l.width} height={l.height} rx={l.radius} fill={l.color}/>:<g clipPath={`url(#clip-${l.id})`}><image href={l.src} width={l.width} height={l.height} preserveAspectRatio={l.fit==='cover'?'xMidYMid slice':'xMidYMid meet'}/><rect width={l.width} height={l.height} fill={doc.overlayMode==='gradient'?'url(#visual-overlay)':doc.overlay} opacity={doc.overlayMode==='solid'?doc.overlayOpacity:1}/>{(doc.grain??0)>0&&<rect width={l.width} height={l.height} filter="url(#visual-grain)" opacity={(doc.grain??0)*.65} pointerEvents="none"/>}</g>}</g></g>)}</svg>;
+});
+export async function exportVisual(svg:SVGSVGElement,doc:VisualDocument){
+ await document.fonts.ready;
+ const clone=svg.cloneNode(true) as SVGSVGElement;
+ for(const image of Array.from(clone.querySelectorAll('image'))){const source=image.getAttribute('href');if(!source)continue;const response=await fetch(source);if(!response.ok)throw new Error('An image could not be loaded for export.');const blob=await response.blob();const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsDataURL(blob);});image.setAttribute('href',data);}
+ // Embed the same loaded font in the standalone SVG used by the PNG renderer.
+ const fontRules:string[]=[];
+ for(const sheet of Array.from(document.styleSheets)){try{for(const rule of Array.from(sheet.cssRules)){if(rule instanceof CSSFontFaceRule&&rule.style.fontFamily.replace(/["']/g,'').toLowerCase().includes('manrope'))fontRules.push(rule.cssText);}}catch{/* Cross-origin stylesheets are not used by the bundled brand font. */}}
+ if(fontRules.length){let css=fontRules.join('\n');const urls=[...css.matchAll(/url\(["']?([^"')]+)["']?\)/g)];for(const match of urls){const response=await fetch(new URL(match[1],location.href));if(!response.ok)throw new Error('Brand font could not be embedded.');const blob=await response.blob();const data=await new Promise<string>((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=reject;r.readAsDataURL(blob);});css=css.replace(match[0],`url("${data}")`);}const style=document.createElementNS('http://www.w3.org/2000/svg','style');style.textContent=css;clone.prepend(style);}
+ const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml;charset=utf-8'}));
+ try{const image=new Image();image.src=url;await image.decode();const canvas=document.createElement('canvas');canvas.width=doc.width;canvas.height=doc.height;canvas.getContext('2d')!.drawImage(image,0,0);return await new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Export failed.')),'image/png'));}finally{URL.revokeObjectURL(url);}
+}

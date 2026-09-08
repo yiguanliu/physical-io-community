@@ -1,14 +1,16 @@
 import { z } from 'zod';
+import {eventCommands,type Episode} from '@/lib/events/model';
 export type Member = {id:string;name:string;email:string;role:string;city:string;joined:string;status:string;topics:string[];notes?:string;website?:string;linkedin?:string;emailStatus?:string;subscriptions?:{topic:string;status:string}[]};
 export type Lead = {id:string;company:string;contact:string;email:string;role:string;stage:string;value:string;score:number;next:string;last:string;tone:string};
 export type Campaign = {id:string;name:string;type:string;audience:string;status:string;date:string;delivery:string;body:string};
-export type CommunityEvent = {id:string;name:string;date:string;location:string;description:string};
+export type CommunityEvent = Episode;
 export type Activity = {id:string;name:string;status:string;detail:string};
 export type WorkspaceData = {members:Member[];leads:Lead[];campaigns:Campaign[];events:CommunityEvent[];runs:Activity[];truncated:boolean};
 const text=z.string().trim().min(1).max(200);
 const optionalText=z.string().trim().max(200).default('');
 const id=z.string().uuid();
 export const commandSchema=z.discriminatedUnion('action',[
+ ...eventCommands,
  z.object({action:z.literal('member.save'),id:id.optional(),name:text,email:z.string().trim().email().max(254).transform(s=>s.toLowerCase()),role:optionalText,city:optionalText,status:z.enum(['Active','Review','Paused','Archived']),notes:z.string().max(10000).optional(),website:z.union([z.literal(''),z.string().url()]).optional(),linkedin:z.union([z.literal(''),z.string().url()]).optional(),topics:z.array(z.string().trim().min(1).max(100)).max(30)}),
  z.object({action:z.literal('member.import'),csv:z.string().min(1).max(800000)}),
  z.object({action:z.literal('member.subscription'),id,topic:z.enum(['newsletter','events','announcements']),status:z.enum(['subscribed','unsubscribed','consent_unknown']),evidence:z.string().trim().min(5).max(1000)}),

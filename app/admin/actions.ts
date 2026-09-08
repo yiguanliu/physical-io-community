@@ -279,3 +279,17 @@ export async function declineAccessAction(formData: FormData) {
   await setUserRole({ userId: text(formData, "userId"), role: "denied", actor: admin });
   revalidatePath("/admin/access");
 }
+
+export async function changeAccessAction(formData:FormData){
+ const admin=await requireAdmin();
+ const {z}=await import('zod');
+ const value=z.object({userId:z.string().uuid(),role:z.enum(['admin','pending','denied'])}).parse({userId:text(formData,'userId'),role:text(formData,'role')});
+ const {setUserRole}=await import('@/lib/admin/access');
+ await setUserRole({...value,actor:admin});revalidatePath('/admin/access');
+}
+export async function inviteAccessAction(formData:FormData){
+ const admin=await requireAdmin();const {z}=await import('zod');
+ const email=z.string().trim().email().max(254).parse(text(formData,'email')).toLowerCase();
+ const {inviteAdministrator}=await import('@/lib/admin/access');
+ try{await inviteAdministrator(email,admin);}finally{revalidatePath('/admin/access');}
+}

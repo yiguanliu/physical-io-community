@@ -13,6 +13,8 @@ export type AdminProfile = {
   email: string;
   role: string;
   createdAt?: string;
+  avatarUrl?: string;
+  accessProtected?: boolean;
 };
 
 function metadataName(authUser: SupabaseUser) {
@@ -30,8 +32,7 @@ function fallbackName(email: string) {
 
 export function adminRoleForUser(authUser: Pick<SupabaseUser, "app_metadata" | "user_metadata">) {
   const fromApp = authUser.app_metadata?.admin_role;
-  const fromUser = authUser.user_metadata?.admin_role || authUser.user_metadata?.role;
-  return typeof fromApp === "string" ? fromApp : typeof fromUser === "string" ? fromUser : undefined;
+  return typeof fromApp === "string" ? fromApp : undefined;
 }
 
 export function profileFromAuthUser(authUser: SupabaseUser): AdminProfile | null {
@@ -43,6 +44,7 @@ export function profileFromAuthUser(authUser: SupabaseUser): AdminProfile | null
     email,
     role: adminRoleForUser(authUser) ?? "pending",
     createdAt: authUser.created_at,
+    avatarUrl: typeof authUser.user_metadata?.headshot_url==='string'&&/^https?:\/\//.test(authUser.user_metadata.headshot_url)?authUser.user_metadata.headshot_url:undefined,
   };
 }
 
@@ -83,7 +85,6 @@ export async function setAdminRole(userId: string, role: string) {
   const { data: userResult, error: getError } = await supabase.auth.admin.getUserById(userId);
   if (getError) throw getError;
   const { data, error } = await supabase.auth.admin.updateUserById(userId, {
-    ...(role === ADMIN_ROLE ? { email_confirm: true } : {}),
     app_metadata: {
       ...userResult.user.app_metadata,
       admin_role: role,
@@ -95,10 +96,7 @@ export async function setAdminRole(userId: string, role: string) {
 
 export async function listAdminProfiles() {
   const supabase = getSupabaseAdminClient();
-  const { data, error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  if (error) throw error;
-  return data.users
-    .map(profileFromAuthUser)
-    .filter((profile): profile is AdminProfile => Boolean(profile))
-    .sort((left, right) => String(right.createdAt ?? "").localeCompare(String(left.createdAt ?? "")));
+  const users: SupabaseUser[]=[];
+  for(let page=1;;page++){const {data,error}=await supabase.auth.admin.listUsers({page,perPage:1000});if(error)throw error;users.push(...data.users);if(data.users.length<1000)break;}
+  return users.map(profileFromAuthUser).filter((profile):profile is AdminProfile=>Boolean(profile)).sort((a,b)=>String(b.createdAt??'').localeCompare(String(a.createdAt??'')));
 }

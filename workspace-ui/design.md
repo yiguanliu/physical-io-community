@@ -112,3 +112,18 @@ Both Brand and Minimal dark modes use the same neutral gray foundations: #111111
 ## Active switches
 
 Checked switches use the action background and white on-action thumb, matching filled primary buttons. Never use a black thumb or border on an orange checked switch.
+
+Colour fields use the shared `ColorField` (`label`, `value`, `onValueChange`): a compact circular picker beside a hex input. Three- or six-digit hex values commit on blur or Enter; invalid values show a correction hint, and Escape restores the saved value. Touch targets expand on coarse pointers.
+
+Transient status messages use shared `Toast` (`message`, `onDismiss`, optional `duration`, default 6000ms). ThemeProvider hosts a fixed bottom-right stack outside page flow. Notifications pause on hover/focus and offer dismissal; persistent validation errors remain beside the relevant workflow.
+
+Dropdown and context-menu items use a subtle grey hover/focus fill without inset borders or rings. Keyboard focus adds an underline. Open select triggers use the same subtle fill instead of a coloured outline.
+
+### Minimal sliders
+Shared range fields use a thin two-tone track and a solid circular thumb, with no resting border or shadow. The filled portion follows the current value, including negative minima. Disabled and keyboard-focus states remain visible; colours follow the active theme.
+
+### Collapsible settings sections
+Use Disclosure for detailed inspector sections. The whole heading toggles the section and exposes expanded state to assistive technology. A right-aligned chevron indicates state. Keep headings quiet, allow several sections open, retain hidden field values, and respect reduced motion.
+
+### Typewriter appearance
+The former Monospace option is presented as Typewriter and uses Courier New with Courier/monospace fallbacks. Preserve the stored `mono` theme value for compatibility with existing preferences.
