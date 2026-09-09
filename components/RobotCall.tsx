@@ -5,7 +5,7 @@ import {useEffect,useRef,useState} from 'react';
 import {Phone,PhoneOff,Video} from 'lucide-react';
 import {Button,IconButton,Popover} from '@/workspace-ui/src';
 import styles from './RobotExperience.module.css';
-type Props={mobileDock?:HTMLElement|null;windowControls?:React.ReactNode;onStart:()=>void;onActive:(active:boolean)=>void;onMessage:(role:'user'|'assistant',text:string)=>void;onExpression:(speaking:boolean,listening:boolean)=>void};
+type Props={actionDock?:HTMLElement|null;windowControls?:React.ReactNode;onStart:()=>void;onActive:(active:boolean)=>void;onMessage:(role:'user'|'assistant',text:string)=>void;onExpression:(speaking:boolean,listening:boolean)=>void};
 export default function RobotCall(props:Props){
  const notify=useNotification();
  const callbacks=useRef(props);callbacks.current=props;
@@ -22,7 +22,7 @@ export default function RobotCall(props:Props){
    preview.current.srcObject=resources.current.media;
    void preview.current.play().catch(()=>{});
   }
- },[state,props.mobileDock]);
+ },[state,props.actionDock]);
  async function start(mode:'voice'|'video'){
   end();callbacks.current.onStart();callbacks.current.onActive(true);setState('connecting');setError('');const token=generation.current;
   try{
@@ -61,13 +61,12 @@ export default function RobotCall(props:Props){
   }catch(e){if(token!==generation.current)return;setError(e instanceof DOMException&&e.name==='NotAllowedError'?'Microphone or camera permission was denied.':e instanceof Error?e.message:'Could not start the call.');end();}
  }
  const callControls=<>
-  {state==='idle'?<Popover title="Call Ohi" closeLabel="Close call options" side={props.mobileDock?'top':'bottom'} align="end" trigger={props.mobileDock?<Button variant="primary"><Phone size={18}/>Call</Button>:<IconButton label="Call Ohi" variant="primary"><Phone size={18}/></IconButton>}><div className={styles.callChoices}><Button variant="ghost" onClick={()=>void start('voice')}><Phone size={18}/>Voice call</Button><Button variant="ghost" onClick={()=>void start('video')}><Video size={18}/>Video call</Button></div></Popover>:<><span role="status">{state==='connecting'?'Connecting…':state==='video'?'Video call':'Voice call'}</span><IconButton label="End call" variant="primary" onClick={end}><PhoneOff size={18}/></IconButton></>}
+  {state==='idle'?<Popover title="Call Ohi" closeLabel="Close call options" side={props.actionDock?'top':'bottom'} align="end" trigger={props.actionDock?<Button variant="primary"><Phone size={18}/>Call</Button>:<IconButton label="Call Ohi" variant="primary"><Phone size={18}/></IconButton>}><div className={styles.callChoices}><Button variant="ghost" onClick={()=>void start('voice')}><Phone size={18}/>Voice call</Button><Button variant="ghost" onClick={()=>void start('video')}><Video size={18}/>Video call</Button></div></Popover>:<><span role="status">{state==='connecting'?'Connecting…':state==='video'?'Video call':'Voice call'}</span><IconButton label="End call" variant="primary" onClick={end}><PhoneOff size={18}/></IconButton></>}
   <video ref={preview} hidden={state!=='video'} className={styles.callPreview} muted playsInline aria-label="Your camera"/>
 
  </>;
  return <div className={styles.callHeader}>
   {props.windowControls}
-  <div className={styles.chatIdentity}><strong>Ohi</strong><span>Chief Community Officer</span></div>
-  {props.mobileDock?createPortal(callControls,props.mobileDock):callControls}
+  {props.actionDock?createPortal(callControls,props.actionDock):callControls}
  </div>;
 }

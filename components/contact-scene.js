@@ -15,7 +15,9 @@ import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
 export function createContactScene(host, signal) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  // Preserve the LED matrix detail on Retina displays. The former 1.5x cap
+  // visibly upscaled the canvas once the desktop stage became wide.
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.VSMShadowMap;
   renderer.setClearColor(0xffffff, 0);
@@ -53,19 +55,35 @@ export function createContactScene(host, signal) {
   // 80mm full-frame lens; preserve the previous framing with a longer camera distance.
   camera.filmGauge=35;
   camera.setFocalLength(80);
-  const cameraTarget=new THREE.Vector3(0,-.05,0);
-  const originalOffset=new THREE.Vector3(4,2.5,7.5).sub(cameraTarget);
+  const bodyCameraTarget=new THREE.Vector3(0,-.05,0);
+  const headCameraTarget=new THREE.Vector3(0,.42,0);
+  const cameraTarget=bodyCameraTarget.clone();
+  const originalOffset=new THREE.Vector3(4,2.5,7.5).sub(bodyCameraTarget);
+  const centeredOffset=new THREE.Vector3(0,0,originalOffset.length());
   const originalFov=THREE.MathUtils.degToRad(35);
-  const frameCamera=()=>{
+  const calculateCameraFrame=(position,target,headFocused=!!signal.headFocused)=>{
     camera.setFocalLength(80);
+    target.copy(headFocused?headCameraTarget:bodyCameraTarget);
     const distanceScale=Math.tan(originalFov/2)/Math.tan(THREE.MathUtils.degToRad(camera.fov)/2);
-    camera.position.copy(signal.centered?new THREE.Vector3(0,0,originalOffset.length()):originalOffset).multiplyScalar(distanceScale * Math.max(.72, Math.min(.85, .85 / camera.aspect))).add(cameraTarget);
+    // At wide desktop ratios, move the full-body camera 1.25x farther away so
+    // the robot renders at 80% of its former apparent size. Blend into the
+    // change to avoid a framing jump while the window is resized.
+    const wideScreenDistanceScale=headFocused?1:THREE.MathUtils.lerp(1,1.25,THREE.MathUtils.smoothstep(camera.aspect,1.15,1.5));
+    position.copy(signal.centered?centeredOffset:originalOffset).multiplyScalar(distanceScale * Math.max(.72, Math.min(.85, .85 / camera.aspect)) * (headFocused?.74:wideScreenDistanceScale)).add(target);
   };
+  const frameCamera=(headFocused=!!signal.headFocused)=>calculateCameraFrame(camera.position,cameraTarget,headFocused);
   frameCamera();
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enablePan = false; controls.enableZoom = false; controls.enableDamping = true;
   controls.minPolarAngle = .45; controls.maxPolarAngle = Math.PI/2-.06;
-  controls.target.set(0, -.05, 0);
+  controls.target.copy(cameraTarget);
+  let cameraFocusMode=!!signal.headFocused;
+  let cameraTransitionStart=-1;
+  const cameraTransitionDuration=400;
+  const cameraFromPosition=new THREE.Vector3();
+  const cameraFromTarget=new THREE.Vector3();
+  const cameraToPosition=new THREE.Vector3();
+  const cameraToTarget=new THREE.Vector3();
   const object = new THREE.Group(); scene.add(object);
   // Fine bead-blasted grain with a faint directional machining texture.
   // Both bump and roughness vary on the actual surface as the object turns.
@@ -173,6 +191,34 @@ export function createContactScene(host, signal) {
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({color:0x31332e,opacity:.24}));
   floor.rotation.x=-Math.PI/2;floor.position.y=-1.833;
   floor.receiveShadow=true;scene.add(floor);
+  // A circular field of dots on a staggered hex lattice. Their radius and
+  // opacity follow the profile of a sphere, strongest beneath Ohi and softly
+  // falling away at the edge without a hard texture boundary.
+  const floorGridCanvas=document.createElement('canvas');floorGridCanvas.width=1024;floorGridCanvas.height=1024;
+  const floorGridContext=floorGridCanvas.getContext('2d');
+  const floorGridCenter=floorGridCanvas.width/2;
+  const floorGridRadius=456;
+  const floorGridSpacing=34;
+  const floorGridRowSpacing=floorGridSpacing*Math.sqrt(3)/2;
+  for(let row=-18;row<=18;row++)for(let column=-18;column<=18;column++){
+    const x=floorGridCenter+column*floorGridSpacing+(Math.abs(row)%2)*floorGridSpacing/2;
+    const y=floorGridCenter+row*floorGridRowSpacing;
+    const radialDistance=Math.hypot(x-floorGridCenter,y-floorGridCenter);
+    if(radialDistance>floorGridRadius)continue;
+    const normalizedRadius=radialDistance/floorGridRadius;
+    const sphereFalloff=Math.sqrt(Math.max(0,1-normalizedRadius*normalizedRadius));
+    const strength=sphereFalloff*sphereFalloff;
+    floorGridContext.beginPath();
+    floorGridContext.arc(x,y,1.125+3*strength,0,Math.PI*2);
+    floorGridContext.fillStyle=`rgba(255,255,255,${strength})`;
+    floorGridContext.fill();
+  }
+  const floorGridTexture=new THREE.CanvasTexture(floorGridCanvas);
+  floorGridTexture.colorSpace=THREE.SRGBColorSpace;
+  floorGridTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+  const floorGridMaterial=new THREE.MeshBasicMaterial({map:floorGridTexture,color:0x3f423d,transparent:true,opacity:.62,depthWrite:false,toneMapped:false});
+  const floorGrid=new THREE.Mesh(new THREE.PlaneGeometry(9,9),floorGridMaterial);
+  floorGrid.rotation.x=-Math.PI/2;floorGrid.position.y=-1.828;floorGrid.renderOrder=1;scene.add(floorGrid);
   // Actual screen-space occlusion, recomputed as the camera orbits.
   const target=new THREE.WebGLRenderTarget(1,1,{type:THREE.HalfFloatType,samples:4});
   const composer=new EffectComposer(renderer,target);
@@ -181,23 +227,28 @@ export function createContactScene(host, signal) {
   const occlusion=new SSAOPass(scene,camera,1,1,16);
   occlusion.kernelRadius=.18;occlusion.minDistance=.002;occlusion.maxDistance=.18;
   composer.addPass(occlusion);
-  // Art-directed f/1.0-style bokeh; this shader's aperture is not a calibrated f-stop.
-  const depthOfField=new BokehPass(scene,camera,{focus:20,aperture:.008,maxblur:.012});
+  // Art-directed bokeh; this shader's aperture is not a calibrated f-stop.
+  const depthOfField=new BokehPass(scene,camera,{focus:20,aperture:.002,maxblur:.012});
   composer.addPass(depthOfField);
-  const screenFocus=new THREE.Vector3();
+  const screenWorldPosition=new THREE.Vector3();
+  const cameraForward=new THREE.Vector3();
+  const depthOfFieldReferenceSpan=900;
   // HDR LEDs bloom above the neutral background, before output tone mapping.
   const bloom=new UnrealBloomPass(new THREE.Vector2(1,1),.05,.35,1.1);
   composer.addPass(bloom);
   const output=new OutputPass();composer.addPass(output);
-  const pose={yaw:0,pitch:0,dragging:false};
+  const pose={yaw:0,pitch:0,eyeX:0,eyeY:0,dragging:false};
+  const eyeLook={x:0,y:0};
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const follow=(event)=>{
     if(pose.dragging)return;
     const bounds=host.getBoundingClientRect();
-    pose.yaw=THREE.MathUtils.clamp((event.clientX-bounds.left)/bounds.width*2-1,-1,1)*.45;
-    pose.pitch=THREE.MathUtils.clamp((event.clientY-bounds.top)/bounds.height*2-1,-1,1)*.18;
+    const horizontal=THREE.MathUtils.clamp((event.clientX-bounds.left)/bounds.width*2-1,-1,1);
+    const vertical=THREE.MathUtils.clamp((event.clientY-bounds.top)/bounds.height*2-1,-1,1);
+    pose.yaw=horizontal*.45;pose.pitch=vertical*.18;
+    pose.eyeX=horizontal*2.25;pose.eyeY=vertical*1.5;
   };
-  const centre=()=>{pose.yaw=0;pose.pitch=0;pose.dragging=false;};
+  const centre=()=>{pose.yaw=0;pose.pitch=0;pose.eyeX=0;pose.eyeY=0;pose.dragging=false;};
   const dragStart=()=>{pose.dragging=true;};
   const dragEnd=()=>{pose.dragging=false;};
   host.addEventListener('pointermove',follow);host.addEventListener('pointerleave',centre);
@@ -211,12 +262,26 @@ export function createContactScene(host, signal) {
     if(event.key==='ArrowDown')pose.pitch=Math.min(.18,pose.pitch+.06);
   };
   host.addEventListener('keydown',keyboard);
-  const resize = () => {const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;frameCamera();camera.updateProjectionMatrix();composer.setSize(w,h);};
+  const resize = () => {const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;frameCamera(cameraFocusMode);controls.target.copy(cameraTarget);controls.update();cameraTransitionStart=-1;camera.updateProjectionMatrix();composer.setSize(w,h);};
   const observer=new ResizeObserver(resize);observer.observe(host);resize();
   const expressionCanvas=document.createElement('canvas');expressionCanvas.width=columns;expressionCanvas.height=rows;
   const expressionContext=expressionCanvas.getContext('2d',{willReadFrequently:true});
   let performanceId=-1,performanceStart=0;
-  function performancePixels(performance,time){
+  let idleExpression='',idleExpressionUntil=0,nextIdleExpressionAt=0,lastIdleExpression='';
+  const idleExpressionChoices=['curious','happy','wink','sleepy'];
+  function naturalExpression(performance,ms){
+    const resting=signal.idleExpressions!==false&&performance?.display==='face'&&!performance.speaking&&!performance.listening&&['friendly','neutral'].includes(performance.expression);
+    if(reduced.matches||!resting){idleExpressionUntil=0;nextIdleExpressionAt=0;return performance?.expression;}
+    if(!nextIdleExpressionAt)nextIdleExpressionAt=ms+2800+Math.random()*3200;
+    if(ms>=nextIdleExpressionAt){
+      const choices=idleExpressionChoices.filter(expression=>expression!==lastIdleExpression);
+      idleExpression=choices[Math.floor(Math.random()*choices.length)];lastIdleExpression=idleExpression;
+      idleExpressionUntil=ms+650+Math.random()*550;
+      nextIdleExpressionAt=idleExpressionUntil+3200+Math.random()*3800;
+    }
+    return ms<idleExpressionUntil?idleExpression:performance.expression;
+  }
+  function performancePixels(performance,time,expression=performance?.expression,lookX=0,lookY=0){
     if(!performance||performance.display==='logo')return null;
     const ctx=expressionContext;ctx.clearRect(0,0,columns,rows);ctx.fillStyle='#fff';ctx.strokeStyle='#fff';ctx.lineWidth=2.3;ctx.lineCap='round';
     if(performance.display==='brand'||performance.display==='text'){
@@ -239,27 +304,27 @@ export function createContactScene(host, signal) {
       ctx.fillText(text,x,baseline);
     }else{
       const blink=Math.sin(time*1.2)> .992;
-      const eyesY=19;
-      if(performance.expression==='thinking'){
+      const eyesY=19+lookY;
+      if(expression==='thinking'){
         for(let i=0;i<3;i++){ctx.globalAlpha=.3+.7*(.5+.5*Math.sin(time*4-i));ctx.beginPath();ctx.arc(13+i*8,24,2.3,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
       }else{
         const settings=performance.face;
         const spacing=settings?.eyeSpacing??17, eyeSize=settings?.eyeSize??3.5;
-        for(const [i,x] of [21.5-spacing/2,21.5+spacing/2].entries()){
+        for(const [i,x] of [21.5-spacing/2+lookX,21.5+spacing/2+lookX].entries()){
           ctx.beginPath();
-          if(performance.expression==='love'){
+          if(expression==='love'){
             ctx.moveTo(x,eyesY+4);ctx.bezierCurveTo(x-9,eyesY-1,x-4,eyesY-8,x,eyesY-3);ctx.bezierCurveTo(x+4,eyesY-8,x+9,eyesY-1,x,eyesY+4);ctx.fill();
           }else{
-            const closed=blink||performance.expression==='sleepy'||(performance.expression==='wink'&&i===1);
-            ctx.ellipse(x,eyesY,eyeSize*.77,closed?1:performance.expression==='curious'&&i===1?eyeSize*1.4:eyeSize,0,0,Math.PI*2);ctx.fill();
+            const closed=blink||expression==='sleepy'||(expression==='wink'&&i===1);
+            ctx.ellipse(x,eyesY,eyeSize*.77,closed?1:expression==='curious'&&i===1?eyeSize*1.4:eyeSize,0,0,Math.PI*2);ctx.fill();
           }
         }
         ctx.beginPath();
         if(performance.speaking){ctx.ellipse(21.5,32,6,2+Math.abs(Math.sin(time*9))*3,0,0,Math.PI*2);ctx.stroke();}
-        else if(performance.expression==='surprised'){ctx.ellipse(21.5,32,3.5,5,0,0,Math.PI*2);ctx.stroke();}
+        else if(expression==='surprised'){ctx.ellipse(21.5,32,3.5,5,0,0,Math.PI*2);ctx.stroke();}
         else if(settings){ctx.moveTo(15,31);ctx.quadraticCurveTo(21.5,31+settings.smile,28,31);ctx.stroke();}
-        else if(['wink','love'].includes(performance.expression)){ctx.arc(21.5,28,7,.15,Math.PI-.15);ctx.stroke();}
-        else if(performance.expression==='happy'||performance.expression==='friendly'){ctx.arc(21.5,28,7,.15,Math.PI-.15);ctx.stroke();}
+        else if(['wink','love'].includes(expression)){ctx.arc(21.5,28,7,.15,Math.PI-.15);ctx.stroke();}
+        else if(expression==='happy'||expression==='friendly'){ctx.arc(21.5,28,7,.15,Math.PI-.15);ctx.stroke();}
         else{ctx.moveTo(17,32);ctx.lineTo(26,32);ctx.stroke();}
         if(performance.listening){ctx.beginPath();ctx.arc(21.5,25,18+Math.sin(time*3),0,Math.PI*2);ctx.stroke();}
       }
@@ -272,18 +337,38 @@ export function createContactScene(host, signal) {
     frame=requestAnimationFrame(animate);
     if(document.hidden)return;
     signal.sample();
-    if(centeredMode!==signal.centered){centeredMode=signal.centered;centre();frameCamera();controls.target.copy(cameraTarget);controls.update();}
+    const nextCameraFocusMode=!!signal.headFocused;
+    if(centeredMode!==signal.centered){centeredMode=signal.centered;cameraFocusMode=nextCameraFocusMode;cameraTransitionStart=-1;centre();frameCamera(cameraFocusMode);controls.target.copy(cameraTarget);controls.update();}
+    else if(cameraFocusMode!==nextCameraFocusMode){
+      cameraFocusMode=nextCameraFocusMode;centre();
+      if(reduced.matches){cameraTransitionStart=-1;frameCamera(cameraFocusMode);controls.target.copy(cameraTarget);controls.update();}
+      else{
+        cameraTransitionStart=ms;
+        cameraFromPosition.copy(camera.position);cameraFromTarget.copy(controls.target);
+        calculateCameraFrame(cameraToPosition,cameraToTarget,cameraFocusMode);
+      }
+    }
     const settings=signal.environment??defaultEnvironment;
     loadEnvironment(settings);
     bloom.strength=settings.bloom;bloom.radius=settings.bloomRadius;bloom.threshold=settings.bloomThreshold;
-    depthOfField.enabled=settings.depthOfField;depthOfField.uniforms.aperture.value=settings.aperture;
+    depthOfField.enabled=settings.depthOfField;
+    // Bokeh is screen-space, so a fixed value grows softer in pixel terms as
+    // the stage expands. Keep it visually stable while preserving the authored
+    // depth effect at the smaller, split-chat size.
+    const depthOfFieldScale=THREE.MathUtils.clamp(
+      depthOfFieldReferenceSpan/Math.max(host.clientWidth,host.clientHeight),
+      .4,
+      1
+    );
+    depthOfField.uniforms.aperture.value=settings.aperture*depthOfFieldScale;
+    depthOfField.uniforms.maxblur.value=.012*depthOfFieldScale;
     occlusion.enabled=settings.ambientOcclusion;renderer.toneMappingExposure=settings.exposure;
     key.intensity=settings.keyStrength;fill.intensity=settings.fillStrength;
     scene.environmentIntensity=settings.environmentStrength;
     scene.environmentRotation.y=THREE.MathUtils.degToRad(settings.rotation);
     scene.backgroundRotation.y=scene.environmentRotation.y;
-    if(signal.dark){backdrop.setRGB(.014,.014,.014);floor.material.color.setHex(0x000000);floor.material.opacity=.3;}
-    else{backdrop.setHex(0xffffff);floor.material.color.setHex(0x31332e);floor.material.opacity=.24;}
+    if(signal.dark){backdrop.setRGB(.014,.014,.014);floor.material.color.setHex(0x000000);floor.material.opacity=.3;floorGridMaterial.color.setHex(0xc7cac4);floorGridMaterial.opacity=.46;}
+    else{backdrop.setHex(0xffffff);floor.material.color.setHex(0x31332e);floor.material.opacity=.24;floorGridMaterial.color.setHex(0x3f423d);floorGridMaterial.opacity=.62;}
     scene.background=settings.showEnvironment?scene.environment:backdrop;
     const performance=signal.performance;
     if(performance && performance.id!==performanceId){performanceId=performance.id;performanceStart=ms;}
@@ -297,7 +382,10 @@ export function createContactScene(host, signal) {
     headPivot.rotation.y+=(pose.yaw+shake-headPivot.rotation.y)*easing;
     headPivot.rotation.x+=(pose.pitch+nod+(!reduced.matches&&performance?.speaking?Math.sin(ms*.005)*.025:0)-headPivot.rotation.x)*easing;
     headPivot.rotation.z+=(tilt-headPivot.rotation.z)*easing;
-    const facePixels=performancePixels(performance,reduced.matches?0:elapsed);
+    const eyeEasing=reduced.matches?1:.16;
+    eyeLook.x+=(pose.eyeX-eyeLook.x)*eyeEasing;eyeLook.y+=(pose.eyeY-eyeLook.y)*eyeEasing;
+    const expression=naturalExpression(performance,ms);
+    const facePixels=performancePixels(performance,reduced.matches?0:elapsed,expression,eyeLook.x,eyeLook.y);
     for(const led of leds){
       const dx=(led.x-(columns-1)/2)/((columns-1)/2);
       const dy=((rows-1)/2-led.y)/((rows-1)/2);
@@ -318,13 +406,25 @@ export function createContactScene(host, signal) {
     }
     matrix.instanceColor.needsUpdate=true;
     light.intensity=signal.active?signal.energy*.7:0;
+    if(cameraTransitionStart>=0){
+      const progress=THREE.MathUtils.clamp((ms-cameraTransitionStart)/cameraTransitionDuration,0,1);
+      const eased=THREE.MathUtils.smoothstep(progress,0,1);
+      camera.position.lerpVectors(cameraFromPosition,cameraToPosition,eased);
+      controls.target.lerpVectors(cameraFromTarget,cameraToTarget,eased);
+      if(progress===1)cameraTransitionStart=-1;
+    }
     controls.update();
     scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
-    // Track the centre of the moving LED face in camera-space depth.
-    screenFocus.set(0,0,.704).applyMatrix4(head.matrixWorld).applyMatrix4(camera.matrixWorldInverse);
-    depthOfField.uniforms.focus.value=Math.max(camera.near,-screenFocus.z+settings.focusOffset);
+    // Keep the depth-of-field plane locked to the LED screen surface through
+    // camera reframing, responsive layout changes, orbiting and head motion.
+    screenWorldPosition.set(0,0,.704).applyMatrix4(head.matrixWorld);
+    camera.getWorldDirection(cameraForward);
+    depthOfField.uniforms.focus.value=Math.max(
+      camera.near,
+      screenWorldPosition.sub(camera.position).dot(cameraForward)
+    );
     composer.render();
   }
   frame=requestAnimationFrame(animate);
-  return { reset(){centre();headPivot.rotation.set(0,0,0);frameCamera();controls.target.copy(cameraTarget);controls.update();}, dispose(){disposed=true;mapRequest++;customEnvironment?.dispose();pmrem.dispose();cancelAnimationFrame(frame);host.removeEventListener('keydown',keyboard);host.removeEventListener('pointermove',follow);host.removeEventListener('pointerleave',centre);host.removeEventListener('pointerdown',dragStart);host.removeEventListener('pointerup',dragEnd);host.removeEventListener('pointercancel',centre);observer.disconnect();controls.dispose();const geometries=new Set(),materials=new Set();scene.traverse(o=>{if(o.isMesh){geometries.add(o.geometry);materials.add(o.material);}});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());beauty.dispose();occlusion.dispose();depthOfField.dispose();bloom.dispose();output.dispose();composer.dispose();key.shadow.dispose();matrix.dispose();etchTexture.dispose();grain.dispose();environment.dispose();renderer.dispose();renderer.domElement.remove();} };
+  return { reset(){cameraTransitionStart=-1;centre();headPivot.rotation.set(0,0,0);frameCamera(cameraFocusMode);controls.target.copy(cameraTarget);controls.update();}, dispose(){disposed=true;mapRequest++;customEnvironment?.dispose();pmrem.dispose();cancelAnimationFrame(frame);host.removeEventListener('keydown',keyboard);host.removeEventListener('pointermove',follow);host.removeEventListener('pointerleave',centre);host.removeEventListener('pointerdown',dragStart);host.removeEventListener('pointerup',dragEnd);host.removeEventListener('pointercancel',centre);observer.disconnect();controls.dispose();const geometries=new Set(),materials=new Set();scene.traverse(o=>{if(o.isMesh){geometries.add(o.geometry);materials.add(o.material);}});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());beauty.dispose();occlusion.dispose();depthOfField.dispose();bloom.dispose();output.dispose();composer.dispose();key.shadow.dispose();matrix.dispose();floorGridTexture.dispose();etchTexture.dispose();grain.dispose();environment.dispose();renderer.dispose();renderer.domElement.remove();} };
 }

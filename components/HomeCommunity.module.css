@@ -21,12 +21,14 @@
 /* Keep the home composition contained on wide displays. */
 .page .site-header,.page main{width:100%;max-width:1440px;margin-inline:auto}
 
-.page .headerJoin{border-radius:999px;min-height:40px;padding:10px 22px;color:#fff;font-size:14px;white-space:nowrap}
+.page .headerCalendar,.page .headerJoin{border-radius:999px;min-height:40px;font-size:14px;white-space:nowrap}
+.page .headerCalendar{padding:10px 16px;border-color:var(--ui-control);background:transparent}
+.page .headerJoin{padding:10px 22px;color:#fff}
 @media(max-width:600px){.site-header{gap:8px;padding-inline:12px}.brand{gap:6px}.brand svg{width:24px}.wordmark{width:88px}.headerTools{gap:2px}.page .headerJoin{font-size:12px;white-space:normal;text-align:center;line-height:1.2;padding:8px 12px;max-width:116px}.headerTools>button,.page .menuTrigger{width:36px;min-width:36px}}
 
 .joinMobile{display:none}
 @media(max-width:760px){.joinDesktop{display:none}.joinMobile{display:inline}.page .headerJoin{white-space:nowrap}}
-@media(max-width:760px){.page .headerJoin{display:none}}
+@media(max-width:760px){.page .headerCalendar,.page .headerJoin{display:none}}
 /* Give the header more breathing room while preserving the viewport layout. */
 .site-header{height:80px;min-height:80px;padding-block:16px}
 @media(max-width:760px){.site-header{height:76px;min-height:76px;padding:16px 20px}}

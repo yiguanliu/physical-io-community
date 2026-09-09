@@ -1,7 +1,7 @@
 "use client";
 import {useNotification} from "@/workspace-ui/src";
 import { useEffect, useRef, useState } from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { ScanFace, SlidersHorizontal } from "lucide-react";
 import { Button, IconButton, Popover, Dialog } from "@/workspace-ui/src";
 import styles from "./ContactObject.module.css";
 import EnvironmentCreator from "./EnvironmentCreator";
@@ -24,7 +24,7 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
   const cleanup = useRef<() => void>(() => {});
   const reset = useRef<() => void>(() => {});
   const request = useRef(0);
-  const signal = useRef({environment:activeEnvironment,environmentStatus:"",dark,centered,energy:0,x:0,y:0,active:false,performance:undefined as RobotPerformance | undefined,depth:null as Float32Array | null,bands:new Uint8Array(128),sample:()=>{}});
+  const signal = useRef({environment:activeEnvironment,environmentStatus:"",dark,centered,headFocused:true,idleExpressions:!previewOnly,energy:0,x:0,y:0,active:false,performance:undefined as RobotPerformance | undefined,depth:null as Float32Array | null,bands:new Uint8Array(128),sample:()=>{}});
   useEffect(()=>{signal.current.environment=activeEnvironment;},[activeEnvironment]);
   useEffect(()=>{signal.current.dark=dark;},[dark]);
   useEffect(()=>{signal.current.centered=centered;},[centered]);
@@ -34,6 +34,7 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
   const [pending,setPending] = useState(false);
   const [loadingMessage,setLoadingMessage] = useState("Waiting for device permission…");
   const [ready,setReady] = useState(false);
+  const [headFocused,setHeadFocused] = useState(true);
   const [error,setError] = useState("");
   const [environmentStatus,setEnvironmentStatus]=useState("");
   useEffect(()=>{if(error)notify(error);},[error,notify]);
@@ -113,6 +114,7 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
   return <div className={styles.object}>
     <div className={styles.stage} ref={host} tabIndex={0} role="img" aria-label="Interactive dark robot with a circular amber display. Move your pointer or use arrow keys to turn its head. Drag to orbit the robot." />
     {!previewOnly&&<div className={styles.controlDock}>
+    <IconButton label={headFocused?"Show full body":"Focus on head"} title={headFocused?"Show full body":"Focus on head"} variant="ghost" aria-pressed={headFocused} className={styles.controlTrigger} disabled={!ready} onClick={()=>{onInteract?.();const next=!headFocused;signal.current.headFocused=next;setHeadFocused(next);}}><ScanFace size={20}/></IconButton>
     <Popover side="left" align="center" title="Robot controls" closeLabel="Close robot controls" trigger={<IconButton label="Robot controls" variant="ghost" className={styles.controlTrigger}><SlidersHorizontal size={20}/>{(mode!=="idle"||pending)&&<span className={styles.activeDot}/>}</IconButton>}>
     <div className={styles.controls}>
       <Button disabled={!ready||pending} aria-pressed={mode==="voice"} onClick={()=>mode==="voice"?stop():void enable("voice")}>{mode==="voice"?"Stop microphone":"Sound reactive"}</Button>
