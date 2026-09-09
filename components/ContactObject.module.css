@@ -21,8 +21,10 @@
 .object .controls button{font-size:13px}
 @media(max-width:760px){.object .controls{flex-wrap:nowrap;gap:4px;margin-bottom:4px}.object .controls button{font-size:12px;padding:4px 7px;min-height:34px}.object .status{font-size:11px!important}}
 
-.controlDock{order:-1;display:flex;justify-content:flex-end;flex-shrink:0;position:relative;z-index:4;margin-bottom:4px}
-.controlTrigger{position:relative;border-radius:50%!important;background:rgb(255 255 255 / 55%)!important;border:0!important;box-shadow:0 3px 12px rgb(0 0 0 / 4%)}
+.controlDock{order:-1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;position:relative;z-index:4;margin-bottom:4px}
+.controlTrigger{position:relative;width:40px;height:40px;min-width:40px;min-height:40px;padding:0;border-radius:50%!important;background:rgb(255 255 255 / 55%)!important;border:0!important;box-shadow:0 3px 12px rgb(0 0 0 / 4%)}
+.controlTrigger[aria-pressed=true]{background:var(--ui-action)!important;color:var(--ui-on-action)}
+.controlTrigger[aria-pressed=true]:not(:disabled):hover{background:var(--ui-action-hover)!important}
 .activeDot{position:absolute;right:6px;top:6px;width:5px;height:5px;border-radius:50%;background:var(--ui-action)}
 .controlDock :global(.ui-popover){width:230px;border:0;background:#f8f8f8}
 .object .controlDock .controls{flex-direction:column;flex-wrap:nowrap;align-items:stretch;order:0;margin:0;gap:4px}
