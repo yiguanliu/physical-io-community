@@ -29,6 +29,12 @@ const member = (overrides: Partial<AudienceMember> = {}): AudienceMember => ({
 });
 
 describe("audience eligibility", () => {
+  it("allows missing consent when requested but always honors opt-outs", () => {
+    expect(skipReasonForMember(member({subscriptions: []}), {requireConsent: false})).toBeNull();
+    expect(skipReasonForMember(member({subscriptions: [{topic: 'newsletter', status: 'unsubscribed'}]}), {requireConsent: false})).toBe('unsubscribed');
+    expect(skipReasonForMember(member({emailStatus: 'complained'}), {requireConsent: false})).toBe('complained');
+  });
+
   it("normalizes emails", () => {
     expect(normalizeEmail("  Ava@Example.com ")).toBe("ava@example.com");
   });

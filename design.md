@@ -403,3 +403,7 @@ Replace the shared owl account image with each signed-in person’s headshot or 
 ## Newsletter email presentation
 
 Newsletter Studio and community campaigns share `lib/email/template.ts`: official white raster wordmark on an ink header, restrained paprika rule, white reading surface and gray canvas. Email uses the current Manrope brand stack with Arial/Helvetica fallback, inline styles and a fluid 600px maximum layout for email clients. Markdown headings and links share email theme colours. Plain-text alternatives, personalisation, consent, unsubscribe and delivery controls remain intact. Browser previews are illustrative; inbox-client rendering requires separate delivery verification.
+
+## Direct community email
+
+The member-list composer supports Send email and Save draft. Direct sends persist the campaign before delivery and automatically continue through the full audience using bounded internal requests. Communications shows accepted counts, status and recipient history. A missing opt-in record does not exclude an address in this workflow; existing topic/global opt-outs, bounces, complaints and archived records remain excluded. Provider limits still apply, with pacing and bounded rate-limit retries using stable idempotency keys. Keep delivery open until completion; an interrupted campaign can resume from Communications.

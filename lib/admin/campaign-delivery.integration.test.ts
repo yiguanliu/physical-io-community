@@ -13,14 +13,17 @@ test('batch email: consent, fresh suppression, bounded batches, retry idempotenc
   const actor={id:crypto.randomUUID(),name:'Verification'},id=crypto.randomUUID();
   await db.query("insert into campaigns(id,name,subject,body,idempotency_key) values($1,'Test','Hello','Hello {{first_name}}',$1)",[id]);
   for(let i=0;i<14;i++){const memberId=`member-${String(i).padStart(2,'0')}`;await db.query("insert into members(id,email,email_normalized,full_name,first_name,status,email_status) values($1,$2,$2,'Test Member','Test','active',$3)",[memberId,`${i}@example.invalid`,i===13?'bounced':'ok']);if(i!==12)await db.query("insert into subscriptions(member_id,topic,status) values($1,'newsletter','subscribed')",[memberId]);}
-  const preview=await previewDelivery(isolated,id);assert.equal(preview.eligibleCount,12);assert.equal(preview.skippedCount,2);
+  const preview=await previewDelivery(isolated,id);assert.equal(preview.eligibleCount,13);assert.equal(preview.skippedCount,1);
   const sent:string[]=[];const keys:string[]=[];
   const transport:EmailTransport=async(payload,key)=>{sent.push(payload.to);keys.push(key);assert.ok(payload.text.includes('Unsubscribe: https://example.invalid/unsubscribe?token='));assert.ok(payload.headers['List-Unsubscribe']);if(sent.length===1)await db.query("update subscriptions set status='unsubscribed' where member_id='member-01'");return {id:crypto.randomUUID()};};
   const request={action:'send' as const,id,requestId:crypto.randomUUID(),confirmation:preview.confirmation};
   const config={from:'Test <test@example.invalid>',site:'https://example.invalid'};
-  const first=await deliverBatch(isolated,request,actor,transport,config);assert.equal(first.sent,9);assert.equal(first.remaining,2);assert.equal(first.skipped,3);
+  const first=await deliverBatch(isolated,request,actor,transport,config);assert.equal(first.sent,9);assert.equal(first.remaining,3);assert.equal(first.skipped,2);
   await deliverBatch(isolated,request,actor,transport,config);assert.equal(sent.length,9,'same request must not send another batch');
-  const second=await deliverBatch(isolated,{...request,requestId:crypto.randomUUID()},actor,transport,config);assert.equal(second.sent,11);assert.equal(second.remaining,0);assert.equal(new Set(keys).size,11);assert.ok(!sent.includes('1@example.invalid'));assert.ok(!sent.includes('12@example.invalid'));assert.ok(!sent.includes('13@example.invalid'));
+  const second=await deliverBatch(isolated,{...request,requestId:crypto.randomUUID()},actor,transport,config);assert.equal(second.sent,12);assert.equal(second.remaining,0);assert.equal(new Set(keys).size,12);assert.ok(!sent.includes('1@example.invalid'));assert.ok(sent.includes('12@example.invalid'));assert.ok(!sent.includes('13@example.invalid'));
+  assert.equal((await db.query('select status from campaigns where id=$1',[id])).rows[0].status,'sent');
+  assert.equal((await db.query('select count(*)::int n from campaign_events where campaign_id=$1',[id])).rows[0].n,2);
+  assert.equal((await db.query("select count(*)::int n from campaign_recipients where campaign_id=$1 and status='sent'",[id])).rows[0].n,12);
   await assert.rejects(()=>deliverBatch(isolated,{...request,requestId:crypto.randomUUID()},actor,transport,config),/Only a draft/);
   const uncertainId=crypto.randomUUID();await db.query("insert into campaigns(id,name,subject,body,idempotency_key,audience_filter) values($1,'Uncertain','Hello','Test',$1,$2)",[uncertainId,JSON.stringify({memberIds:['member-00']})]);const p=await previewDelivery(isolated,uncertainId);
   const outcome=await deliverBatch(isolated,{...request,id:uncertainId,requestId:crypto.randomUUID(),confirmation:p.confirmation},actor,async()=>{throw new DeliveryError('Timeout',true);},config);assert.equal(outcome.uncertain,1);assert.equal(outcome.sent,0);

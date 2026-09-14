@@ -70,6 +70,8 @@ export function skipReasonForMember(member: AudienceMember, filter: AudienceFilt
   if (filter.interests?.length && !filter.interests.some((interest) => member.interests.includes(interest))) {
     return "interest_filter";
   }
+  const topicSubscription = member.subscriptions.find(item => item.topic === campaignTypeToTopic(filter.campaignType ?? "newsletter"));
+  if (topicSubscription?.status === "unsubscribed") return "unsubscribed";
   const requireConsent = filter.requireConsent !== false;
   if (requireConsent) {
     const topic = campaignTypeToTopic(filter.campaignType ?? "newsletter");
