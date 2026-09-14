@@ -127,3 +127,15 @@ Use Disclosure for detailed inspector sections. The whole heading toggles the se
 
 ### Typewriter appearance
 The former Monospace option is presented as Typewriter and uses Courier New with Courier/monospace fallbacks. Preserve the stored `mono` theme value for compatibility with existing preferences.
+
+## Public pages
+
+OHI programmed messages reuse the shared field, switch, card, dialog, alert and button primitives. The admin-only editor is accessible from the homepage robot and the admin workspace. Changes are drafts until explicitly published. Use labeled duration and speed fields, inline removal confirmation, keyboard-accessible ordering, and a shared 5×7 bitmap glyph renderer for the hardware preview and actual LED scene. The amber preview (#ffb347 on #111111, approximately 10.6:1) represents the physical display, not an alternate admin palette. Public playback yields to conversations, pauses in hidden tabs, and offers pause and static reading controls. Reduced-motion visitors receive the static reader without automatic scrolling.
+
+`components/public/PublicHeader.tsx` is the shared navigation for About, Events, Shop and the desktop homepage: official brand, three page links, Join free and the appearance toggle, with a subtle bottom divider. The homepage switches to its existing compact menu at 760px and below; keep its full-viewport robot composition intact. Appearance state belongs to the page shell, not the header.
+
+The About starting-point card uses three bold, smooth SVG silhouettes for love, mind and body. Keep them monochrome with the current theme foreground, equally spaced and static. The smaller supporting illustrations remain pixel art. The triptych has a descriptive accessible name; it is not a replacement for the official Physical I/O logo.
+
+Action buttons in equal-height card rows stay bottom-aligned, regardless of copy length. The shared public tier grid applies an automatic block-start margin to each card's action; preceding content retains one section-spacing token of clearance. This applies to both business tiers and event formats, without fixed card heights or truncated content.
+
+The public About, Events and Shop pages use the homepage's grey canvas via `--ui-public-canvas` (#eaeaea light, #111111 dark), Manrope and the same shared action tokens. `components/public/PublicShell.tsx` owns their navigation and appearance; `public.css` contains public composition only. Cards use the shared Card primitive, with 24px public corners and readable 14–17px prose. Inline pixel SVGs are static, theme-aware and decorative. The public pages use normal document scrolling, a responsive bento grid in reading order and no admin sidebar. Keep shared controls and dark-mode behavior intact when extending this composition.

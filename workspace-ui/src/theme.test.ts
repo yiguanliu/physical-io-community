@@ -34,6 +34,15 @@ test('minimal preset uses a neutral action with white text', () => {
  assert.ok(contrast(themeColors(minimalTheme.accent).action, '#ffffff') >= 4.5);
 });
 
+test('public canvas keeps text and focus readable in light and dark modes', () => {
+ const css=readFileSync(new URL('./styles.css',import.meta.url),'utf8');
+ for(const pattern of [/\.wui\{([^}]+)/, /\.wui\[data-mode=dark\]\{([^}]+)/]) {
+  const tokens=Object.fromEntries([...css.match(pattern)![1].matchAll(/--ui-([\w-]+):(#[\da-f]{6})/g)].map(m=>[m[1],m[2]]));
+  for(const fg of ['text','muted']) assert.ok(contrast(tokens[fg],tokens['public-canvas'])>=4.5,`${fg}/public-canvas`);
+  assert.ok(contrast(tokens.focus,tokens['public-canvas'])>=3,'focus/public-canvas');
+ }
+});
+
  test('both dark palettes share neutral foundations without a color cast',()=>{
   const css=readFileSync(new URL('./styles.css',import.meta.url),'utf8');
   const blocks=[css.match(/\.wui\[data-mode=dark\]\{([^}]+)/)![1],css.match(/\.wui\[data-palette=minimal\]\[data-mode=dark\]\{([^}]+)/)![1]];

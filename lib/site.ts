@@ -11,10 +11,25 @@ export const INSTAGRAM_URL = "https://www.instagram.com/physical.io/";
 export const LINKEDIN_URL = "https://www.linkedin.com/company/physical-i-o/";
 export const WHATSAPP_URL = "https://chat.whatsapp.com/DoR1MYEm1yU2VKG8ETmQys?mode=gi_t";
 export const LUMA_URL = "https://luma.com/phyiscal-io";
+export const LUMA_CALENDAR_EMBED_URL = "https://luma.com/embed/calendar/cal-Qb2jFfezFMiVkF1/events";
 
 export const SITE_NAME = "Physical I/O";
 export const SITE_DESCRIPTION =
-  "Physical I/O is London's community for Physical AI, Robotics, Spatial Intelligence, Wearables, Intelligent Hardware and Embodied AI.";
+  "A community led by curiosity, design and engineering. Physical I/O connects people exploring intelligence in the physical world and building what comes next.";
+
+export const OHI_GITHUB_URL = 'https://github.com/yiguanliu/physical-io-community/';
+export const BUSINESS_TIERS: { name: string; price: string; description: string; features: string[]; action: string; href: string }[] = [
+  { name: 'Community', price: 'Free to join', description: 'Find your people. Exchange ideas, share your work and make something together.', features: ['Free community gatherings', 'Collaborators and shared knowledge', 'News and opportunities, by opt-in'], action: 'Join free', href: '/join' },
+  { name: 'Build', price: 'Scoped to your project', description: 'Our next chapter: help teams move from an idea to working hardware.', features: ['Design and prototype support', 'Component and supplier sourcing', 'Small-batch production coordination'], action: 'Discuss your project', href: '/askusanything' },
+  { name: 'Partners', price: 'Commercial partnerships', description: 'Meet the people exploring your technology and put it into their hands.', features: ['Programme sponsorship', 'Product launches and demonstrations', 'Supplier collaborations and distribution'], action: 'Work with us', href: '/askusanything' },
+];
+export const EVENT_FORMATS: { name: string; art: 'speaker' | 'hackathon' | 'robot'; description: string; audience: string; outcome: string; partner: string }[] = [
+  { name: 'Speaker night', art: 'speaker', description: 'Fresh perspectives, honest conversations and hardware you can see up close.', audience: 'Anyone with a question about physical intelligence.', outcome: 'A new perspective. A useful conversation.', partner: 'Share a talk, demonstrate a product or co-host a night.' },
+  { name: 'Hackathon', art: 'hackathon', description: 'Bring a question. Find a team. Turn an idea into a physical prototype.', audience: 'Designers, engineers and curious problem-solvers.', outcome: 'A prototype, new collaborators and something to build on.', partner: 'Set a challenge, provide hardware or mentor a team.' },
+  { name: 'Robotics workshop', art: 'robot', description: 'Learn by making. Explore sensors, code and movement through hands-on sessions.', audience: 'Newcomers and builders, with the level listed for each session.', outcome: 'Practical skills and a working experiment.', partner: 'Contribute equipment, teach a session or support OHI workshops.' },
+];
+export const MEMBER_BENEFITS = ['Free member gatherings, subject to capacity', 'Talks, demos and opportunities to build together', 'Connections with collaborators, mentors and employers', 'Optional news, product updates and supplier opportunities', 'A place to share your work and propose an event'];
+export const MEMBER_RIGHTS = ['Membership without a subscription fee', 'Respectful participation and a way to raise concerns', 'Clear sponsorship and commercial disclosures', 'Control over email preferences and personal information', 'No sharing of your contact details with partners without permission'];
 
 export const FOCUS_AREAS = [
   "Physical AI",
@@ -134,7 +149,7 @@ export const FAQ: FaqEntry[] = [
   },
   {
     q: "What is Physical I/O?",
-    a: "Physical I/O is an independent London community for Physical AI, Robotics, Spatial Intelligence, Wearables and Intelligent Hardware, connecting founders, engineers, designers, researchers and investors through meetups, demo nights and talks.",
+    a: "Physical I/O is a community led by curiosity, design and engineering, exploring intelligence in the physical world. Alongside the community, we are developing services and a platform to help teams build physical products.",
   },
   {
     q: "Who can join?",
@@ -142,7 +157,7 @@ export const FAQ: FaqEntry[] = [
   },
   {
     q: "Is it free?",
-    a: "Yes. Joining the Physical I/O community is free. Some future events may be ticketed, but membership costs nothing.",
+    a: "Yes. Community membership and our community events are free. Events require registration and are subject to capacity. Hardware products and commercial services are paid separately.",
   },
   {
     q: "Is it only for engineers?",

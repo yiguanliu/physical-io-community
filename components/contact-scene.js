@@ -9,6 +9,7 @@ import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { defaultEnvironment } from '../lib/robot/environment';
+import { matrixPoints } from '../lib/robot/dot-matrix';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader.js';
 import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
@@ -285,6 +286,12 @@ export function createContactScene(host, signal) {
     if(!performance||performance.display==='logo')return null;
     const ctx=expressionContext;ctx.clearRect(0,0,columns,rows);ctx.fillStyle='#fff';ctx.strokeStyle='#fff';ctx.lineWidth=2.3;ctx.lineCap='round';
     if(performance.display==='brand'||performance.display==='text'){
+      if(performance.textStyle==='matrix'){
+        const lines=(performance.displayText||'Hello').split('\n').slice(0,3);
+        const top=Math.floor((rows-(lines.length*10-3))/2);
+        for(const [x,y] of matrixPoints(lines.join('\n'),time,performance.scrollSpeed??10))ctx.fillRect(x+4,y+top,1,1);
+        return ctx.getImageData(0,0,columns,rows).data;
+      }
       const isIdentity=performance.display==='brand';
       // Keep the static mark for visitors who prefer reduced motion.
       if(isIdentity&&reduced.matches)return null;
@@ -399,8 +406,10 @@ export function createContactScene(host, signal) {
       const edge=Math.max(0,Math.min(1,(outer-radius)/.045));
       const spoke=radius>=inner && radius<=outer ? edge*(.12+band*.88):0;
       const response=spoke+Math.exp(-Math.pow((radius-inner)/.025,2))*.12;
-      const target=signal.depth?signal.depth[led.index]:signal.active?Math.min(1,response):facePixels?facePixels[led.index*4+3]/255*.8*(performance?.face?.brightness??1):led.logo*.38;
-      led.brightness+=(target-led.brightness)*(signal.depth?.35:.16);
+      const matrixText=performance?.textStyle==='matrix';
+      const target=signal.depth?signal.depth[led.index]:signal.active?Math.min(1,response):facePixels?facePixels[led.index*4+3]/255*(matrixText?.55:.8)*(performance?.face?.brightness??1):led.logo*.38;
+      // Scrolling lettering needs crisp on/off pixels, without facial-expression trails.
+      led.brightness+=(target-led.brightness)*(matrixText?1:signal.depth?.35:.16);
       const power=led.brightness*8;
       matrix.setColorAt(led.index,ledColor.setRGB(.001+power,.001+power*.34,.001+power*.021));
     }

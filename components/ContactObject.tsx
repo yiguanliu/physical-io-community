@@ -10,7 +10,7 @@ import ExpressionCreator from "./ExpressionCreator";
 import type { RobotPerformance } from "@/lib/robot/contracts";
 
 type Mode = "idle" | "voice" | "camera";
-export default function ContactObject({performance,onReady,onInteract,onConfigure,configureDisabled,dark=false,previewOnly=false,centered=false,environmentSettings}:{environmentSettings?:EnvironmentSettings;centered?:boolean;previewOnly?:boolean;onConfigure?:(value:RobotPerformance)=>void;configureDisabled?:boolean;dark?:boolean;performance?:RobotPerformance;onReady?:(ready:boolean)=>void;onInteract?:()=>void}) {
+export default function ContactObject({performance,onReady,onInteract,onConfigure,configureDisabled,dark=false,previewOnly=false,centered=false,environmentSettings,extraControls}:{extraControls?:React.ReactNode;environmentSettings?:EnvironmentSettings;centered?:boolean;previewOnly?:boolean;onConfigure?:(value:RobotPerformance)=>void;configureDisabled?:boolean;dark?:boolean;performance?:RobotPerformance;onReady?:(ready:boolean)=>void;onInteract?:()=>void}) {
  const notify=useNotification();
   const [environmentOpen,setEnvironmentOpen]=useState(false);
   const [environment,setEnvironment]=useState(defaultEnvironment);
@@ -112,7 +112,7 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
     finally{if(token===request.current && next==="voice")setPending(false);}
   }
   return <div className={styles.object}>
-    <div className={styles.stage} ref={host} tabIndex={0} role="img" aria-label="Interactive dark robot with a circular amber display. Move your pointer or use arrow keys to turn its head. Drag to orbit the robot." />
+    <div className={styles.stage} ref={host} tabIndex={0} role="img" aria-label={performance?.textStyle==="matrix"?`OHI announcement: ${performance.displayText}`:"Interactive dark robot with a circular amber display. Move your pointer or use arrow keys to turn its head. Drag to orbit the robot."} />
     {!previewOnly&&<div className={styles.controlDock}>
     <IconButton label={headFocused?"Show full body":"Focus on head"} title={headFocused?"Show full body":"Focus on head"} variant="ghost" aria-pressed={headFocused} className={styles.controlTrigger} disabled={!ready} onClick={()=>{onInteract?.();const next=!headFocused;signal.current.headFocused=next;setHeadFocused(next);}}><ScanFace size={20}/></IconButton>
     <Popover side="left" align="center" title="Robot controls" closeLabel="Close robot controls" trigger={<IconButton label="Robot controls" variant="ghost" className={styles.controlTrigger}><SlidersHorizontal size={20}/>{(mode!=="idle"||pending)&&<span className={styles.activeDot}/>}</IconButton>}>
@@ -125,6 +125,7 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
       <Button variant="ghost" disabled={!ready} onClick={()=>setEnvironmentOpen(true)}>Environment studio ↗</Button>
     </div>
     </Popover>
+    {extraControls}
     </div>
     }
     {!previewOnly&&onConfigure&&<Dialog open={studioOpen} onOpenChange={setStudioOpen} title="Expression studio" description="Shape Ohi’s expression. Changes preview live."><div className={styles.studio}><div className={styles.studioPreview}><ContactObject previewOnly environmentSettings={activeEnvironment} dark={dark} performance={performance}/></div><aside className={styles.studioSettings} aria-label="Expression settings"><ExpressionCreator expanded disabled={configureDisabled} onChange={value=>{stop();onConfigure(value);}}/></aside></div></Dialog>}
