@@ -415,3 +415,5 @@ The latest email direction is a typed letter on one continuous gray canvas. All 
 Email canvas is now #EF2900 with white live text and underlined white links. Thin light-orange rules separate the banner, reading content, footer and editorial subsections. Rokkitt and the supplied images remain unchanged.
 
 The communication composer provides Write/Preview tabs and contextual Markdown controls for headings, emphasis, lists, linked text and publicly hosted images. Preview uses the same escaped Markdown renderer and email wrapper as test/live delivery, isolated in a sandboxed iframe. Personalisation remains visible as placeholders in preview; recipient-specific values and unsubscribe links are filled during delivery. Plain-text alternatives strip Markdown syntax and preserve destinations.
+
+Account confirmation, invitation, recovery, code verification and security notifications reuse the newsletter wrapper through `lib/email/auth-templates.ts`. Generated Supabase files retain provider template variables and omit marketing unsubscribe links. The app email transport also adds this wrapper to messages without supplied HTML.
