@@ -407,3 +407,11 @@ Newsletter Studio and community campaigns share `lib/email/template.ts`: officia
 ## Direct community email
 
 The member-list composer supports Send email and Save draft. Direct sends persist the campaign before delivery and automatically continue through the full audience using bounded internal requests. Communications shows accepted counts, status and recipient history. A missing opt-in record does not exclude an address in this workflow; existing topic/global opt-outs, bounces, complaints and archived records remain excluded. Provider limits still apply, with pacing and bounded rate-limit retries using stable idempotency keys. Keep delivery open until completion; an interrupted campaign can resume from Communications.
+
+Newsletter emails use the supplied orange banner (`public/assets/email/physical-io-banner.png`) at full reading width. Body copy uses bundled Rokkitt with Georgia/Times fallback; headings and pill-shaped white-on-orange CTAs retain the sans-serif brand stack. Standalone Markdown links become CTAs, while inline and unsubscribe links remain text links. Custom font support varies by email client; assets must be deployed before sending the updated template.
+
+The latest email direction is a typed letter on one continuous gray canvas. All live text uses Rokkitt, then American Typewriter and Courier New fallbacks. Editorial links are underlined text rather than filled buttons. The supplied orange header and footer images frame the letter; unsubscribe remains readable live text above the footer.
+
+Email canvas is now #EF2900 with white live text and underlined white links. Thin light-orange rules separate the banner, reading content, footer and editorial subsections. Rokkitt and the supplied images remain unchanged.
+
+The communication composer provides Write/Preview tabs and contextual Markdown controls for headings, emphasis, lists, linked text and publicly hosted images. Preview uses the same escaped Markdown renderer and email wrapper as test/live delivery, isolated in a sandboxed iframe. Personalisation remains visible as placeholders in preview; recipient-specific values and unsubscribe links are filled during delivery. Plain-text alternatives strip Markdown syntax and preserve destinations.

@@ -1,3 +1,4 @@
+import { markdownToHtml, markdownToPlainText } from "@/lib/marketing/markdown";
 import { renderEmailHtml } from "@/lib/email/template";
 import type { PoolClient } from 'pg';
 import { z } from 'zod';
@@ -27,7 +28,8 @@ export async function deliverBatch(db:PoolClient,input:z.infer<typeof deliveryCo
   if(!c.body.trim()||!c.subject.trim())throw new RecordConflict('Save a subject and message before sending.');
   if(input.action==='test'){
    const payload:EmailPayload={from:config.from,to:input.email,subject:`[TEST] ${c.subject}`,text:personalise(c.body,{firstName:actor.name.split(' ')[0],fullName:actor.name,email:input.email,city:''}),headers:{'X-Physical-IO-Campaign':c.id}};
-   payload.html=renderEmailHtml({previewText:c.subject,body:payload.text});
+   payload.html=renderEmailHtml({previewText:c.subject,body:payload.text,bodyHtml:markdownToHtml(payload.text)});
+   payload.text=markdownToPlainText(payload.text);
    const result=await transport(payload,`test/${input.requestId}`);const summary={test:true,providerId:result.id};await log(db,c.id,'test_sent',summary,actor,input.requestId);return summary;
   }
   if(!['draft','sending'].includes(c.status))throw new RecordConflict('Only a draft or an in-progress campaign can be sent.');
@@ -44,8 +46,8 @@ export async function deliverBatch(db:PoolClient,input:z.infer<typeof deliveryCo
   for(const r of pending){const m=(await people(db,r.member_id))[0];const reason=!m?'member_removed':m.email!==r.email?'email_changed':skipReasonForMember(m,filter);if(reason){await db.query("update public.campaign_recipients set status='skipped',skip_reason=$2 where id=$1",[r.id,reason]);continue;}
    const unsubscribe=new URL('/unsubscribe',config.site);unsubscribe.searchParams.set('token',m.unsubscribeToken);
    const oneClick=new URL('/api/email/unsubscribe',config.site);oneClick.searchParams.set('token',m.unsubscribeToken);
-   const payload:EmailPayload={from:config.from,to:r.email,subject:c.subject,text:`${personalise(c.body,m)}\n\nUnsubscribe: ${unsubscribe}`,headers:{'List-Unsubscribe':`<${oneClick}>`,'List-Unsubscribe-Post':'List-Unsubscribe=One-Click','X-Physical-IO-Campaign':c.id},...(c.reply_to?{reply_to:c.reply_to}:{})};
-   payload.html=renderEmailHtml({previewText:c.subject,body:personalise(c.body,m),unsubscribeUrl:unsubscribe.toString()});
+   const payload:EmailPayload={from:config.from,to:r.email,subject:c.subject,text:`${markdownToPlainText(personalise(c.body,m))}\n\nUnsubscribe: ${unsubscribe}`,headers:{'List-Unsubscribe':`<${oneClick}>`,'List-Unsubscribe-Post':'List-Unsubscribe=One-Click','X-Physical-IO-Campaign':c.id},...(c.reply_to?{reply_to:c.reply_to}:{})};
+   payload.html=renderEmailHtml({previewText:c.subject,body:personalise(c.body,m),bodyHtml:markdownToHtml(personalise(c.body,m)),unsubscribeUrl:unsubscribe.toString()});
    await db.query("update public.campaign_recipients set status='processing' where id=$1",[r.id]);
    try{const result=await transport(payload,`campaign/${c.id}/${r.id}`);await db.query('BEGIN');try{await db.query("update public.campaign_recipients set status='sent',provider_id=$2,sent_at=now() where id=$1",[r.id,result.id]);await db.query('update public.members set last_contacted_at=now() where id=$1',[m.id]);await db.query('COMMIT');}catch(e){await db.query('ROLLBACK');throw e;}}
    catch(e){const uncertain=!(e instanceof DeliveryError)||e.uncertain;await db.query('update public.campaign_recipients set status=$2,skip_reason=$3 where id=$1',[r.id,uncertain?'uncertain':'failed',uncertain?'Check provider before retrying':'Provider rejected email']);}
