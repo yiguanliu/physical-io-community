@@ -1,0 +1,60 @@
+/* Shared controls inside a spacious, split authentication composition. */
+.admin-login{min-height:100dvh;display:grid;place-items:center;padding:calc(var(--ui-space-section) * 2)}
+.admin-login-frame{width:min(1160px,100%);min-height:min(720px,calc(100dvh - 96px));display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ui-border);border-radius:calc(var(--ui-radius) * 3);padding:var(--ui-space-control);background:var(--ui-bg);overflow:hidden}
+.admin-login-brand{display:flex;flex-direction:column;position:relative;padding:var(--ui-space-section);min-width:0}
+.admin-login-home{display:inline-flex;align-items:center;gap:var(--ui-space-control);align-self:flex-start;color:var(--ui-text);text-decoration:none;font-size:16px;font-weight:600;z-index:1}
+.admin-login-home svg{width:28px;height:28px}
+.admin-login-art{flex:1;min-height:280px;display:grid;place-items:center;position:relative;margin-block:var(--ui-space-section)}
+.admin-login-art>svg{width:150px;height:150px;position:relative;color:var(--ui-text);background:var(--ui-bg);padding:var(--ui-space-card)}
+.admin-login-brand-footer{display:flex;flex-direction:column;gap:8px;color:var(--ui-muted);font-size:12px}
+.admin-login-panel{border:1px solid var(--ui-border);background:var(--ui-surface);border-radius:calc(var(--ui-radius) * 2);padding:calc(var(--ui-space-section) * 1.5);display:flex;flex-direction:column;gap:var(--ui-space-section);min-width:0}
+.admin-login-top,.admin-login-bottom{display:flex;align-items:center;justify-content:space-between;gap:var(--ui-space-control);font-size:12px;color:var(--ui-muted)}
+.admin-login-form{display:grid;gap:var(--ui-space-section);margin-block:auto;padding-block:calc(var(--ui-space-section) * 2)}
+.admin-login-heading{display:grid;gap:var(--ui-space-card)}
+.admin-login-heading>p:first-child{font-size:12px;letter-spacing:.12em;color:var(--ui-muted)}
+.admin-login-heading h1{font-size:clamp(30px,3.3vw,44px);font-weight:500;letter-spacing:-.055em;line-height:1.12}
+.admin-login-heading>p:last-child{color:var(--ui-muted)}
+.admin-login-fields{display:grid;grid-template-columns:1fr 1fr;gap:var(--ui-space-card);margin-block:var(--ui-space-control)}
+.admin-login-fields .ui-field{min-width:0}
+.admin-login-fields .ui-input{min-height:44px}
+.admin-login-password{position:relative;min-width:0}
+.admin-login-password .ui-input{padding-right:44px}
+.admin-login-password>.ui-icon-button{position:absolute;bottom:6px;right:5px}
+.admin-login-submit{display:flex;justify-content:space-between;align-items:center;gap:var(--ui-space-card)}
+.admin-login-submit p{font-size:12px;line-height:1.6;color:var(--ui-muted)}
+.admin-login-submit>.ui-button{min-height:44px!important;padding-inline:var(--ui-space-section)}
+@media(max-width:1000px){.admin-login{padding:var(--ui-space-section)}.admin-login-fields{grid-template-columns:1fr}.admin-login-frame{min-height:640px}.admin-login-panel{padding:var(--ui-space-section)}}
+@media(max-width:700px){.admin-login{padding:var(--ui-space-card)}.admin-login-frame{grid-template-columns:1fr;min-height:calc(100dvh - 32px)}.admin-login-brand{padding:var(--ui-space-card)}.admin-login-art,.admin-login-brand-footer{display:none}.admin-login-panel{padding:var(--ui-space-section);gap:var(--ui-space-card)}.admin-login-form{padding-block:var(--ui-space-section)}.admin-login-bottom{flex-wrap:wrap}.admin-login-password>.ui-icon-button{bottom:0;right:0}.admin-login-submit{flex-wrap:wrap}}
+/* Keep browser-autofilled credentials on the current neutral surface. */
+.admin-login .ui-input:-webkit-autofill{box-shadow:0 0 0 1000px var(--ui-surface) inset;-webkit-text-fill-color:var(--ui-text);caret-color:var(--ui-text)}
+
+/* Essential login: a single brand mark, labeled fields and one primary action. */
+.admin-workspace .wui[data-mode=dark]:has(.admin-login){--ui-bg:#000000;--ui-surface:#171717;--ui-subtle:#222222}
+.admin-login-top,.admin-login-submit{justify-content:flex-end}
+@media(max-width:700px){.admin-login-brand{display:none}}
+
+.admin-login-identity{display:flex;align-items:center;gap:var(--ui-space-control);margin-bottom:var(--ui-space-control);font-size:16px;font-weight:600}
+.admin-login-identity svg{width:28px;height:28px}
+.admin-login-fields .ui-input{border-color:transparent;background:var(--ui-subtle)}
+.admin-login-fields .ui-input:focus-visible{outline:2px solid var(--ui-focus);outline-offset:3px}
+.admin-login-fields .ui-input[aria-invalid=true]{border-color:var(--ui-danger)}
+.admin-login .ui-input:-webkit-autofill{box-shadow:0 0 0 1000px var(--ui-subtle) inset}
+.admin-login-fields .ui-input::placeholder{color:var(--ui-muted);opacity:1}
+.admin-login-options{display:flex;align-items:center;justify-content:space-between;gap:var(--ui-space-control);margin-top:calc(-1 * var(--ui-space-card))}
+.admin-remember{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ui-muted);min-height:44px;cursor:pointer}
+.admin-remember input{appearance:none;width:16px;height:16px;border:1px solid var(--ui-control);border-radius:50%;background:var(--ui-surface);cursor:pointer;display:grid;place-items:center}
+.admin-remember input:checked::after{content:'';width:8px;height:8px;background:var(--ui-text);border-radius:50%}
+.admin-login-options>.ui-button{font-size:12px}
+.admin-login-top>.ui-button:first-child{margin-right:auto}
+
+/* Center the credential row within the panel, with roomier input targets. */
+.admin-login-fields .ui-input{min-height:52px;padding-block:13px}
+.admin-login-password>.ui-icon-button{bottom:10px}
+@media(min-width:701px){.admin-login-form{transform:translateY(calc(-2 * var(--ui-space-section)))}}
+@media(max-width:700px){.admin-login-password>.ui-icon-button{bottom:4px}}
+
+/* Decorative dashed axes stay quiet and behind the central brand mark. */
+.admin-login-art::before,.admin-login-art::after{content:'';position:absolute;pointer-events:none;opacity:.4}
+.admin-login-art::before{left:0;right:0;top:50%;border-top:1px dashed var(--ui-border)}
+.admin-login-art::after{top:0;bottom:0;left:50%;border-left:1px dashed var(--ui-border)}
+.admin-login-art>svg{z-index:1}

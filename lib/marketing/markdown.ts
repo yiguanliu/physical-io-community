@@ -6,12 +6,12 @@
 // produce (headings, bullets, ordered lists, quotes, rules, links, images,
 // bold/italic/code) and escapes everything else.
 
-import { escapeHtml } from "@/lib/email/send";
+import { escapeHtml, emailTheme } from "@/lib/email/template";
 
 const SAFE_URL = /^(https?:\/\/|mailto:)/i;
-const LINK_COLOR = "#b83c12";
-const INK = "#171714";
-const MUTED = "#5f5e58";
+const LINK_COLOR = emailTheme.link;
+const INK = emailTheme.ink;
+const MUTED = emailTheme.muted;
 
 function safeUrl(raw: string) {
   const url = raw.trim();
@@ -31,7 +31,7 @@ function renderInline(raw: string) {
     if (!url) return label;
     return `<a href="${url}" style="color:${LINK_COLOR};">${label}</a>`;
   });
-  out = out.replace(/`([^`]+)`/g, `<code style="background:#f0efea;border-radius:4px;padding:1px 4px;">$1</code>`);
+  out = out.replace(/`([^`]+)`/g, `<code style="background:${emailTheme.canvas};border-radius:4px;padding:1px 4px;">$1</code>`);
   out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   out = out.replace(/(^|[^*\w])\*([^*\n]+)\*/g, "$1<em>$2</em>");
   out = out.replace(/(^|[^_\w])_([^_\n]+)_(?![\w])/g, "$1<em>$2</em>");
@@ -44,8 +44,8 @@ function paragraph(lines: string[]) {
 }
 
 function heading(level: number, text: string) {
-  const size = level === 1 ? 24 : level === 2 ? 19 : 16;
-  const space = level === 1 ? "0 0 14px" : "22px 0 10px";
+  const size = level === 1 ? 32 : level === 2 ? 24 : 18;
+  const space = level === 1 ? "0 0 24px" : "24px 0 12px";
   return `<h${level} style="margin:${space};font-size:${size}px;line-height:1.3;color:${INK};font-weight:700;">${renderInline(text)}</h${level}>`;
 }
 
@@ -59,7 +59,7 @@ function list(items: string[], ordered: boolean) {
 
 function quote(lines: string[]) {
   const body = lines.map(renderInline).join("<br/>");
-  return `<blockquote style="margin:0 0 16px;padding:2px 0 2px 14px;border-left:3px solid #deddd6;color:${MUTED};font-size:15px;line-height:1.6;">${body}</blockquote>`;
+  return `<blockquote style="margin:0 0 16px;padding:2px 0 2px 14px;border-left:3px solid ${emailTheme.line};color:${MUTED};font-size:15px;line-height:1.6;">${body}</blockquote>`;
 }
 
 /** Render Markdown to email-safe HTML (all input is escaped first). */
@@ -96,7 +96,7 @@ export function markdownToHtml(markdown: string): string {
     }
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
       flush();
-      blocks.push(`<hr style="border:0;border-top:1px solid #deddd6;margin:22px 0;" />`);
+      blocks.push(`<hr style="border:0;border-top:1px solid ${emailTheme.line};margin:22px 0;" />`);
       continue;
     }
     const bullet = trimmed.match(/^[-*+]\s+(.*)$/);

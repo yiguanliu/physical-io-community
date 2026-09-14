@@ -1,0 +1,37 @@
+.member-library{padding-block:var(--ui-space-section);display:grid;gap:var(--ui-space-section)}
+.member-stack{display:grid;gap:var(--ui-space-card)}
+.member-auth{max-width:480px;margin:var(--ui-space-section) auto;padding:var(--ui-space-section)}
+.member-auth h1,.member-heading h1{font-size:clamp(28px,4vw,48px);line-height:1.15;letter-spacing:-.04em}
+.member-auth p,.member-episode p,.member-heading p{color:var(--ui-muted)}
+.member-auth .public-eyebrow,.member-heading .public-eyebrow{margin:0 0 var(--ui-space-control)}
+.member-heading{display:flex;align-items:center;justify-content:space-between;gap:var(--ui-space-card);flex-wrap:wrap}
+.member-heading h2{font-size:20px}.member-heading h1+p{margin-top:var(--ui-space-card)}
+.member-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:var(--ui-space-section)}
+.member-episode{max-width:620px;overflow:hidden;padding:0}.member-episode>.member-stack{padding:var(--ui-space-section)}
+.member-episode h3{font-size:24px}.member-episode .ui-badge{justify-self:start}
+.member-cover{aspect-ratio:16/9;background:var(--ui-text);color:var(--ui-bg);padding:var(--ui-space-section);display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;font-size:12px;letter-spacing:.12em}.member-cover>svg{align-self:center}
+.member-actions{display:flex;flex-wrap:wrap;gap:var(--ui-space-control)}
+.member-note{font-size:12px;color:var(--ui-muted);line-height:1.7}.member-note a{display:inline-flex;align-items:center;gap:4px;text-decoration:underline}
+.member-player{padding:var(--ui-space-card);background:var(--ui-surface);border:1px solid var(--ui-border);border-radius:var(--ui-radius)}
+.member-player iframe{width:100%;aspect-ratio:16/9;min-height:200px;border:0;border-radius:var(--ui-radius)}
+.member-consent{display:flex;align-items:flex-start;gap:var(--ui-space-control);font-size:12px}.member-consent input{width:18px;height:18px;flex-shrink:0;accent-color:var(--ui-action)}.member-consent a{text-decoration:underline}
+@media(max-width:600px){.member-auth{padding:var(--ui-space-card)}.member-cover{padding:var(--ui-space-card)}.member-heading h1{font-size:32px}.member-episode>.member-stack{padding:var(--ui-space-card)}}
+
+.member-cover{padding:0;display:block}.member-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.public-site .member-episode{padding:0;border-radius:var(--ui-radius)}
+
+.member-password{position:relative}.member-password .ui-input{padding-inline-end:56px}.member-password>.ui-icon-button{position:absolute;inset-inline-end:4px;top:28px}
+
+/* Member authentication reuses the admin split composition and shared controls. */
+.member-login{font-size:13px;--ui-radius:8px}
+.member-login .admin-login-form{transform:none;padding-block:var(--ui-space-section)}
+.member-login .admin-login-identity{text-decoration:none;color:var(--ui-text)}
+.member-login .admin-login-form>p{color:var(--ui-muted);line-height:1.6;margin:0}
+.member-login .ui-input{min-height:52px;background:var(--ui-subtle);border-color:transparent}
+.member-login .member-password>.ui-icon-button{top:34px}
+.member-login .ui-input:focus-visible{outline:2px solid var(--ui-focus);outline-offset:3px}
+.member-login .member-stack{gap:var(--ui-space-control)}
+.member-login .member-login-fields>.ui-button-ghost{justify-self:start}
+
+.member-login-recovery{display:flex;justify-content:space-between;align-items:center;gap:var(--ui-space-control);margin-top:var(--ui-space-control)}
+.member-login-recovery .ui-button{font-size:12px}

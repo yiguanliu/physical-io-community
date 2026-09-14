@@ -42,7 +42,7 @@ export default function Footer() {
                 <Link href="/about">About</Link>
               </li>
               <li><Link href="/events">Events</Link></li>
-              <li><Link href="/shop">Shop</Link></li>
+              <li><Link href="/login">Member login</Link></li>
               <li>
                 <a href={JOIN_URL} target="_blank" rel="noopener">Join Community</a>
               </li>

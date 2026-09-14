@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import { Button, IconButton, Field, Alert, Dialog } from '@/workspace-ui/src';
 import LogoMark from '@/workspace-ui/app/LogoMark';
+import { SITE_URL } from '@/lib/site';
 import { createClient } from '@/utils/supabase/client';
 
 export function AdminSignIn({onSignedIn,error,dark,onToggleAppearance}:{onSignedIn:()=>Promise<void>;error:string;dark:boolean;onToggleAppearance:()=>void}) {
@@ -56,7 +57,7 @@ export function AdminSignIn({onSignedIn,error,dark,onToggleAppearance}:{onSigned
    </section>
   </div>
  <Dialog open={dialog!==null} onOpenChange={open=>{if(!open&&!emailPending)setDialog(null);}} title={emailSent?'Check your email':dialog==='create'?'Create account':'Reset your password'} description={dialog==='create'?'Confirm your email to set up an account. Admin access still requires administrator approval.':'We’ll email a secure link so you can choose a new password.'}>
-  {emailSent?<div className="admin-stack"><Alert title="Email requested" tone="success">If this address is eligible, a confirmation link will arrive shortly. Check your spam folder too.</Alert><Button onClick={()=>setDialog(null)}>Done</Button></div>:<form className="admin-stack" onSubmit={async e=>{e.preventDefault();if(emailPending)return;setEmailPending(true);setEmailError('');try{const redirectTo=`${window.location.origin}/admin/auth/confirm?flow=${dialog}`;const client=createClient();const result=dialog==='create'?await client.auth.signInWithOtp({email:confirmationEmail.trim(),options:{shouldCreateUser:true,emailRedirectTo:redirectTo}}):await client.auth.resetPasswordForEmail(confirmationEmail.trim(),{redirectTo});if(result.error)throw result.error;setEmailSent(true);}catch(e){setEmailError(e instanceof Error?e.message:'Unable to request an email. Please retry.');}finally{setEmailPending(false);}}}>
+  {emailSent?<div className="admin-stack"><Alert title="Email requested" tone="success">If this address is eligible, a confirmation link will arrive shortly. Check your spam folder too.</Alert><Button onClick={()=>setDialog(null)}>Done</Button></div>:<form className="admin-stack" onSubmit={async e=>{e.preventDefault();if(emailPending)return;setEmailPending(true);setEmailError('');try{const redirectTo=`${SITE_URL}/admin/auth/confirm?flow=${dialog}`;const client=createClient();const result=dialog==='create'?await client.auth.signInWithOtp({email:confirmationEmail.trim(),options:{shouldCreateUser:true,emailRedirectTo:redirectTo}}):await client.auth.resetPasswordForEmail(confirmationEmail.trim(),{redirectTo});if(result.error)throw result.error;setEmailSent(true);}catch(e){setEmailError(e instanceof Error?e.message:'Unable to request an email. Please retry.');}finally{setEmailPending(false);}}}>
    <Field label="Email address" type="email" autoComplete="email" required value={confirmationEmail} onChange={e=>setConfirmationEmail(e.target.value)}/>
    {emailError&&<Alert title="Email request failed" tone="danger">{emailError}</Alert>}
    <div className="admin-actions"><Button variant="ghost" disabled={emailPending} onClick={()=>setDialog(null)}>Cancel</Button><Button type="submit" variant="primary" busy={emailPending}>Send confirmation email</Button></div>
