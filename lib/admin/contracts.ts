@@ -16,7 +16,7 @@ export const commandSchema=z.discriminatedUnion('action',[
  z.object({action:z.literal('member.subscription'),id,topic:z.enum(['newsletter','events','announcements']),status:z.enum(['subscribed','unsubscribed','consent_unknown']),evidence:z.string().trim().min(5).max(1000)}),
  z.object({action:z.literal('member.activate'),ids:z.array(id).min(1).max(1000)}),
  z.object({action:z.literal('lead.save'),id:id.optional(),company:text,contact:text,email:z.union([z.literal(''),z.string().trim().email().max(254)]),role:optionalText,stage:z.enum(['Research','Contacted','Meeting','Proposal','Agreement','Closed']),value:z.string().regex(/^\d+$/, 'Enter a whole-pound GBP amount, for example 12000.').refine(s=>Number(s)<=100000000,'Amount is too large.'),next:z.string().trim().max(2000)}),
- z.object({action:z.literal('campaign.save'),id:id.optional(),name:text,body:z.string().trim().min(1).max(50000),memberIds:z.array(id).max(1000).optional(),audience:z.union([z.literal('Selected members'),z.literal('All opted-in'),z.literal('Saved audience'),z.string().uuid()])}),
+ z.object({action:z.literal('campaign.save'),id:id.optional(),name:text,body:z.string().trim().min(1).max(50000),memberIds:z.array(id).max(1000).optional(),audience:z.union([z.literal('Selected members'),z.literal('All opted-in'),z.literal('Email list'),z.literal('Saved audience'),z.string().uuid()])}),
  z.object({action:z.literal('event.save'),id:id.optional(),name:text,date:z.string().datetime({offset:true}),location:text,description:z.string().trim().max(10000)})
 ]);
 export const requestSchema=z.object({requestId:z.string().uuid(),command:commandSchema});
