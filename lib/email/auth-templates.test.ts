@@ -4,7 +4,7 @@ import { authEmailTemplates } from './auth-templates';
 describe('account email templates',()=>{
  for(const template of authEmailTemplates) it(`${template.name} shares the newsletter style and generated file`,()=>{
   expect(template.html).toContain('background:#EF2900');
-  expect(template.html).toContain('American Typewriter');
+  expect(template.html).toContain('Manrope');
   expect(template.html).toContain('physical-io-banner.png');
   expect(template.html).toContain('physical-io-footer.png');
   expect(template.html).not.toContain('unsubscribe from');
