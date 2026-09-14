@@ -11,11 +11,11 @@ test('batch email: consent, fresh suppression, bounded batches, retry idempotenc
   for(const table of ['members','subscriptions','member_interests','campaigns','campaign_recipients','campaign_events','audit_log'])await db.query(`create temporary table ${table} (like public.${table} including defaults including indexes)`);
   const isolated=new Proxy(db,{get(target,prop){if(prop==='query')return (sql:string,...args:any[])=>target.query(sql.replaceAll('public.','pg_temp.'),...args);return Reflect.get(target,prop);}});
   const actor={id:crypto.randomUUID(),name:'Verification'},id=crypto.randomUUID();
-  await db.query("insert into campaigns(id,name,subject,body,idempotency_key) values($1,'Test','Hello','Hello {{first_name}}',$1)",[id]);
+  await db.query("insert into campaigns(id,name,subject,body,idempotency_key) values($1,'Test','Hello','## Hello {{first_name}}',$1)",[id]);
   for(let i=0;i<14;i++){const memberId=`member-${String(i).padStart(2,'0')}`;await db.query("insert into members(id,email,email_normalized,full_name,first_name,status,email_status) values($1,$2,$2,'Test Member','Test','active',$3)",[memberId,`${i}@example.invalid`,i===13?'bounced':'ok']);if(i!==12)await db.query("insert into subscriptions(member_id,topic,status) values($1,'newsletter','subscribed')",[memberId]);}
   const preview=await previewDelivery(isolated,id);assert.equal(preview.eligibleCount,13);assert.equal(preview.skippedCount,1);
   const sent:string[]=[];const keys:string[]=[];
-  const transport:EmailTransport=async(payload,key)=>{sent.push(payload.to);keys.push(key);assert.ok(payload.text.includes('Unsubscribe: https://example.invalid/unsubscribe?token='));assert.ok(payload.headers['List-Unsubscribe']);if(sent.length===1)await db.query("update subscriptions set status='unsubscribed' where member_id='member-01'");return {id:crypto.randomUUID()};};
+  const transport:EmailTransport=async(payload,key)=>{sent.push(payload.to);keys.push(key);assert.ok(payload.html?.includes('<h2'));assert.ok(!payload.text.includes('##'));assert.ok(payload.text.includes('Unsubscribe: https://example.invalid/unsubscribe?token='));assert.ok(payload.headers['List-Unsubscribe']);if(sent.length===1)await db.query("update subscriptions set status='unsubscribed' where member_id='member-01'");return {id:crypto.randomUUID()};};
   const request={action:'send' as const,id,requestId:crypto.randomUUID(),confirmation:preview.confirmation};
   const config={from:'Test <test@example.invalid>',site:'https://example.invalid'};
   const first=await deliverBatch(isolated,request,actor,transport,config);assert.equal(first.sent,9);assert.equal(first.remaining,3);assert.equal(first.skipped,2);
