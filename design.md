@@ -399,3 +399,7 @@ The owl menu links to /admin/profile in the current workspace shell. Show the si
 
 ### Personal headshots
 Replace the shared owl account image with each signed-in person’s headshot or initials. User details supports PNG/JPEG/WebP uploads up to 750 KB and restoring the name placeholder. Uploads use authenticated user-scoped storage paths; profile updates change only the current user’s headshot metadata. Header identity refreshes after profile updates.
+
+## Newsletter email presentation
+
+Newsletter Studio and community campaigns share `lib/email/template.ts`: official white raster wordmark on an ink header, restrained paprika rule, white reading surface and gray canvas. Email uses the current Manrope brand stack with Arial/Helvetica fallback, inline styles and a fluid 600px maximum layout for email clients. Markdown headings and links share email theme colours. Plain-text alternatives, personalisation, consent, unsubscribe and delivery controls remain intact. Browser previews are illustrative; inbox-client rendering requires separate delivery verification.
