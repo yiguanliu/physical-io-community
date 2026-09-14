@@ -58,4 +58,3 @@
 .admin-login-art::before{left:0;right:0;top:50%;border-top:1px dashed var(--ui-border)}
 .admin-login-art::after{top:0;bottom:0;left:50%;border-left:1px dashed var(--ui-border)}
 .admin-login-art>svg{z-index:1}
-
