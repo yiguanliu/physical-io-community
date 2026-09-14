@@ -10,11 +10,12 @@ import LogoMark from '@/workspace-ui/app/LogoMark';
 import CampaignDelivery from './CampaignDelivery';
 import MarketingWorkspace from './MarketingWorkspace';
 import EventWorkspace from './EventWorkspace';
+import MessageEditor from '@/components/robot/MessageEditor';
 import { AdminSignIn } from './AdminSignIn';
 import { createClient } from '@/utils/supabase/client';
 import type { Member, Lead, Campaign, CommunityEvent, Activity, WorkspaceData, Command } from '@/lib/admin/contracts';
 
-const navigation = [{name:'Overview', icon:LayoutGrid},{name:'Members',icon:Users},{name:'Outreach',icon:Target},{name:'Communications',icon:Mail},{name:'Content',icon:ImageIcon},{name:'Events',icon:CalendarDays},{name:'Automations',icon:Workflow}];
+const navigation = [{name:'Overview', icon:LayoutGrid},{name:'Members',icon:Users},{name:'Outreach',icon:Target},{name:'Communications',icon:Mail},{name:'Content',icon:ImageIcon},{name:'Events',icon:CalendarDays},{name:'OHI messages',icon:ImageIcon},{name:'Automations',icon:Workflow}];
 const baseTheme: Theme = {...defaultTheme, density:'compact', hierarchy:'quiet'};
 const options = (values: string[]) => values.map(value=>({value,label:value}));
 const tone = (status:string) => ['Active','Completed','Sent'].includes(status)?'success' as const:['Review','Needs review'].includes(status)?'warning' as const:'neutral' as const;
@@ -31,6 +32,7 @@ export default function AdminWorkspace({initialPage='Overview',accessPage,userPa
  const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
  useEffect(()=>{try{setSidebarCollapsed(localStorage.getItem('ohi-admin-sidebar-collapsed')==='true');}catch{}},[]);
  function toggleSidebar(){setSidebarCollapsed(current=>{const next=!current;try{localStorage.setItem('ohi-admin-sidebar-collapsed',String(next));}catch{}return next;});}
+ const [robotDirty,setRobotDirty]=useState(false);
  const [members,setMembers]=useState<Member[]>([]);
  const [leads,setLeads]=useState<Lead[]>([]);
  const [campaigns,setCampaigns]=useState<Campaign[]>([]);
@@ -59,6 +61,7 @@ export default function AdminWorkspace({initialPage='Overview',accessPage,userPa
   if(stepping&&(position<0||position>=pageHistory.pages.length))return;
   const destination=stepping?pageHistory.pages[position]:next;
   if(!stepping&&destination===page)return;
+  if(page==='OHI messages'&&destination!==page&&robotDirty&&!window.confirm('Discard unpublished OHI message changes?'))return;
   const updated=stepping?{...pageHistory,index:position}:{pages:[...pageHistory.pages.slice(0,pageHistory.index+1),destination],index:pageHistory.index+1};
   setPageHistory(updated);try{sessionStorage.setItem('ohi-admin-page-history',JSON.stringify(updated));}catch{}
   if(destination==='User details'){router.push('/admin/profile');return;}
@@ -110,6 +113,7 @@ export default function AdminWorkspace({initialPage='Overview',accessPage,userPa
  {page==='Communications'&&<><PageHeader title="Communications" description="Review campaigns and prepare drafts in one place." action={<Button variant="primary" onClick={()=>startMessage()}><Plus size={16}/>Create draft</Button>}/>{filters(['Draft','Scheduled','Active','Sent'])}<div className="admin-table-frame"><DataTable label="Campaigns" rows={campaigns.filter(c=>matches(c.name)&&(status==='All'||status===c.status))} rowKey={c=>c.id} columns={[{key:'name',label:'Campaign',render:c=><Button variant="ghost" onClick={()=>setCampaign(c)}>{c.name}</Button>},{key:'audience',label:'Audience',render:c=>['All opted-in','Saved audience'].includes(c.audience)?c.audience:leads.find(l=>l.id===c.audience)?.contact??'Selected lead'},{key:'status',label:'Status',render:c=><Badge tone={tone(c.status)}>{c.status}</Badge>},{key:'date',label:'Updated / scheduled',render:c=>c.date}]}/>{!campaigns.some(c=>matches(c.name)&&(status==='All'||status===c.status))&&noResults}</div></>}
  {page==='Content'&&<MarketingWorkspace initialId={contentId}/>}
  {page==='Events'&&<EventWorkspace initialEvents={events} onDirtyChange={setEventDirty} campaigns={campaigns} leads={leads} onEvents={(next,data)=>{setEvents(next);if(data){setCampaigns(data.campaigns);setLeads(data.leads);}}} onOpen={(kind,id)=>{if(kind==='content'){setContentId(id);go('Content');}else if(kind==='campaign'){setCampaign(campaigns.find(c=>c.id===id)??null);go('Communications');}else{setCreatingLead(false);setLead(leads.find(l=>l.id===id)??null);go('Outreach');}}}/>}
+ {page==='OHI messages'&&<><PageHeader title="OHI messages" description="Program the homepage robot’s LED announcements."/><MessageEditor onDirtyChange={setRobotDirty}/></>}
  {page==='Automations'&&<><PageHeader title="Activity & automations" description="A reliable record of changes made through this workspace."/><Alert title="Automation runtime not connected">No jobs are scheduled or executed here. Recent workspace actions appear below.</Alert><Toolbar><SearchField label="Search activity" placeholder="Search activity…" value={query} onChange={e=>setQuery(e.target.value)}/></Toolbar><div className="admin-table-frame"><DataTable label="Workspace activity" rows={runs.filter(r=>matches(r.name))} rowKey={r=>r.id} columns={[{key:'name',label:'Action',render:r=><Button variant="ghost" onClick={()=>setRun(r)}>{r.name}</Button>},{key:'status',label:'Status',render:r=><Badge>{r.status}</Badge>},{key:'detail',label:'Details',render:r=>r.detail}]}/>{!runs.filter(r=>matches(r.name)).length&&<EmptyState title="No activity yet" description="Saved workspace changes will appear here."/>}</div></>}
 
  </PageTransition>

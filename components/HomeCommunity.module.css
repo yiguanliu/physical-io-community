@@ -39,3 +39,8 @@
 
 .socialLinks{flex-wrap:wrap}
 .socialLinks a{width:auto;padding:0 12px;gap:8px;border-radius:999px;font-size:12px}
+
+/* Share the public header on desktop; preserve the compact mobile navigation. */
+.desktopHeader{padding-inline:3%;position:relative;z-index:20}
+@media(min-width:761px){.page .site-header{display:none}}
+@media(max-width:760px){.desktopHeader{display:none}}

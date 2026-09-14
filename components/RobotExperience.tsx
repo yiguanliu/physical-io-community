@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowUp, Mic, Square, ExternalLink, Maximize2, Minimize2, Me
 import { Button,IconButton,TextArea,Dialog,NotificationProvider,useNotification } from '@/workspace-ui/src';
 import { robotReplySchema,type RobotPerformance,type RobotReply } from '@/lib/robot/contracts';
 import ContactObject from './ContactObject';
+import { useProgrammedMessages } from './robot/useProgrammedMessages';
 import RobotCall from './RobotCall';
 import LogoMark from '@/workspace-ui/app/LogoMark';
 import { COMMUNITY_FORM_URL,LUMA_URL,SITE_URL } from '@/lib/site';
@@ -106,6 +107,7 @@ function RobotExperienceContent({onReady,introEnabled=true,dark=false}:{onReady?
   const timer=setTimeout(()=>setPerformance(p=>({...p,id:Date.now(),display:'face',displayText:'',expression:'friendly',gesture:'none',speaking:false,listening:false})),10000);
   return()=>clearTimeout(timer);
  },[sceneReady,introEnabled,busy,recording,performance,messages]);
+ const programmed = useProgrammedMessages(sceneReady && introEnabled && !busy && !recording && !callActive && !performance.speaking && !performance.listening && performance.display === 'face' && performance.expression === 'friendly' && (mobile ? mobileView === 'robot' : windowMode === 'minimized'));
  async function speak(reply:RobotReply,controller:AbortController,token:number){
   setPhase('Preparing voice…');const response=await fetch('/api/robot/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:reply.reply.replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g,'$1').replace(/https?:\/\/\S+/g,'the link in our conversation')}),signal:controller.signal});
   if(!response.ok)throw new Error((await response.json()).error||'Voice is unavailable.');
@@ -168,9 +170,10 @@ function RobotExperienceContent({onReady,introEnabled=true,dark=false}:{onReady?
     <span className="ui-sr-only" role="status">{busy ? "" : phase}</span>
    </form>
   </div>
-  <div className={styles.robot}><div className={styles.robotIntro}><h2>Meet Ohi.</h2><p>Our Chief Community Officer.</p></div><ContactObject centered={mobile||windowMode==='minimized'} dark={dark} performance={performance} onReady={setSceneReady} configureDisabled={callActive} onConfigure={value=>{end();setPerformance(value);}}/></div>
+  <div className={styles.robot}><div className={styles.robotIntro}><h2>Meet Ohi.</h2><p>Our Chief Community Officer.</p></div><ContactObject centered={mobile||windowMode==='minimized'} dark={dark} performance={programmed.performance ?? performance} extraControls={programmed.controls} onInteract={programmed.pause} onReady={setSceneReady} configureDisabled={callActive} onConfigure={value=>{end();setPerformance(value);}}/></div>
   <nav className={styles.mobileNav} aria-label="Ohi navigation"><Button ref={chatButtonRef} variant="ghost" aria-pressed={mobile?mobileView==='chat':windowMode!=='minimized'} onClick={()=>{if(mobile){setMobileView(view=>view==='chat'?'robot':'chat');return;}if(windowMode==='minimized')void changeWindow('normal');else void closeChat();}}><MessageCircle size={20}/>Chat</Button><div className={styles.mobileCallDock} ref={setActionDock}/></nav>
   <Dialog open={eventsOpen} onOpenChange={setEventsOpen} title="Community events" description="Gatherings, talks and demos from Physical I/O."><div className={styles.eventsCalendar}><iframe src="https://luma.com/embed/calendar/cal-Qb2jFfezFMiVkF1/events" title="Physical I/O event calendar" width="600" height="450" allowFullScreen tabIndex={0}/><a href="https://luma.com/phyiscal-io" target="_blank" rel="noopener noreferrer">Open calendar in Luma <ExternalLink size={14} aria-hidden/></a></div></Dialog>
+  {programmed.dialogs}
  </section>;
 }
 

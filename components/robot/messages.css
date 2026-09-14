@@ -1,0 +1,16 @@
+.ohi-message-editor{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,260px);gap:var(--ui-space-section);font-size:.875rem}
+.ohi-editor-stack{display:grid;gap:var(--ui-space-card);min-width:0}
+.ohi-editor-stack>p,.ohi-editor-preview>p,.ohi-editor-actions>span{color:var(--ui-muted);font-size:.8125rem;line-height:1.6}
+.ohi-editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:var(--ui-space-control)}
+.ohi-editor-actions h3{margin-inline-end:auto;font-size:.9375rem}
+.ohi-editor-fields{display:grid;grid-template-columns:1fr 1fr;gap:var(--ui-space-control)}
+.ohi-editor-stack textarea{resize:vertical}
+.ohi-editor-preview{min-width:0;align-self:start;position:sticky;top:0}
+.ohi-message-preview{display:grid;justify-items:center;gap:var(--ui-space-control);margin-block-end:var(--ui-space-card)}
+/* The amber-on-black LED preview is a hardware simulation, not an admin control palette. */
+.ohi-message-preview svg{width:100%;max-width:260px;color:#ffb347}
+.ohi-matrix-surface{fill:#111111}
+.ohi-message-preview p{font-size:.75rem;color:var(--ui-muted)}
+.ui-dialog.ui-dialog:has(.ohi-message-editor){width:min(1000px,calc(100vw - 32px))}
+.ohi-announcement-copy{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:700px){.ohi-message-editor{grid-template-columns:1fr}.ohi-editor-fields{grid-template-columns:1fr}.ohi-editor-preview{position:static}.ohi-message-preview svg{max-width:180px}}

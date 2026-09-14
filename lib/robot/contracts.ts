@@ -8,5 +8,5 @@ export const robotReplySchema = z.object({
 });
 export type RobotReply = z.infer<typeof robotReplySchema>;
 export type FaceSettings = { eyeSize:number; eyeSpacing:number; smile:number; brightness:number };
-export type RobotPerformance = RobotReply & { id:number; speaking?:boolean; listening?:boolean; face?:FaceSettings };
+export type RobotPerformance = RobotReply & { id:number; speaking?:boolean; listening?:boolean; face?:FaceSettings; textStyle?:'matrix'; scrollSpeed?:number };
 export const chatSchema=z.object({messages:z.array(z.object({role:z.enum(['user','assistant']),content:z.string().min(1).max(2000)})).min(1).max(16)});

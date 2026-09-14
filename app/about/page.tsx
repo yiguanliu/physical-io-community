@@ -1,205 +1,45 @@
-import type { Metadata } from "next";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
-import Reveal from "@/components/Reveal";
-import Faq from "@/components/Faq";
-import {
-  AUDIENCE,
-  DECK_URL,
-  FAQ,
-  FOCUS_AREAS,
-  HOW_WE_BUILD,
-  JOIN_URL,
-  MEMBER_ORGS,
-  ROADMAP,
-  SITE_URL,
-  STRUCTURE_TIERS,
-} from "@/lib/site";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import PublicShell from '@/components/public/PublicShell';
+import PixelArt from '@/components/public/PixelArt';
+import LoveMindBody from '@/components/public/LoveMindBody';
+import { Hero, ActionLink, SectionHeading, ClosingNote } from '@/components/public/Sections';
+import { Card } from '@/workspace-ui/src';
+import { BUSINESS_TIERS, MEMBER_BENEFITS, MEMBER_RIGHTS, SITE_DESCRIPTION, SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: "About | Physical I/O — London's Physical AI Community",
-  description:
-    "Physical I/O builds the community behind Physical AI in London — through meetups, demo nights, technical talks, founder panels and workshops.",
-  alternates: { canonical: "/about" },
-  openGraph: {
-    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
-    title: "About Physical I/O",
-    description: "Building the community behind Physical AI in London.",
-    url: "/about",
-  },
-};
-
-const aboutPageJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "AboutPage",
-  name: "About Physical I/O",
-  url: `${SITE_URL}/about`,
-  description:
-    "Physical I/O builds the community behind Physical AI in London — through meetups, demo nights, technical talks, founder panels and workshops.",
-};
-
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: FAQ.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: { "@type": "Answer", text: f.a },
-  })),
+  title: 'About | Physical I/O', description: SITE_DESCRIPTION, alternates: { canonical: '/about' },
+  openGraph: { title: 'Curiosity. Design. Engineering. | Physical I/O', description: SITE_DESCRIPTION, url: '/about' },
 };
 
 export default function AboutPage() {
-  return (
-    <div className="page-about">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutPageJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+  return <PublicShell>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'AboutPage', name: 'About Physical I/O', url: SITE_URL + '/about', description: SITE_DESCRIPTION }) }} />
+    <Hero eyebrow="About Physical I/O" title={<>Curious minds.<br />Physical possibilities.</>} actions={<><ActionLink href="/join" primary>Join the community</ActionLink><ActionLink href="/events">Explore events</ActionLink></>}>
+      A community led by curiosity, design and engineering. We bring people together to explore how humans and intelligent systems can coexist in the physical world.
+    </Hero>
 
-      <Nav />
+    <section className="public-section" aria-label="Our community">
+      <div className="public-bento">
+        <Card className="public-card public-card-wide"><span className="public-eyebrow">01 / Our starting point</span><LoveMindBody /><h2>Curiosity. Design. Engineering.</h2><p>Ask what’s possible. Consider what should exist. Make it work. Different ways of thinking, brought together through the things we build.</p></Card>
+        <Card className="public-card"><PixelArt kind="people" /><h2>Find your people.</h2><p>Designers, engineers, researchers, founders and manufacturers. Experienced or just exploring, there’s room for your perspective.</p><ul className="public-pills" role="list">{['Designers', 'Engineers', 'Researchers', 'Founders', 'Manufacturers', 'Curious newcomers'].map(x => <li key={x}>{x}</li>)}</ul></Card>
+        <Card className="public-card"><PixelArt kind="idea" /><h3>A reason to gather.</h3><p>A sense of belonging. An unexpected idea. Someone who can help you get unstuck. Progress often begins with a conversation.</p></Card>
+        <Card className="public-card"><PixelArt kind="hackathon" /><h3>Meet. Share. Build.</h3><p>Speaker nights, hands-on workshops and shared experiments. Bring a question, a point of view or a work in progress.</p><Link className="public-card-link" href="/events">Find a gathering <span aria-hidden="true">→</span></Link></Card>
+        <Card className="public-card"><PixelArt kind="ticket" /><h3>Free to belong.</h3><p>Register through our website to join. Community membership and community events are free, with places subject to availability.</p><Link className="public-card-link" href="/join">Become a member <span aria-hidden="true">→</span></Link></Card>
+        <Card className="public-card public-card-full"><span className="public-eyebrow">From the community, into the world</span><h2>Ideas deserve a physical form.</h2><p>We’re building towards a manufacturing platform that connects design, prototyping, sourcing and production. Our ambition: make deploying hardware as straightforward as deploying software.</p><Link className="public-card-link" href="#business">How the business works <span aria-hidden="true">↓</span></Link></Card>
+      </div>
+    </section>
 
-      <main>
-        <section className="hero">
-          <div className="container narrow">
-            <span className="eyebrow">About Physical I/O</span>
-            <h1>Building the community behind Physical&nbsp;AI.</h1>
-          </div>
-        </section>
+    <section id="business" className="public-section">
+      <SectionHeading label="How we sustain it" title="Free community. Real business.">Physical I/O is a commercial company. Products, paid services and partnerships help fund the spaces, programmes and connections we create.</SectionHeading>
+      <div className="public-tiers">{BUSINESS_TIERS.map((tier, index) => <Card className="public-card public-tier" key={tier.name}><span className="public-eyebrow">0{index + 1}</span><h3>{tier.name}</h3><span className="public-tier-price">{tier.price}</span><p className="public-tier-description">{tier.description}</p><ul className="public-list" role="list">{tier.features.map(x => <li key={x}>{x}</li>)}</ul><ActionLink href={tier.href} primary={index === 0}>{tier.action}</ActionLink></Card>)}</div>
+      <p className="public-footnote">Build services and the ordering platform are in development. Talk to us about your project; we’ll agree the scope, availability and price before any work begins.</p>
+    </section>
 
-        <section className="section" aria-label="Why Physical I/O">
-          <Reveal className="container narrow">
-            <span className="eyebrow">Why</span>
-            <p className="statement">
-              Today&apos;s AI communities focus primarily on software. The next generation of intelligence will exist
-              in the physical world.
-            </p>
-            <ul className="dot-list">
-              <li>Robots</li>
-              <li>Wearables</li>
-              <li>Autonomous systems</li>
-              <li>Spatial interfaces</li>
-              <li>Intelligent hardware</li>
-            </ul>
-            <p className="statement-close">Physical I/O connects the people building that future.</p>
-          </Reveal>
-        </section>
-
-        <section className="section" aria-label="How we build community">
-          <Reveal className="container narrow">
-            <span className="eyebrow">How</span>
-            <h2 className="section-title">How we build community</h2>
-            <ul className="dot-list">
-              {HOW_WE_BUILD.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </Reveal>
-        </section>
-
-        <section className="section" aria-label="Focus areas">
-          <Reveal className="container narrow">
-            <span className="eyebrow">What</span>
-            <h2 className="section-title">Focus areas</h2>
-            <ul className="dot-list">
-              {FOCUS_AREAS.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </Reveal>
-        </section>
-
-        <section className="section" aria-label="Who it is for">
-          <Reveal className="container narrow">
-            <span className="eyebrow">Community</span>
-            <h2 className="section-title">Who is it for?</h2>
-            <p className="section-intro">Physical AI is built by multidisciplinary teams. So is this community.</p>
-            <ul className="dot-list">
-              {AUDIENCE.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </Reveal>
-        </section>
-
-        <section className="section" aria-label="Member organisations">
-          <Reveal className="container narrow">
-            <span className="eyebrow">Current Members</span>
-            <h2 className="section-title">Members work across</h2>
-            {/* Only display organisations with real community members */}
-            <div className="logos">
-              {MEMBER_ORGS.map((org) => (
-                <span key={org}>{org}</span>
-              ))}
-            </div>
-          </Reveal>
-        </section>
-
-        <section className="section" aria-label="Community structure">
-          <Reveal className="container narrow">
-            <span className="eyebrow">Community Structure</span>
-            <h2 className="section-title">How the community is organised</h2>
-            <div className="structure">
-              {STRUCTURE_TIERS.map((tier, i) => (
-                <div key={tier.name} style={{ display: "contents" }}>
-                  {i > 0 && (
-                    <div className="tier-arrow" aria-hidden="true">
-                      ↓
-                    </div>
-                  )}
-                  <div className="tier">
-                    <span className="tier-name">{tier.name}</span>
-                    <p>{tier.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="structure-note">
-              The structure represents contribution and responsibility rather than status.
-            </p>
-          </Reveal>
-        </section>
-
-        <section className="section" aria-label="Community roadmap">
-          <Reveal className="container narrow">
-            <span className="eyebrow">Community Roadmap</span>
-            <h2 className="section-title">Where this is going</h2>
-            <div className="roadmap">
-              {ROADMAP.map((item) => (
-                <div className={`roadmap-item${item.now ? " now" : ""}`} key={item.when}>
-                  <div className="roadmap-when">{item.when}</div>
-                  <div className="roadmap-what">
-                    <h3>{item.title}</h3>
-                    <p>{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        </section>
-
-        <section className="section" aria-label="Frequently asked questions">
-          <Reveal className="container narrow">
-            <span className="eyebrow">FAQ</span>
-            <h2 className="section-title">Questions, answered</h2>
-            <Faq />
-          </Reveal>
-        </section>
-
-        <section className="cta-band">
-          <Reveal className="container narrow">
-            <h2>Be part of it from the start.</h2>
-            <p>We are building the founding community right now. Join early, shape what it becomes.</p>
-            <div className="cta-actions">
-              <a className="btn btn-primary btn-lg" href={JOIN_URL} target="_blank" rel="noopener">
-                Join the Community <span className="arrow">→</span>
-              </a>
-              <a className="btn btn-ghost btn-lg" href={DECK_URL} target="_blank" rel="noopener">
-                View the Deck
-              </a>
-            </div>
-          </Reveal>
-        </section>
-      </main>
-
-      <Footer />
-    </div>
-  );
+    <section className="public-section">
+      <SectionHeading label="Membership" title="A place to contribute. A place to belong." />
+      <div className="public-two-col"><Card className="public-card"><h3>What you get</h3><ul className="public-list" role="list">{MEMBER_BENEFITS.map(x => <li key={x}>{x}</li>)}</ul></Card><Card className="public-card"><h3>What you can expect from us</h3><ul className="public-list" role="list">{MEMBER_RIGHTS.map(x => <li key={x}>{x}</li>)}</ul><Link href="/privacy" className="public-card-link">Your privacy <span aria-hidden="true">→</span></Link></Card></div>
+    </section>
+    <ClosingNote title="Bring your curiosity." href="/join" action="Join free">You don’t need a finished project or a particular job title. Start with what interests you.</ClosingNote>
+  </PublicShell>;
 }
