@@ -420,3 +420,19 @@ content_path = "./supabase/templates/magic-link.html"
 [auth.email.template.recovery]
 subject = "Reset your Physical I/O password"
 content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.confirmation]
+subject = "Confirm your Physical I/O account"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.invite]
+subject = "You’re invited to Physical I/O"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your new Physical I/O email"
+content_path = "./supabase/templates/email_change.html"
+
+[auth.email.template.reauthentication]
+subject = "Your Physical I/O verification code"
+content_path = "./supabase/templates/reauthentication.html"

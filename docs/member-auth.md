@@ -43,3 +43,9 @@ Hosted URL Configuration must allow the exact public member and admin callbacks.
 - Magic Link / OTP template updated to include `{{ .Token }}` and retain `{{ .ConfirmationURL }}`.
 - Recovery token-hash template remains pending deployment of the new callback handlers. Do not switch live recovery links to an undeployed handler.
 - No delivery test has been sent; successful SMTP authentication does not establish inbox delivery.
+
+## Shared account-email design
+
+`lib/email/auth-templates.ts` defines all six authentication and seven security-notification emails using the newsletter wrapper. Regenerate the checked-in Supabase HTML with `node --import tsx scripts/generate-auth-emails.ts` whenever the shared design changes. Go template variables, confirmation URLs, OTP codes and the recovery token-hash callback remain intact. Transactional account emails omit marketing unsubscribe controls.
+
+Local config selects the six authentication templates. The seven security notification templates are supplied for existing enabled hosted notifications; this change does not enable or disable notifications. Apply each matching HTML file in hosted Supabase Authentication → Emails after the banner, footer and font assets are deployed. On 14 September, the public banner asset still returned HTTP 404, so hosted templates were not changed. Preserve current notification toggles when applying styling.

@@ -1,10 +1,9 @@
-import { LINKEDIN_URL, INSTAGRAM_URL, X_URL, YOUTUBE_URL } from "../site";
 import { physicalIOBrand, themeColors } from "../../workspace-ui/src/theme";
 
 // Email clients require inline styles and system-font fallbacks, not app CSS.
 export const emailTheme = {
-  font: '"Rokkitt", "American Typewriter", "Courier New", serif',
-  headingFont: '"Rokkitt", "American Typewriter", "Courier New", serif',
+  font: '"Manrope", Arial, Helvetica, sans-serif',
+  headingFont: '"Manrope", Arial, Helvetica, sans-serif',
   accent: physicalIOBrand.accent,
   link: themeColors(physicalIOBrand.accent).action,
   ink: "#ffffff",
@@ -42,20 +41,18 @@ export function renderEmailHtml(input: {
   return `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(input.previewText ?? "Physical I/O")}</title>
-<!--[if !mso]><!--><style>@font-face{font-family:Rokkitt;font-style:normal;font-weight:400;font-display:swap;src:url('https://www.physical-io.com/fonts/rokkitt/rokkitt-regular.ttf') format('truetype');}</style><!--<![endif]-->
+<!--[if !mso]><!--><style>@font-face{font-family:Manrope;font-style:normal;font-weight:200 800;font-display:swap;src:url('https://www.physical-io.com/fonts/manrope/Manrope-Variable.ttf') format('truetype');}</style><!--<![endif]-->
 </head>
 <body style="margin:0;padding:0;background:${t.canvas};font-family:${escapeHtml(t.font)};color:${t.ink};-webkit-text-size-adjust:100%;">
 <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${escapeHtml(input.previewText ?? "")}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${t.canvas};"><tr><td align="center" style="padding:24px 12px;">
 <!--[if mso]><table role="presentation" width="600"><tr><td><![endif]-->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:${t.canvas};">
-<tr><td style="padding:0;background:${t.accent};"><a href="https://www.physical-io.com/" style="text-decoration:none;"><img src="https://www.physical-io.com/assets/email/physical-io-banner.png" width="600" alt="Physical I/O" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></a></td></tr>
+<tr><td style="padding:0;background:${t.accent};"><img src="https://www.physical-io.com/assets/email/physical-io-banner.png" width="600" alt="Physical I/O" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></td></tr>
 <tr><td style="padding:32px 24px 24px;border-top:1px solid ${t.line};font-family:${escapeHtml(t.font)};">${body}</td></tr>
-<tr><td style="padding:0;border-top:1px solid ${t.line};"><a href="https://www.physical-io.com/" style="text-decoration:none;"><img src="https://www.physical-io.com/assets/email/physical-io-footer.png" width="600" alt="Love, Intelligence + Body. A community led by curiosity, design and engineering." style="display:block;width:100%;max-width:600px;height:auto;border:0;"></a></td></tr>
+<tr><td style="padding:0;border-top:1px solid ${t.line};"><img src="https://www.physical-io.com/assets/email/physical-io-footer.png" width="600" alt="Love, Intelligence + Body. A community led by curiosity, design and engineering." style="display:block;width:100%;max-width:600px;height:auto;border:0;"></td></tr>
 <tr><td align="center" style="text-align:center;padding:24px 24px 32px;border-top:1px solid ${t.line};font-family:${escapeHtml(t.font)};font-size:13px;line-height:1.6;color:#ffd5cc;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;margin:0 0 24px;"><tr>${[["LinkedIn", LINKEDIN_URL], ["Instagram", INSTAGRAM_URL], ["YouTube", YOUTUBE_URL], ["X", X_URL]].map(([label, href]) => `<td width="25%" align="center" style="text-align:center;font-family:${escapeHtml(t.font)};font-size:13px;line-height:1.6;"><a href="${escapeHtml(href)}" style="display:inline-block;padding:8px 0;color:#ffd5cc;text-decoration:underline;white-space:nowrap;">${label}</a></td>`).join('')}</tr></table>
 <p style="margin:0 0 16px;font-weight:400;color:#ffd5cc;">Physical I/O · London</p>
-<p style="margin:0 0 16px;font-size:14px;"><a href="https://www.physical-io.com/" style="color:#ffd5cc;text-decoration:underline;">Explore the community</a></p>
 ${unsubscribe}
 </td></tr>
 </table>
