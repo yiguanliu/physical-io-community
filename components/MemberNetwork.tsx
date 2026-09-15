@@ -1,4 +1,5 @@
 "use client";
+import { ArrowUpRight } from 'lucide-react';
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -235,7 +236,7 @@ export default function MemberNetwork() {
             <section className={styles.focusCard} aria-live="polite">
               <div className={styles.focusAvatar}>{activeMember.name.split(" ").map((name) => name[0]).join("")}</div>
               <div><span>IN YOUR NETWORK</span><h2>{activeMember.name}</h2><p>{activeMember.role} · {activeMember.location}</p></div>
-              <button type="button">View profile <span>↗</span></button>
+              <button type="button">View profile <ArrowUpRight size={16} aria-hidden="true" /></button>
             </section>
           ) : (
             <div className={styles.tip}>Hover a member to explore their position in the network.</div>

@@ -1,7 +1,7 @@
 "use client";
 import {useNotification} from "@/workspace-ui/src";
 import { useEffect, useRef, useState } from "react";
-import { ScanFace, SlidersHorizontal, Share2, Camera, Play, ArrowUpRight } from "lucide-react";
+import { ScanFace, SlidersHorizontal, Share2, Camera, Play, ArrowUpRight } from 'lucide-react';
 import { Button, IconButton, Popover, Dialog } from "@/workspace-ui/src";
 import { X_URL, YOUTUBE_URL, INSTAGRAM_URL, LINKEDIN_URL } from "@/lib/site";
 import styles from "./ContactObject.module.css";
@@ -127,8 +127,8 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
       <Button disabled={!ready||pending} aria-pressed={mode==="camera"} onClick={()=>mode==="camera"?stop():void enable("camera")}>{mode==="camera"?"Stop camera":"Use camera"}</Button>
       <Button disabled={!ready} onClick={()=>{onInteract?.();reset.current();}}>Reset pose</Button>
       {pending && <Button onClick={stop}>Cancel</Button>}
-    {onConfigure&&<Button variant="ghost" disabled={!ready||configureDisabled} onClick={()=>{onInteract?.();setStudioOpen(true);}}>Expression studio ↗</Button>}
-      <Button variant="ghost" disabled={!ready} onClick={()=>setEnvironmentOpen(true)}>Environment studio ↗</Button>
+    {onConfigure&&<Button variant="ghost" disabled={!ready||configureDisabled} onClick={()=>{onInteract?.();setStudioOpen(true);}}>Expression studio <ArrowUpRight size={16} aria-hidden="true" /></Button>}
+      <Button variant="ghost" disabled={!ready} onClick={()=>setEnvironmentOpen(true)}>Environment studio <ArrowUpRight size={16} aria-hidden="true" /></Button>
     </div>
     </Popover>
     {extraControls}
