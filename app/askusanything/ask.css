@@ -1,0 +1,7 @@
+/* Keep the existing contact form readable inside the shared public theme. */
+.public-site .page-ask{--ink:var(--ui-text);--ink-soft:var(--ui-muted);--ink-faint:var(--ui-muted);--line:var(--ui-control);--accent:var(--ui-action);--accent-deep:var(--ui-danger)}
+.public-site .page-ask .ask-form-box{background:var(--ui-surface);border-color:var(--ui-border);box-shadow:none}
+.public-site .page-ask .ask-form :is(input,textarea,select){background:var(--ui-bg);color:var(--ui-text);color-scheme:inherit}
+.public-site .page-ask .ask-form :is(input,textarea,select):focus-visible{outline:2px solid var(--ui-focus);outline-offset:3px;box-shadow:none}
+.public-site .page-ask .btn-primary{background:var(--ui-action);color:var(--ui-on-action)}
+.public-site .page-ask .btn-primary:hover{background:var(--ui-action-hover)}
