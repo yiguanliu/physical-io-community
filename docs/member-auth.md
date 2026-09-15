@@ -59,3 +59,9 @@ On success, `/login?status=joined` opens the code form. The email is carried in 
 The member page contains published upcoming Events and Past recordings. Event service failures show a calendar fallback; recordings remain behind the existing verified-member check. Marketing navigation, signup prompts, the large footer, decorative login art and redundant recording actions are omitted from member access.
 
 Before release, apply the updated `supabase/templates/confirmation.html` to hosted Authentication → Emails → Confirm signup. Both Confirm signup and Magic Link must include `{{ .Token }}`: first-time OTP registration can use the confirmation template, while returning members use Magic Link. Local templates do not update hosted configuration. No live signup or email delivery was performed during local verification.
+
+## Required member profile
+
+Create account routes to `/join`; the legacy signup action also redirects there. Email-code requests check `public.members` by normalized email first. Unknown addresses must complete the join form. Existing database members, including CSV imports, can create their auth identity through email OTP. Every `/members` request verifies the session and checks database membership; accounts created elsewhere cannot bypass onboarding. Database errors fail closed. Existing imported records count as membership.
+
+Verified accounts missing a profile go to `/join?status=profile_required`, with their verified email prefilled. The join API enforces that email server-side. After saving, an already verified account proceeds directly to `/members`; new unauthenticated signups receive a verification code as before. Password-recovery authorization stays independent of profile completion.

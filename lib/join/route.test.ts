@@ -1,11 +1,11 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-const mocks = vi.hoisted(() => ({ query: vi.fn(), release: vi.fn(), save: vi.fn(), otp: vi.fn() }));
+const mocks = vi.hoisted(() => ({ query: vi.fn(), release: vi.fn(), save: vi.fn(), otp: vi.fn(), getUser: vi.fn() }));
 vi.mock('server-only', () => ({}));
 vi.mock('next/server', () => ({ after: vi.fn() }));
 vi.mock('next/headers', () => ({ cookies: async () => ({}) }));
 vi.mock('@/lib/admin/database', () => ({ database: () => ({ connect: async () => ({ query: mocks.query, release: mocks.release }) }) }));
 vi.mock('@/lib/join/service', () => ({ saveSignup: mocks.save, deliverJoinNotifications: vi.fn(), JoinRateLimit: class extends Error {} }));
-vi.mock('@/utils/supabase/server', () => ({ createClient: () => ({ auth: { signInWithOtp: mocks.otp } }) }));
+vi.mock('@/utils/supabase/server', () => ({ createClient: () => ({ auth: { signInWithOtp: mocks.otp, getUser: mocks.getUser } }) }));
 import { POST } from '@/app/api/join/route';
 const profile = { firstName:'Test',lastName:'Visitor',email:'member@example.com',city:'London',role:'Designer',experience:'3–5 years',work:'Robotics',website:'https://example.com',linkedin:'https://linkedin.com/in/test-visitor',goals:['Meet peers'],formats:['Talks / panels'],suggestions:'',consent:true,updates:false };
 const request = (body = profile) => new Request('https://www.physical-io.com/api/join', { method:'POST', headers:{ origin:'https://www.physical-io.com', 'Content-Type':'application/json' }, body:JSON.stringify(body) });
@@ -24,3 +24,14 @@ it('preserves a saved profile and explains retry when email delivery fails', asy
  const result=await POST(request()); expect(result.status).toBe(503); expect((await result.json()).error).toContain('Your profile is saved'); expect(mocks.query).not.toHaveBeenCalledWith('rollback'); expect(mocks.release).toHaveBeenCalled();
 });
 it('allows an existing unchanged profile to receive a code', async () => { mocks.save.mockResolvedValue(undefined); expect((await POST(request())).status).toBe(200); expect(mocks.otp).toHaveBeenCalledOnce(); });
+
+it('completes the profile for a verified session without sending another code', async () => {
+ mocks.getUser.mockResolvedValue({data:{user:{email:profile.email,email_confirmed_at:'2026-09-15'}},error:null});
+ const response=await POST(request());
+ expect(await response.json()).toEqual({ok:true,redirectTo:'/members'});
+ expect(mocks.save).toHaveBeenCalledOnce();expect(mocks.otp).not.toHaveBeenCalled();
+});
+it('prevents a verified user from completing onboarding under another email', async () => {
+ mocks.getUser.mockResolvedValue({data:{user:{email:'different@example.com',email_confirmed_at:'2026-09-15'}},error:null});
+ expect((await POST(request())).status).toBe(409);expect(mocks.save).not.toHaveBeenCalled();
+});

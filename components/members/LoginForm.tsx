@@ -38,7 +38,7 @@ export default function LoginForm({ configured, invalidLink = false, joined = fa
     <div className="admin-login-frame">
 
     <section className="admin-login-panel" aria-labelledby="member-login-title">
-    <div className="admin-login-top"><Link href="/join" className="ui-button ui-button-ghost">Join the community</Link><IconButton variant="ghost" label={dark ? 'Use light appearance' : 'Use dark appearance'} onClick={toggleAppearance}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</IconButton></div>
+    <div className="admin-login-top"><Link href="/join" className="ui-button ui-button-ghost">Create account</Link><IconButton variant="ghost" label={dark ? 'Use light appearance' : 'Use dark appearance'} onClick={toggleAppearance}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</IconButton></div>
     <div className="admin-login-form">
     <header className="admin-login-heading"><Link href="/" className="admin-login-identity"><LogoMark/><span>Physical I/O</span></Link><h1 id="member-login-title">{titles[mode]}</h1></header>
     {!(joined && mode === 'code') && <p>{mode === 'code' ? 'Get a one-time code at your account email. No password needed.' : mode === 'recovery' ? 'Enter your account email and we’ll send a link to choose a new password.' : mode === 'confirm' ? 'Enter the email you registered with to request a new confirmation link.' : 'Use your email and password to watch Physical I/O talks and past events.'}</p>}

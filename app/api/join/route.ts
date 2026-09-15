@@ -1,6 +1,6 @@
 import {cookies} from 'next/headers';
 import {createClient} from '@/utils/supabase/server';
-import {memberAuthConfigured} from '@/lib/auth/member';
+import {memberAuthConfigured,getMember} from '@/lib/auth/member';
 import {memberAuthRedirect} from '@/lib/auth/member-redirect';
 import {after} from 'next/server';
 import {createHash} from 'node:crypto';
@@ -18,12 +18,15 @@ export async function POST(request:Request){
  let input;try{input=joinSchema.safeParse(JSON.parse(raw));}catch{return Response.json({error:'Invalid submission.'},{status:400});}
  if(!input.success)return Response.json({error:input.error.issues[0]?.message||'Check your answers.'},{status:400});
  if(!memberAuthConfigured())return Response.json({error:'Member registration is temporarily unavailable. Please try again later.'},{status:503});
+ const user=await getMember();
+ if(user?.email&&user.email.toLowerCase()!==input.data.email)return Response.json({error:'Use your signed-in email to complete your member profile.'},{status:409});
  let db;
  try{
   db=await database().connect();await db.query('begin');
   const key=createHash('sha256').update(request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'local').digest('hex');
   await saveSignup(db,input.data,key);await db.query('commit');
   after(async()=>{let delivery;try{delivery=await database().connect();await deliverJoinNotifications(delivery);}catch{console.error('Join notification queue unavailable');}finally{delivery?.release();}});
+  if(user)return Response.json({ok:true,redirectTo:'/members'});
   try{
    const {error}=await createClient(await cookies()).auth.signInWithOtp({email:input.data.email,options:{shouldCreateUser:true,emailRedirectTo:memberAuthRedirect(origin)}});
    if(error)throw error;
