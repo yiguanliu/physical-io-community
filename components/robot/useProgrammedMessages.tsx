@@ -3,7 +3,7 @@ import { layoutMessageText } from '@/lib/robot/dot-matrix';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { Megaphone, Pause, Play, Pencil } from 'lucide-react';
+import { Megaphone, Pause, Play, Pencil, ArrowRight } from 'lucide-react';
 import { Dialog, IconButton, Skeleton } from '@/workspace-ui/src';
 import { displayMessageSchema, type DisplayMessage } from '@/lib/robot/playlist';
 import type { RobotPerformance } from '@/lib/robot/contracts';
@@ -80,7 +80,7 @@ export function useProgrammedMessages(available: boolean) {
     {canEdit && <IconButton label="Edit OHI messages" title="Edit OHI messages · Admin" variant="ghost" onClick={() => setEditing(true)}><Pencil size={18} /></IconButton>}
   </>;
   const dialogs = <>
-    <Dialog open={reading} onOpenChange={setReading} title="OHI announcements" description="All current messages, without scrolling or animation."><div className="ohi-editor-stack">{messages.map(message => <p className="ohi-announcement-copy" key={message.id}>{message.text}</p>)}<div className="ohi-editor-actions"><Link href="/events#upcoming" className="ui-button ui-button-primary" onClick={() => setReading(false)}>View upcoming events <span aria-hidden="true">→</span></Link></div></div></Dialog>
+    <Dialog open={reading} onOpenChange={setReading} title="OHI announcements" description="All current messages, without scrolling or animation."><div className="ohi-editor-stack">{messages.map(message => <p className="ohi-announcement-copy" key={message.id}>{message.text}</p>)}<div className="ohi-editor-actions"><Link href="/events#upcoming" className="ui-button ui-button-primary" onClick={() => setReading(false)}>View upcoming events <ArrowRight size={16} aria-hidden="true" /></Link></div></div></Dialog>
     {canEdit && <Dialog open={editing} onOpenChange={open => { if (open || !editorDirty || window.confirm('Close the editor? Any unpublished changes will be discarded.')) setEditing(open); }} title="OHI messages" description="Admin only · Edit and publish the homepage LED playlist.">{editing && <MessageEditor onPublished={() => void refresh()} onDirtyChange={setEditorDirty} />}</Dialog>}
   </>;
   return { performance: playing ? active : null, controls, dialogs, pause: () => setPaused(true) };

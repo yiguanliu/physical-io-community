@@ -1,3 +1,4 @@
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
@@ -5,7 +6,7 @@ export function Hero({ eyebrow, title, children, actions }: { eyebrow: string; t
   return <header className="public-hero"><span className="public-eyebrow"><i aria-hidden="true" />{eyebrow}</span><h1>{title}</h1><p>{children}</p>{actions && <div className="public-actions">{actions}</div>}</header>;
 }
 export function ActionLink({ href, children, primary = false, external = false }: { href: string; children: ReactNode; primary?: boolean; external?: boolean }) {
-  return <Link className={`ui-button ui-button-${primary ? 'primary' : 'ghost'}`} href={href} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{children}<span aria-hidden="true">{external ? '↗' : '→'}</span></Link>;
+  return <Link className={`ui-button ui-button-${primary ? 'primary' : 'ghost'}`} href={href} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{children}<>{external ? <ArrowUpRight size={16} aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}</></Link>;
 }
 export function SectionHeading({ label, title, children }: { label: string; title: string; children?: ReactNode }) {
   return <header className="public-section-heading"><span className="public-eyebrow">{label}</span><h2>{title}</h2>{children && <p>{children}</p>}</header>;

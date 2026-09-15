@@ -1,4 +1,5 @@
 "use client";
+import { ArrowRight } from 'lucide-react';
 
 import dynamic from "next/dynamic";
 import { useRef, useState, useTransition } from "react";
@@ -153,7 +154,7 @@ export default function DraftEditor({
 
       <div className="content-editor-footer">
         <Button type="button" className="admin-primary" onClick={confirm} disabled={pending}>
-          {confirmed ? "Re-confirm master draft" : "Confirm draft → build variants"}
+          {confirmed ? "Re-confirm master draft" : <>Confirm draft <ArrowRight size={16} aria-hidden="true" /> build variants</>}
         </Button>
         {confirmed ? <small>Confirming reseeds platform variants from this draft.</small> : null}
       </div>

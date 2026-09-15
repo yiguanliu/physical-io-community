@@ -147,9 +147,9 @@ function RobotExperienceContent({onReady,introEnabled=true,dark=false}:{onReady?
   }catch(e){if(token===generation.current){setError(e instanceof Error?e.message:'Microphone access failed.');setPhase('You can type instead.');}}
  }
  function toggleVoice(){const next=!voice;setVoice(next);if(!next){stopAudio();setPerformance(p=>({...p,speaking:false}));}}
- return <section className={styles.workspace} data-window={windowMode} data-mobile-view={mobileView} data-morphing={morphing}>
+ return <section className={styles.workspace} data-window={mobile?'normal':windowMode} data-mobile-view={mobileView} data-morphing={morphing}>
   
-  <div className={styles.panel} data-window={windowMode} data-started={messages.length>0||busy}>
+  <div className={styles.panel} data-window={mobile?'normal':windowMode} data-started={messages.length>0||busy}>
    <IdentityTitle/>
    <div className={styles.transitionSkeleton} aria-hidden="true"><div className={styles.skeletonHeading}><i/><span/></div><div className={styles.skeletonLines}><span/><span/><span/></div><div className={styles.skeletonComposer}/></div>
 

@@ -1,4 +1,5 @@
 "use client";
+import { ArrowRight } from 'lucide-react';
 
 import { useState } from "react";
 import { ASK_CATEGORIES } from "@/lib/site";
@@ -144,7 +145,7 @@ export default function AskForm() {
 
       <button type="submit" className="btn btn-primary btn-lg" disabled={status === "submitting"}>
         {status === "submitting" ? "Sending…" : "Send question"}
-        {status !== "submitting" && <span className="arrow">→</span>}
+        {status !== "submitting" && <ArrowRight size={16} aria-hidden="true" className="arrow" />}
       </button>
     </form>
   );

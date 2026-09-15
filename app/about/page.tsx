@@ -1,3 +1,4 @@
+import { ArrowDown, ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import PublicShell from '@/components/public/PublicShell';
@@ -24,9 +25,9 @@ export default function AboutPage() {
         <Card className="public-card public-card-wide"><span className="public-eyebrow">01 / Our starting point</span><LoveMindBody /><h2>Curiosity. Design. Engineering.</h2><p>Ask what’s possible. Consider what should exist. Make it work. Different ways of thinking, brought together through the things we build.</p></Card>
         <Card className="public-card"><PixelArt kind="people" /><h2>Find your people.</h2><p>Designers, engineers, researchers, founders and manufacturers. Experienced or just exploring, there’s room for your perspective.</p><ul className="public-pills" role="list">{['Designers', 'Engineers', 'Researchers', 'Founders', 'Manufacturers', 'Curious newcomers'].map(x => <li key={x}>{x}</li>)}</ul></Card>
         <Card className="public-card"><PixelArt kind="idea" /><h3>A reason to gather.</h3><p>A sense of belonging. An unexpected idea. Someone who can help you get unstuck. Progress often begins with a conversation.</p></Card>
-        <Card className="public-card"><PixelArt kind="hackathon" /><h3>Meet. Share. Build.</h3><p>Speaker nights, hands-on workshops and shared experiments. Bring a question, a point of view or a work in progress.</p><Link className="public-card-link" href="/events">Find a gathering <span aria-hidden="true">→</span></Link></Card>
-        <Card className="public-card"><PixelArt kind="ticket" /><h3>Free to belong.</h3><p>Register through our website to join. Community membership and community events are free, with places subject to availability.</p><Link className="public-card-link" href="/join">Become a member <span aria-hidden="true">→</span></Link></Card>
-        <Card className="public-card public-card-full"><span className="public-eyebrow">From the community, into the world</span><h2>Ideas deserve a physical form.</h2><p>We’re building towards a manufacturing platform that connects design, prototyping, sourcing and production. Our ambition: make deploying hardware as straightforward as deploying software.</p><Link className="public-card-link" href="#business">How the business works <span aria-hidden="true">↓</span></Link></Card>
+        <Card className="public-card"><PixelArt kind="hackathon" /><h3>Meet. Share. Build.</h3><p>Speaker nights, hands-on workshops and shared experiments. Bring a question, a point of view or a work in progress.</p><Link className="public-card-link" href="/events">Find a gathering <ArrowRight size={16} aria-hidden="true" /></Link></Card>
+        <Card className="public-card"><PixelArt kind="ticket" /><h3>Free to belong.</h3><p>Register through our website to join. Community membership and community events are free, with places subject to availability.</p><Link className="public-card-link" href="/join">Become a member <ArrowRight size={16} aria-hidden="true" /></Link></Card>
+        <Card className="public-card public-card-full"><span className="public-eyebrow">From the community, into the world</span><h2>Ideas deserve a physical form.</h2><p>We’re building towards a manufacturing platform that connects design, prototyping, sourcing and production. Our ambition: make deploying hardware as straightforward as deploying software.</p><Link className="public-card-link" href="#business">How the business works <ArrowDown size={16} aria-hidden="true" /></Link></Card>
       </div>
     </section>
 
@@ -38,7 +39,7 @@ export default function AboutPage() {
 
     <section className="public-section">
       <SectionHeading label="Membership" title="A place to contribute. A place to belong." />
-      <div className="public-two-col"><Card className="public-card"><h3>What you get</h3><ul className="public-list" role="list">{MEMBER_BENEFITS.map(x => <li key={x}>{x}</li>)}</ul></Card><Card className="public-card"><h3>What you can expect from us</h3><ul className="public-list" role="list">{MEMBER_RIGHTS.map(x => <li key={x}>{x}</li>)}</ul><Link href="/privacy" className="public-card-link">Your privacy <span aria-hidden="true">→</span></Link></Card></div>
+      <div className="public-two-col"><Card className="public-card"><h3>What you get</h3><ul className="public-list" role="list">{MEMBER_BENEFITS.map(x => <li key={x}>{x}</li>)}</ul></Card><Card className="public-card"><h3>What you can expect from us</h3><ul className="public-list" role="list">{MEMBER_RIGHTS.map(x => <li key={x}>{x}</li>)}</ul><Link href="/privacy" className="public-card-link">Your privacy <ArrowRight size={16} aria-hidden="true" /></Link></Card></div>
     </section>
     <ClosingNote title="Bring your curiosity." href="/join" action="Join free">You don’t need a finished project or a particular job title. Start with what interests you.</ClosingNote>
   </PublicShell>;

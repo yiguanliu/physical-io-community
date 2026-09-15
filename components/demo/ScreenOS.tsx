@@ -1,4 +1,5 @@
 "use client";
+import { ArrowUpRight } from 'lucide-react';
 
 import { useEffect, useState } from "react";
 import type { Disk } from "./disks";
@@ -131,7 +132,7 @@ export default function ScreenOS({
                   <DocIcon className="file-ico" />
                   <span className="file-name">
                     {e.title}
-                    {e.href && <span className="file-link" aria-hidden="true"> ↗</span>}
+                    {e.href && <ArrowUpRight size={16} aria-hidden="true" />}
                   </span>
                   {e.tag && <span className="file-tag">{e.tag}</span>}
                 </>

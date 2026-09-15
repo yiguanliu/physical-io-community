@@ -1,4 +1,5 @@
 "use client";
+import { ArrowUpRight } from 'lucide-react';
 
 import { useEffect, useRef } from "react";
 import { IconGrid, IconList, IconSearch, NewsThumb, SadMac } from "./PixelIcons";
@@ -231,7 +232,7 @@ export default function NewsScreen({
           </button>
           {article.href && (
             <a className="news-link" href={article.href} target="_blank" rel="noopener noreferrer">
-              read source ↗
+              read source <ArrowUpRight size={16} aria-hidden="true" />
             </a>
           )}
         </p>
