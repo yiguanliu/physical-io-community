@@ -31,7 +31,11 @@ it('completes the profile for a verified session without sending another code', 
  expect(await response.json()).toEqual({ok:true,redirectTo:'/members'});
  expect(mocks.save).toHaveBeenCalledOnce();expect(mocks.otp).not.toHaveBeenCalled();
 });
-it('prevents a verified user from completing onboarding under another email', async () => {
+it('requires a fresh code when signing up with a different email from the current session', async () => {
  mocks.getUser.mockResolvedValue({data:{user:{email:'different@example.com',email_confirmed_at:'2026-09-15'}},error:null});
- expect((await POST(request())).status).toBe(409);expect(mocks.save).not.toHaveBeenCalled();
+ const response=await POST(request());
+ expect(response.status).toBe(200);
+ expect(await response.json()).toEqual({ok:true});
+ expect(mocks.save).toHaveBeenCalledOnce();
+ expect(mocks.otp).toHaveBeenCalledWith({email:profile.email,options:{shouldCreateUser:true,emailRedirectTo:'https://www.physical-io.com/auth/confirm'}});
 });
