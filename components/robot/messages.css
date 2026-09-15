@@ -2,6 +2,7 @@
 .ohi-editor-stack{display:grid;gap:var(--ui-space-card);min-width:0}
 .ohi-editor-stack>p,.ohi-editor-preview>p,.ohi-editor-actions>span{color:var(--ui-muted);font-size:.8125rem;line-height:1.6}
 .ohi-editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:var(--ui-space-control)}
+.ohi-editor-actions a.ui-button-primary{color:var(--ui-on-action)}
 .ohi-editor-actions h3{margin-inline-end:auto;font-size:.9375rem}
 .ohi-editor-fields{display:grid;grid-template-columns:1fr 1fr;gap:var(--ui-space-control)}
 .ohi-editor-stack textarea{resize:vertical}
