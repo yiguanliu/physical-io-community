@@ -1,5 +1,4 @@
 import type {Metadata} from 'next';
-import {getMember} from '@/lib/auth/member';
 import JoinFlow from './JoinFlow';
 export const metadata:Metadata={title:'Join the community | Physical I/O',alternates:{canonical:'/join'},description:'Find your people in Physical AI. Join the Physical I/O community.'};
-export default async function JoinPage({searchParams}:{searchParams:Promise<{status?:string}>}){const [user,params]=await Promise.all([getMember(),searchParams]);return <JoinFlow verifiedEmail={user?.email} profileRequired={params.status==='profile_required'}/>;}
+export default async function JoinPage({searchParams}:{searchParams:Promise<{status?:string}>}){const params=await searchParams;return <JoinFlow profileRequired={params.status==='profile_required'}/>;}

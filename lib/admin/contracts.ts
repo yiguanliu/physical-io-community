@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import {eventCommands,type Episode} from '@/lib/events/model';
-export type Member = {id:string;name:string;email:string;role:string;city:string;joined:string;status:string;topics:string[];notes?:string;website?:string;linkedin?:string;emailStatus?:string;subscriptions?:{topic:string;status:string}[]};
+export type Member = {id:string;name:string;email:string;role:string;city:string;joined:string;status:string;topics:string[];notes?:string;website?:string;linkedin?:string;emailStatus?:string;accountCreatedAt?:string|null;lastSignInAt?:string|null;emailConfirmedAt?:string|null;subscriptions?:{topic:string;status:string}[]};
 export type Lead = {id:string;company:string;contact:string;email:string;role:string;stage:string;value:string;score:number;next:string;last:string;tone:string};
 export type Campaign = {id:string;name:string;type:string;audience:string;status:string;date:string;delivery:string;body:string};
 export type CommunityEvent = Episode;
