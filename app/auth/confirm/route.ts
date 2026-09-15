@@ -9,7 +9,12 @@ export async function GET(request: Request) {
   const tokenHash = url.searchParams.get('token_hash');
   const type = url.searchParams.get('type');
   const recovery = type === 'recovery' || url.searchParams.get('flow') === 'recovery';
-  const failure = () => NextResponse.redirect(new URL('/login?status=invalid_link', url.origin));
+  const destination = (path: string) => {
+    const response = NextResponse.redirect(new URL(path, url.origin));
+    response.headers.set('Cache-Control', 'private, no-store');
+    return response;
+  };
+  const failure = () => destination(recovery ? '/login?status=invalid_link' : '/login?status=request_code');
   if ((!code && !tokenHash) || !memberAuthConfigured()) return failure();
   try {
     const client = createClient(await cookies());
@@ -19,7 +24,5 @@ export async function GET(request: Request) {
       : await client.auth.exchangeCodeForSession(code!);
     if (error) return failure();
   } catch { return failure(); }
-  const response = NextResponse.redirect(new URL(recovery ? '/login/reset-password' : '/members', url.origin));
-  response.headers.set('Cache-Control', 'private, no-store');
-  return response;
+  return destination(recovery ? '/login/reset-password' : '/login?status=email_confirmed');
 }
