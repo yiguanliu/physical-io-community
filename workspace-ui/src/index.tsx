@@ -2,7 +2,7 @@
 import * as React from 'react';
 import {createPortal} from 'react-dom';
 import { Dialog as D, Popover as P, Tabs as T, Switch as S, Tooltip as Tip, Select as Dropdown, DropdownMenu as Menu, ToggleGroup as G } from 'radix-ui';
-import { X, LoaderCircle, Search, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { X, LoaderCircle, Search, ChevronDown, ChevronUp, ArrowUp, ArrowDown, ArrowUpDown, Check } from 'lucide-react';
 import { defaultTheme, themeColors, type Theme } from './theme';
 export { defaultTheme, themeColors, contrast, physicalIOBrand, minimalTheme } from './theme';
 export type { Theme } from './theme';
@@ -91,8 +91,17 @@ export function Toolbar({ children }: { children: React.ReactNode }) { return <d
 export function EmptyState({ title, description, action }: { title: string; description: string; action?: React.ReactNode }) { return <div className="ui-empty"><Search aria-hidden size={26}/><h3>{title}</h3><p>{description}</p>{action}</div>; }
 export function Alert({ title, children, tone = 'neutral' }: { title: string; children: React.ReactNode; tone?: 'neutral' | 'danger' | 'success' }) { return <div className={`ui-alert ui-${tone}`} role={tone === 'danger' ? 'alert' : 'status'}><strong>{title}</strong><p>{children}</p></div>; }
 export function Skeleton({ label = 'Loading content' }: { label?: string }) { return <div className="ui-skeleton" role="status" aria-label={label}><span/><span/><span/></div>; }
-export type Column<T> = { key: string; label: string; render: (row: T) => React.ReactNode };
-export function DataTable<T>({ rows, columns, rowKey, label }: { rows: T[]; columns: Column<T>[]; rowKey: (row: T) => string; label: string }) { return <div className="ui-table-scroll" tabIndex={0} role="region" aria-label={`${label}, scrollable table`}><table className="ui-table"><caption className="ui-sr-only">{label}</caption><thead><tr>{columns.map(c => <th scope="col" key={c.key}>{c.label}</th>)}</tr></thead><tbody>{rows.map(row => <tr key={rowKey(row)}>{columns.map(c => <td key={c.key}>{c.render(row)}</td>)}</tr>)}</tbody></table></div>; }
+export type Column<T> = { key: string; label: string; render: (row: T) => React.ReactNode; sortValue?: (row:T)=>string|number|null|undefined };
+export function DataTable<T>({rows,columns,rowKey,label}:{rows:T[];columns:Column<T>[];rowKey:(row:T)=>string;label:string}) {
+ const [sort,setSort]=React.useState<{key:string;descending:boolean}|null>(null);
+ const column=columns.find(c=>c.key===sort?.key);
+ const sorted=React.useMemo(()=>{
+  if(!column?.sortValue||!sort)return rows;
+  const value=column.sortValue;
+  return [...rows].sort((a,b)=>{const av=value(a),bv=value(b);if(av==null)return bv==null?0:1;if(bv==null)return -1;const result=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv),'en',{numeric:true,sensitivity:'base'});return sort.descending?-result:result;});
+ },[rows,column,sort]);
+ return <div className="ui-table-scroll" tabIndex={0} role="region" aria-label={`${label}, scrollable table`}><table className="ui-table"><caption className="ui-sr-only">{label}</caption><thead><tr>{columns.map(c=><th scope="col" key={c.key} aria-sort={c.sortValue?(sort?.key===c.key?(sort.descending?'descending':'ascending'):'none'):undefined}><span className="ui-table-heading">{c.label}{c.sortValue&&<IconButton variant="ghost" label={`Sort ${c.label} ${sort?.key===c.key&&!sort.descending?'descending':'ascending'}`} onClick={()=>setSort(current=>({key:c.key,descending:current?.key===c.key?!current.descending:false}))}>{sort?.key===c.key?(sort.descending?<ArrowDown size={14}/>:<ArrowUp size={14}/>):<ArrowUpDown size={14}/>}</IconButton>}</span></th>)}</tr></thead><tbody>{sorted.map(row=><tr key={rowKey(row)}>{columns.map(c=><td key={c.key}>{c.render(row)}</td>)}</tr>)}</tbody></table></div>;
+}
 export function WorkspaceShell({ sidebar, topbar, children }: { sidebar: React.ReactNode; topbar: React.ReactNode; children: React.ReactNode }) { return <div className="ui-shell"><a className="ui-skip" href="#workspace-main">Skip to content</a><aside className="ui-sidebar">{sidebar}</aside><div className="ui-workspace"><div className="ui-topbar">{topbar}</div><main id="workspace-main" tabIndex={-1}>{children}</main></div></div>; }
 export function NavItem({ active, children, ...props }: React.ComponentProps<'button'> & { active?: boolean }) { return <button type="button" {...props} className="ui-nav-item" aria-current={active ? 'page' : undefined}>{children}</button>; }
 

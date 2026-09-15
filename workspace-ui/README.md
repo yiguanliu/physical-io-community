@@ -115,3 +115,7 @@ Transient status messages use shared `Toast` (`message`, `onDismiss`, optional `
 `Disclosure` groups independently collapsible settings with a keyboard-accessible heading button. Props: `title`, `children`, and optional `defaultOpen` (true). Children remain mounted while hidden to preserve input state.
 
 `Avatar` accepts `name` and optional `src`. It displays a circular headshot when available and falls back to uppercase initials if absent or the image fails to load.
+
+### Table sorting
+
+Provide `sortValue: row => row.name` on a `DataTable` column to show a small ascending/descending arrow button. Use numbers for dates (`Date.parse`) and numeric fields; missing values stay last. Sorting preserves the input rows and selection, and headers expose `aria-sort`. Selection and action columns omit sorting. The Community people gallery demonstrates the pattern.

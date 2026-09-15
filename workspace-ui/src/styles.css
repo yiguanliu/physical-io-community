@@ -117,3 +117,5 @@
 @media(prefers-reduced-motion:reduce){.ui-disclosure-trigger svg{transition:none}}
 
 .ui-avatar{overflow:hidden}.ui-avatar img{width:100%;height:100%;object-fit:cover}
+
+.ui-table-heading{display:flex;align-items:center;gap:4px}.ui-table-heading .ui-icon-button{width:32px;min-height:32px;height:32px;padding:0;flex-shrink:0}
