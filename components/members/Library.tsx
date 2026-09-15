@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Play, ArrowUpRight } from 'lucide-react';
 import { Alert, Button, Card } from '@/workspace-ui/src';
 import { memberSignOut } from '@/app/login/actions';
-import type { PublicEvent } from '@/lib/public-events';
+import LumaCalendar from '@/components/public/LumaCalendar';
 import { LUMA_URL } from '@/lib/site';
 type Episode = { id: string; title: string; label: string; description: string; youtubeId: string; start: number };
-export default function Library({ episodes, events, eventsUnavailable }: { episodes: Episode[]; events: PublicEvent[]; eventsUnavailable: boolean }) {
+export default function Library({ episodes }: { episodes: Episode[] }) {
   const [watching, setWatching] = useState<{ episode: Episode; start: number } | null>(null);
   const playerHeading = useRef<HTMLHeadingElement>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
@@ -22,7 +22,8 @@ export default function Library({ episodes, events, eventsUnavailable }: { episo
     {error && <Alert title="Sign out failed" tone="danger">{error}</Alert>}
     <section className="member-stack" aria-labelledby="member-events-title">
       <div className="member-heading"><h2 id="member-events-title">Events</h2><a className="ui-button ui-button-ghost" href={LUMA_URL} target="_blank" rel="noopener noreferrer">Full calendar <ArrowUpRight size={16} aria-hidden /></a></div>
-      {events.length ? <ul className="member-event-list">{events.map(event => <li key={event.id}><div><h3>{event.title}</h3><p><time dateTime={event.startsAt}>{new Date(event.startsAt).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/London' })} (London)</time>{event.venue && <> · {event.venue}</>}</p></div>{event.registrationUrl ? <a className="ui-button ui-button-secondary" href={event.registrationUrl} target="_blank" rel="noopener noreferrer">Register <ArrowUpRight size={16} aria-hidden /></a> : <span className="member-note">Registration opening soon</span>}</li>)}</ul> : <p className="member-note">{eventsUnavailable ? 'Event listings are temporarily unavailable. See the calendar for upcoming gatherings.' : 'No upcoming events announced yet. Check back soon.'}</p>}
+      <LumaCalendar />
+      <p id="luma-privacy-note" className="member-note">Registration is handled by Luma. Its privacy settings apply.</p>
     </section>
     {watching && <section className="member-player member-stack" aria-label="Video player">
       <div className="member-heading"><h2 ref={playerHeading} tabIndex={-1}>{watching.episode.title}</h2><Button variant="ghost" onClick={() => { setWatching(null); opener.current?.focus(); }}>Close player</Button></div>

@@ -11,7 +11,8 @@ describe('account email templates',()=>{
   expect(readFileSync(`supabase/templates/${template.file??template.name}.html`,'utf8')).toBe(template.html+'\n');
  });
  it('preserves action links and one-time codes',()=>{
-  for(const name of ['confirmation','invite','email_change']) expect(authEmailTemplates.find(t=>t.name===name)?.html).toContain('{{ .ConfirmationURL }}');
+  expect(authEmailTemplates.find(t=>t.name==='confirmation')?.html).toContain('{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=signup');
+  for(const name of ['invite','email_change']) expect(authEmailTemplates.find(t=>t.name===name)?.html).toContain('{{ .ConfirmationURL }}');
   for(const name of ['confirmation','magic_link','reauthentication']) expect(authEmailTemplates.find(t=>t.name===name)?.html).toContain('{{ .Token }}');
   expect(authEmailTemplates.find(t=>t.name==='recovery')?.html).toContain('{{ .RedirectTo }}&amp;token_hash={{ .TokenHash }}&amp;type=recovery');
  });
