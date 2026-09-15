@@ -36,7 +36,7 @@ export default function LoginForm({ configured, invalidLink = false, joined = fa
   const titles = { code: 'Member sign in', signin: 'Member sign in', recovery: 'Reset your password', confirm: 'Confirm your email' };
   return <ThemeProvider theme={{ ...defaultTheme, mode: dark ? 'dark' : 'light' }}><main className="admin-login member-login">
     <div className="admin-login-frame">
-
+    <section className="admin-login-brand" aria-label="Physical I/O"><div className="admin-login-art" aria-hidden="true"><LogoMark /></div></section>
     <section className="admin-login-panel" aria-labelledby="member-login-title">
     <div className="admin-login-top"><Link href="/join" className="ui-button ui-button-ghost">Create account</Link><IconButton variant="ghost" label={dark ? 'Use light appearance' : 'Use dark appearance'} onClick={toggleAppearance}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</IconButton></div>
     <div className="admin-login-form">

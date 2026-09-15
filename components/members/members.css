@@ -36,7 +36,6 @@
 .member-login-recovery{display:flex;justify-content:space-between;align-items:center;gap:var(--ui-space-control);margin-top:var(--ui-space-control)}
 .member-login-recovery .ui-button{font-size:12px}
 
-.member-login .admin-login-frame{max-width:520px;min-height:0;display:block;padding:0;border:0}
 .member-login .admin-login-panel{padding:var(--ui-space-section)}
 .member-login .admin-login-heading h1{font-size:var(--ui-heading)}
 .member-library{max-width:960px;margin-inline:auto}
