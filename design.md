@@ -420,3 +420,10 @@ Account confirmation, invitation, recovery, code verification and security notif
 
 
 Latest email direction: all live text uses Manrope with Arial/Helvetica sans-serif fallbacks. Header and footer images are not links; social links and the community footer CTA are removed. Body actions and marketing unsubscribe links remain functional. The orange canvas, white text and thin separators are retained.
+
+
+## Monochrome emails (15 September 2026)
+
+All shared email templates now use a white canvas with near-black live text, neutral gray supporting text and underlined links. Supported dark-mode clients receive a black canvas with white live text and lighter gray footer text. This supersedes the orange email canvas. Use inline light-mode fallback colors, color-scheme metadata, prefers-color-scheme overrides and Outlook data-ogsc overrides; never depend on CSS variables or JavaScript in delivered emails. Email clients may apply their own inversion when these rules are unsupported.
+
+The exact supplied Branding/Email/Banner - Top.png and Banner - Bottom.png replace the public email banner assets. Preserve their black backgrounds and white artwork in both themes; do not invert or recolor the images. The bottom banner reads “Love, Mind + Body.” Account templates, Markdown newsletters and transactional text share the wrapper. Preserve authentication placeholders and marketing unsubscribe links. Publish assets and apply regenerated hosted authentication templates before release.

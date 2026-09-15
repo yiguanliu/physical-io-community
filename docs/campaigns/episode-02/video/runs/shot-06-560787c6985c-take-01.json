@@ -1,0 +1,19 @@
+{
+  "shot": "06",
+  "title": "The invitation arrives",
+  "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-06-v2.png",
+  "image_sha256": "6b988db85235a64edb72d9f013c0780f7dc0c841d0cfbdd0296b0f55a94825c0",
+  "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. Locked straight-on camera. A sparse band of existing black discs flips white, pauses, then returns to black. Keep the display enclosure and grid completely rigid. Two short bursts of mechanical clicks, ending in silence. Leave the board without text; the exact date and title will be added in the edit.",
+  "model": "veo-3.1-fast-generate-preview",
+  "resolution": "720p",
+  "seconds": 4,
+  "aspect_ratio": "16:9",
+  "estimated_cost_usd": 0.4,
+  "price_checked": "2026-09-14",
+  "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "state": "complete",
+  "submitted_at": "2026-09-14T21:00:02.949381+00:00",
+  "operation": "models/veo-3.1-fast-generate-preview/operations/3z6q7v8acpac",
+  "output": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/video/runs/shot-06-560787c6985c-take-01.mp4",
+  "completed_at": "2026-09-14T21:02:30.856777+00:00"
+}

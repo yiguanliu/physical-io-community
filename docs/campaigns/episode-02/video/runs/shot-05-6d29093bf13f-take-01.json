@@ -1,0 +1,19 @@
+{
+  "shot": "05",
+  "title": "A response, almost",
+  "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-05-v2.png",
+  "image_sha256": "261a5d1183a367b9ac59a02289c979d4fd369cf12a19c14129d4f7f0e2cf3b0e",
+  "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. A very slow focus pull through the existing glass. The indistinct white signal becomes slightly more visible, then softens again without resolving into a person or object. The hardware remains perfectly still. Two isolated soft ticks.",
+  "model": "veo-3.1-fast-generate-preview",
+  "resolution": "720p",
+  "seconds": 4,
+  "aspect_ratio": "16:9",
+  "estimated_cost_usd": 0.4,
+  "price_checked": "2026-09-14",
+  "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "state": "complete",
+  "submitted_at": "2026-09-14T20:59:46.566540+00:00",
+  "operation": "models/veo-3.1-fast-generate-preview/operations/ophuquy083i9",
+  "output": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/video/runs/shot-05-6d29093bf13f-take-01.mp4",
+  "completed_at": "2026-09-14T21:02:29.418146+00:00"
+}

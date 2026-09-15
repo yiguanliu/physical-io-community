@@ -42,7 +42,7 @@ function paragraph(lines: string[]) {
   const cta = lines.length === 1 ? lines[0].match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)$/i) : null;
   if (cta) return renderEmailLink(cta[1], cta[2]);
   const body = lines.map(renderInline).join("<br/>");
-  return `<p style="margin:0 0 16px;font-size:20px;line-height:1.5;color:${INK};">${body}</p>`;
+  return `<p style="margin:0 0 16px;font-size:16px;line-height:1.5;color:${INK};">${body}</p>`;
 }
 
 function heading(level: number, text: string) {
@@ -54,7 +54,7 @@ function heading(level: number, text: string) {
 function list(items: string[], ordered: boolean) {
   const tag = ordered ? "ol" : "ul";
   const body = items
-    .map((item) => `<li style="margin:0 0 6px;font-size:20px;line-height:1.5;color:${INK};">${renderInline(item)}</li>`)
+    .map((item) => `<li style="margin:0 0 6px;font-size:16px;line-height:1.5;color:${INK};">${renderInline(item)}</li>`)
     .join("");
   return `<${tag} style="margin:0 0 16px;padding-left:22px;">${body}</${tag}>`;
 }

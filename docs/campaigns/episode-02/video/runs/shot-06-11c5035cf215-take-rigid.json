@@ -1,0 +1,21 @@
+{
+  "shot": "06",
+  "title": "The invitation arrives",
+  "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-06-first-v3.png",
+  "image_sha256": "6b988db85235a64edb72d9f013c0780f7dc0c841d0cfbdd0296b0f55a94825c0",
+  "prompt": "Single continuous STATIC shot photographed from a bolted tripod. The supplied first and last images show the exact same rigid machine. Keep every screw, border, axle and disc center at its exact screen position for every frame. Camera, lens, focus, lighting and exposure never change. Start with every disc black and hold for 1 second. Only discs needed to form the exact end-image lettering 07 OCT on the top line and 18-21 on the bottom line rotate 180 degrees, individually in staggered random order. The result must match that image precisely. All unused discs stay black. Each circular disc is a solid rigid hinged object, rotating briefly about its existing horizontal axle; it does not translate, expand, melt, fade, glow, ripple, bend or detach. Complete all flips by second 5, then hold the exact supplied end image motionless for 3 seconds. Sparse dry individual mechanical clicks precisely accompanying the flips, then silence. Black-and-white grainy film, no music or speech.",
+  "model": "veo-3.1-fast-generate-preview",
+  "resolution": "720p",
+  "seconds": 8,
+  "aspect_ratio": "16:9",
+  "estimated_cost_usd": 0.8,
+  "price_checked": "2026-09-14",
+  "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-06-end-v3.png",
+  "end_image_sha256": "3bc7909f5067fe59b7c4873788860405cb6a7b18e264334a10a5f7eeb6d16191",
+  "negative_prompt": "camera movement, zoom, pan, tilt, tracking, dolly, handheld, reframing, focus change, moving board, waving surface, warping, morphing, liquid, melting, floating discs, new objects, fingers, hands, people, glowing dots, blinking LEDs, crossfade, dissolve, changing text",
+  "state": "rejected",
+  "submitted_at": "2026-09-14T21:28:43.283641+00:00",
+  "error_code": 429,
+  "error_summary": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+}

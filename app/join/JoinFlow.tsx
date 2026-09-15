@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
+import {useRouter} from 'next/navigation';
 import {ArrowLeft,ArrowRight,Check,Moon,Sun} from 'lucide-react';
 import {Button,IconButton,Field,TextArea,Switch,ThemeProvider,defaultTheme} from '@/workspace-ui/src';
 import LogoMark from '@/workspace-ui/app/LogoMark';
@@ -25,6 +26,7 @@ const steps=[
 type Key=typeof steps[number]['key'];
 const initial={firstName:'',lastName:'',email:'',city:'',role:'',experience:'',work:'',website:'',linkedin:'',goals:[] as string[],formats:[] as string[],suggestions:'',consent:false,updates:false,websiteTrap:''};
 export default function JoinFlow(){
+ const router=useRouter();
  const [values,setValues]=useState(initial);const [step,setStep]=useState(0);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [done,setDone]=useState(false);const [dark,setDark]=useState(false);
  const heading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{try{const saved=localStorage.getItem('ohi-appearance');setDark(saved?saved==='dark':matchMedia('(prefers-color-scheme: dark)').matches);}catch{}},[]);
@@ -39,7 +41,7 @@ export default function JoinFlow(){
  async function submit(){
   const parsed=joinSchema.safeParse(values);if(!parsed.success){setError(parsed.error.issues[0].message);return;}
   setBusy(true);setError('');
-  try{const response=await fetch('/api/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(parsed.data)});const data=await response.json();if(!response.ok)throw new Error(data.error);setDone(true);}
+  try{const response=await fetch('/api/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(parsed.data)});const data=await response.json();if(!response.ok)throw new Error(data.error);try{sessionStorage.setItem('member-join-email',parsed.data.email);}catch{}setDone(true);router.replace('/login?status=joined');}
   catch(e){setError(e instanceof Error?e.message:'Could not submit. Please try again.');}finally{setBusy(false);}
  }
  const current=steps[step];const review=step===steps.length;
@@ -47,7 +49,7 @@ export default function JoinFlow(){
  <header className={`${homeStyles['site-header']} ${styles.header}`}><Link className={homeStyles.brand} href="/" aria-label="Physical I/O home"><LogoMark/><img className={styles.wordmark} src="/assets/physical-io-wordmark.png" alt="Physical I/O" width={879} height={184}/></Link><IconButton label={dark?'Switch to light mode':'Switch to dark mode'} variant="ghost" onClick={toggleTheme}>{dark?<Sun size={20}/>:<Moon size={20}/>}</IconButton></header>
  {!done&&<div className={styles.progress} role="progressbar" aria-label="Signup progress" aria-valuemin={0} aria-valuemax={steps.length+1} aria-valuenow={step+1}><span style={{width:`${(step+1)/(steps.length+1)*100}%`}}/></div>}
  <section className={styles.content} key={done?'done':step}>
- {done?<><div className={styles.check}><Check size={28}/></div><h1 ref={heading} tabIndex={-1}>You’re in good company.</h1><p>Thanks for joining Physical I/O. If you’ve joined before, your existing membership stays unchanged.</p><Link className="ui-button ui-button-primary" href="/">Meet Ohi <ArrowRight size={18}/></Link></>:
+ {done?<><div className={styles.check}><Check size={28}/></div><h1 ref={heading} tabIndex={-1}>Check your email.</h1><p>We’ve sent your one-time code. Continue to member sign-in to confirm your email.</p><Link className="ui-button ui-button-primary" href="/login?status=joined">Member sign in <ArrowRight size={18}/></Link></>:
  <form onSubmit={e=>{e.preventDefault();if(review)void submit();else next();}}>
  <div className={styles.counter}>{step+1} / {steps.length+1}</div>
  <h1 ref={heading} tabIndex={-1}>{review?'Make yourself at home.':current.title}</h1>

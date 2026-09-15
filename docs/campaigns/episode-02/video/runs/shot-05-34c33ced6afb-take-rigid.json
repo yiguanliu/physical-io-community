@@ -1,0 +1,21 @@
+{
+  "shot": "05",
+  "title": "A mechanical response",
+  "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-05-first-v3.png",
+  "image_sha256": "176391da521ca18589f5adf5364e3fd617f38098efbc474010ede4dd7d9f7b70",
+  "prompt": "Single continuous STATIC shot photographed from a bolted tripod. The supplied first and last images show the exact same rigid machine. Keep every screw, border, axle and disc center at its exact screen position for every frame. Camera, lens, focus, lighting and exposure never change. Start with every disc black and hold for 1 second. Only the four discs that are white in the end image rotate 180 degrees, individually, in staggered random order. All other discs stay black for the entire clip. Each circular disc is a solid rigid hinged object, rotating briefly about its existing horizontal axle; it does not translate, expand, melt, fade, glow, ripple, bend or detach. Complete all flips by second 5, then hold the exact supplied end image motionless for 3 seconds. Sparse dry individual mechanical clicks precisely accompanying the flips, then silence. Black-and-white grainy film, no music or speech.",
+  "model": "veo-3.1-fast-generate-preview",
+  "resolution": "720p",
+  "seconds": 8,
+  "aspect_ratio": "16:9",
+  "estimated_cost_usd": 0.8,
+  "price_checked": "2026-09-14",
+  "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-05-end-v3.png",
+  "end_image_sha256": "41ced81e65fb3fe408d34ca79addc29df7c4bcbe9894467675cd4729292d5961",
+  "negative_prompt": "camera movement, zoom, pan, tilt, tracking, dolly, handheld, reframing, focus change, moving board, waving surface, warping, morphing, liquid, melting, floating discs, new objects, fingers, hands, people, glowing dots, blinking LEDs, crossfade, dissolve, changing text",
+  "state": "rejected",
+  "submitted_at": "2026-09-14T21:28:13.997031+00:00",
+  "error_code": 429,
+  "error_summary": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+}

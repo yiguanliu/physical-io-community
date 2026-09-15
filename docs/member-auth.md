@@ -49,3 +49,13 @@ Hosted URL Configuration must allow the exact public member and admin callbacks.
 `lib/email/auth-templates.ts` defines all six authentication and seven security-notification emails using the newsletter wrapper. Regenerate the checked-in Supabase HTML with `node --import tsx scripts/generate-auth-emails.ts` whenever the shared design changes. Go template variables, confirmation URLs, OTP codes and the recovery token-hash callback remain intact. Transactional account emails omit marketing unsubscribe controls.
 
 Local config selects the six authentication templates. The seven security notification templates are supplied for existing enabled hosted notifications; this change does not enable or disable notifications. Apply each matching HTML file in hosted Supabase Authentication → Emails after the banner, footer and font assets are deployed. On 14 September, the public banner asset still returned HTTP 404, so hosted templates were not changed. Preserve current notification toggles when applying styling.
+
+## Join → code → members (15 September 2026)
+
+New members complete `/join`, including profile consent. The API commits their profile before requesting Supabase email OTP with account creation enabled. It preserves existing profiles and subscriptions. If email sending fails, the form retains answers and explains that the profile was saved; resubmission retries without duplicating membership.
+
+On success, `/login?status=joined` opens the code form. The email is carried in tab-scoped session storage, never the URL; if storage is unavailable, members can enter it again. Verification confirms the email and opens the protected `/members` page. Returning members use email codes (without automatic account creation), with password and recovery available as secondary options.
+
+The member page contains published upcoming Events and Past recordings. Event service failures show a calendar fallback; recordings remain behind the existing verified-member check. Marketing navigation, signup prompts, the large footer, decorative login art and redundant recording actions are omitted from member access.
+
+Before release, apply the updated `supabase/templates/confirmation.html` to hosted Authentication → Emails → Confirm signup. Both Confirm signup and Magic Link must include `{{ .Token }}`: first-time OTP registration can use the confirmation template, while returning members use Magic Link. Local templates do not update hosted configuration. No live signup or email delivery was performed during local verification.

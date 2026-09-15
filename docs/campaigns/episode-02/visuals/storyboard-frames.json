@@ -1,0 +1,62 @@
+[
+  {
+    "id": "01",
+    "title": "One bit of possibility",
+    "first_frame": "assets/shot-01-first-v3.png",
+    "end_frame": "assets/shot-01-end-v3.png",
+    "first_description": "All discs black.",
+    "end_description": "One white disc pivots into view.",
+    "motion": "Only the single disc turns on its axle; all other discs remain black.",
+    "camera": "Locked tripod. Fixed framing, lens, focus, perspective and lighting."
+  },
+  {
+    "id": "02",
+    "title": "A signal acquires weight",
+    "first_frame": "assets/shot-02-first-v3.png",
+    "end_frame": "assets/shot-02-end-v3.png",
+    "first_description": "Every disc black.",
+    "end_description": "Original white-dot pattern.",
+    "motion": "Discs flip individually in a random staggered order, settling into the exact end-frame pattern.",
+    "camera": "Locked tripod. Fixed framing, lens, focus, perspective and lighting."
+  },
+  {
+    "id": "03",
+    "title": "Three dots respond",
+    "first_frame": "assets/shot-03-first-v3.png",
+    "end_frame": "assets/shot-03-end-v3.png",
+    "first_description": "All display dots black.",
+    "end_description": "Exactly three white dots.",
+    "motion": "Only the three target display discs flip black to white in random order. Knob remains still. No hand.",
+    "camera": "Locked tripod. Fixed framing, lens, focus, perspective and lighting."
+  },
+  {
+    "id": "04",
+    "title": "The world answers back",
+    "first_frame": "assets/shot-04-first-v3.png",
+    "end_frame": "assets/shot-04-end-v3.png",
+    "first_description": "Relaxed diaphragm.",
+    "end_description": "Diaphragm gently depressed.",
+    "motion": "A subtle unseen force deforms only the membrane; rim, light and camera stay fixed.",
+    "camera": "Locked tripod. Fixed framing, lens, focus, perspective and lighting."
+  },
+  {
+    "id": "05",
+    "title": "A mechanical response",
+    "first_frame": "assets/shot-05-first-v3.png",
+    "end_frame": "assets/shot-05-end-v3.png",
+    "first_description": "All discs black.",
+    "end_description": "Four white discs in a sparse cluster.",
+    "motion": "Only the four target discs flip individually in staggered random order. Every other dot stays black; all disc centers, the frame and the camera remain stationary. Hold the final cluster.",
+    "camera": "Locked tripod. Fixed framing, lens, focus, perspective and lighting."
+  },
+  {
+    "id": "06",
+    "title": "The invitation arrives",
+    "first_frame": "assets/shot-06-first-v3.png",
+    "end_frame": "assets/shot-06-end-v3.png",
+    "first_description": "All-black board.",
+    "end_description": "07 OCT / 18-21 in physical white discs.",
+    "motion": "Only individual target discs flip to form 07 OCT / 18-21. Every unused dot stays black. No whole-board transformation, ripple, crossfade or movement. Hold the final lettering.",
+    "camera": "Locked tripod. Fixed framing, lens, focus, perspective and lighting."
+  }
+]

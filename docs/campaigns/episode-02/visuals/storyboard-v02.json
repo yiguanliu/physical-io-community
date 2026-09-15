@@ -1,0 +1,62 @@
+[
+  {
+    "id": "01",
+    "time": "00\u201304s",
+    "title": "One bit of possibility",
+    "description": "A single pale disc turns in a field of black mechanical dots.",
+    "camera": "100mm macro. Locked-off. Wait for one disc to pivot.",
+    "sound": "Silence, then one dry mechanical tick.",
+    "voiceover": "What makes a body feel alive?",
+    "transition": "A second click becomes the beginning of the wave."
+  },
+  {
+    "id": "02",
+    "time": "04\u201309s",
+    "title": "A signal acquires weight",
+    "description": "A sparse wave travels across a physical flip-dot board.",
+    "camera": "Tripod locked. Random disc flips; no camera or focus movement.",
+    "sound": "Individual ticks gather into a short, uneven sequence.",
+    "voiceover": "A gesture. A response.",
+    "transition": "Match the circular discs to a physical rotary control."
+  },
+  {
+    "id": "03",
+    "time": "09\u201315s",
+    "title": "Something to turn",
+    "description": "A rotary encoder sits beside a tiny physical display.",
+    "camera": "Tripod locked. Fixed focus; only three display discs flip.",
+    "sound": "A single detent click, a low electrical room tone.",
+    "voiceover": "An idea becomes an interface.",
+    "transition": "Hold a beat of black before revealing the material."
+  },
+  {
+    "id": "04",
+    "time": "15\u201322s",
+    "title": "The world answers back",
+    "description": "A dark diaphragm bends under an unseen force.",
+    "camera": "Fixed macro. A narrow reflection reveals a small deformation.",
+    "sound": "A soft material creak. Let the room tone drop away.",
+    "voiceover": "An interface meets resistance. What should it understand?",
+    "transition": "Match the reflected line into the diffused signal."
+  },
+  {
+    "id": "05",
+    "time": "22\u201326s",
+    "title": "A response, almost",
+    "description": "A sparse response appears in a physical flip-dot grid.",
+    "camera": "Tripod locked. Four mechanical discs flip; no glass or focus pull.",
+    "sound": "Two isolated ticks with space between them.",
+    "voiceover": "Who gets to shape it?",
+    "transition": "The unresolved dots cut to a legible physical board."
+  },
+  {
+    "id": "06",
+    "time": "26\u201330s",
+    "title": "The invitation arrives",
+    "description": "A suspended mechanical display resolves the date and time.",
+    "camera": "Straight-on static frame. Flip the date first, then the time.",
+    "sound": "Two restrained bursts of disc clicks. End in silence.",
+    "voiceover": "Physical I/O. Love, Mind + Body.",
+    "transition": "Hold the date and title. No visual fade until the details are readable."
+  }
+]

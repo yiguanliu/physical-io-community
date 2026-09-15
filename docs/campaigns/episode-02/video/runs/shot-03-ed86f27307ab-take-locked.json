@@ -1,0 +1,22 @@
+{
+  "shot": "03",
+  "title": "Three dots respond",
+  "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-03-first-v3.png",
+  "image_sha256": "7a05bd36aa10edcb5cf5877e4fa2c5b997752b832f0c1643c886006797168fe6",
+  "prompt": "LOCKED CAMERA, fixed tripod, absolutely stationary camera and lens throughout. Identical crop, perspective, focus, exposure and lighting from first to last frame. Animate only the difference between the supplied first and end frames. Only the three target display discs flip black to white in random order. Knob remains still. No hand. Keep all rigid hardware perfectly fixed and unchanged. Black-and-white grainy physical hardware. Individual dry mechanical clicks and quiet room tone, no music or speech. Complete the transformation, then hold the exact end frame. No camera pan, tilt, zoom, dolly, shake, drift, focus pull, hand, person, glow, added objects or morphing.",
+  "model": "veo-3.1-fast-generate-preview",
+  "resolution": "720p",
+  "seconds": 8,
+  "aspect_ratio": "16:9",
+  "estimated_cost_usd": 0.8,
+  "price_checked": "2026-09-14",
+  "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-03-end-v3.png",
+  "end_image_sha256": "11230986b1223c9d99e9d8111678045367ae13835fb8ca45a910a6a8c47b6655",
+  "negative_prompt": "camera movement, zoom, dolly, pan, tilt, camera shake, reframing, focus pull, hands, fingers, people, bending hardware, morphing, glow",
+  "state": "complete",
+  "submitted_at": "2026-09-14T21:20:15.388776+00:00",
+  "operation": "models/veo-3.1-fast-generate-preview/operations/66pbgtyhpjq9",
+  "output": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/video/runs/shot-03-ed86f27307ab-take-locked.mp4",
+  "completed_at": "2026-09-14T21:23:49.029185+00:00"
+}
