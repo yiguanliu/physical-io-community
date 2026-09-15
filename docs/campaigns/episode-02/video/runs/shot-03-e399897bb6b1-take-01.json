@@ -1,0 +1,19 @@
+{
+  "shot": "03",
+  "title": "Something to turn",
+  "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-03-v2.png",
+  "image_sha256": "11230986b1223c9d99e9d8111678045367ae13835fb8ca45a910a6a8c47b6655",
+  "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. A tiny, deliberate movement of the existing rotary encoder, less than one detent, as focus moves gently from the aluminium case edge to the three white dots. The device remains rigid. One detent click, low room tone. Do not add a hand.",
+  "model": "veo-3.1-fast-generate-preview",
+  "resolution": "720p",
+  "seconds": 6,
+  "aspect_ratio": "16:9",
+  "estimated_cost_usd": 0.6,
+  "price_checked": "2026-09-14",
+  "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "state": "complete",
+  "submitted_at": "2026-09-14T20:58:30.878789+00:00",
+  "operation": "models/veo-3.1-fast-generate-preview/operations/7htugcddy0gs",
+  "output": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/video/runs/shot-03-e399897bb6b1-take-01.mp4",
+  "completed_at": "2026-09-14T20:59:17.476858+00:00"
+}

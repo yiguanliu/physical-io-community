@@ -7,5 +7,5 @@ export const metadata: Metadata = { title: 'Member login | Physical I/O', robots
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   if (await getMember()) redirect('/members');
   const { status } = await searchParams;
-  return <LoginForm configured={memberAuthConfigured()} invalidLink={status === 'invalid_link'} />;
+  return <LoginForm configured={memberAuthConfigured()} invalidLink={status === 'invalid_link'} joined={status === 'joined'} />;
 }

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { authEmailTemplates } from './auth-templates';
 describe('account email templates',()=>{
  for(const template of authEmailTemplates) it(`${template.name} shares the newsletter style and generated file`,()=>{
-  expect(template.html).toContain('background:#EF2900');
+  expect(template.html).toContain('background:#ffffff');
   expect(template.html).toContain('Manrope');
   expect(template.html).toContain('physical-io-banner.png');
   expect(template.html).toContain('physical-io-footer.png');
@@ -12,7 +12,7 @@ describe('account email templates',()=>{
  });
  it('preserves action links and one-time codes',()=>{
   for(const name of ['confirmation','invite','email_change']) expect(authEmailTemplates.find(t=>t.name===name)?.html).toContain('{{ .ConfirmationURL }}');
-  for(const name of ['magic_link','reauthentication']) expect(authEmailTemplates.find(t=>t.name===name)?.html).toContain('{{ .Token }}');
+  for(const name of ['confirmation','magic_link','reauthentication']) expect(authEmailTemplates.find(t=>t.name===name)?.html).toContain('{{ .Token }}');
   expect(authEmailTemplates.find(t=>t.name==='recovery')?.html).toContain('{{ .RedirectTo }}&amp;token_hash={{ .TokenHash }}&amp;type=recovery');
  });
 });

@@ -2,7 +2,7 @@
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { memberAuthConfigured, getMember } from '@/lib/auth/member';
+import { memberAuthConfigured, getMember, hasMemberProfile } from '@/lib/auth/member';
 import { memberAuthRedirect } from '@/lib/auth/member-redirect';
 
 export type MemberAuthState = { error?: string; notice?: string };
@@ -19,16 +19,7 @@ export async function memberLogin(_previous: MemberAuthState, form: FormData): P
 }
 
 export async function memberSignup(_previous: MemberAuthState, form: FormData): Promise<MemberAuthState> {
-  if (!memberAuthConfigured()) return { error: 'Member registration is temporarily unavailable. Please try again later.' };
-  const email = String(form.get('email') ?? '').trim().toLowerCase();
-  const password = String(form.get('password') ?? '');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8 || form.get('terms') !== 'on') return { error: 'Enter a valid email, a password of at least 8 characters, and accept the terms.' };
-  try {
-    const { data, error } = await createClient(await cookies()).auth.signUp({ email, password, options: { emailRedirectTo: memberAuthRedirect((await headers()).get('origin')) } });
-    if (error) return { error: 'Unable to create an account. Try signing in if you already have one, or try again later.' };
-    if (!data.session) return { notice: 'Check your email to confirm your account, then return here to sign in. If you already have an account, use Sign in.' };
-  } catch { return { error: 'Unable to connect. Please try again.' }; }
-  redirect('/members');
+  redirect('/join');
 }
 
 export async function memberSignOut() {
@@ -76,9 +67,13 @@ export async function memberSendCode(_previous: MemberAuthState, form: FormData)
   if (!memberAuthConfigured()) return { error: 'Email sign-in is temporarily unavailable. Please try again later.' };
   const email = String(form.get('email') ?? '').trim().toLowerCase();
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: 'Enter a valid email address.' };
+  let registered;
+  try { registered = await hasMemberProfile(email); }
+  catch { return { error: 'Unable to check your membership. Please try again shortly.' }; }
+  if (!registered) redirect('/join?status=profile_required');
   try {
     const { error } = await createClient(await cookies()).auth.signInWithOtp({ email, options: {
-      shouldCreateUser: false,
+      shouldCreateUser: true,
       emailRedirectTo: memberAuthRedirect((await headers()).get('origin')),
     } });
     if (error) return { error: 'Unable to send a code. Check that you have created a member account, or wait a moment before trying again.' };

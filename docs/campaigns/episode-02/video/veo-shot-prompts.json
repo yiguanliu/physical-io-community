@@ -1,0 +1,50 @@
+[
+  {
+    "shot": "01",
+    "title": "One bit of possibility",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-01-v2.png",
+    "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. Locked macro camera. Hold still, then the one pale flip-dot disc pivots once on its axle and settles. Surrounding black discs remain still. Sound: one dry mechanical tick, quiet room tone. End on a still frame.",
+    "status": "prepared_not_submitted",
+    "edit_duration": "00\u201304s"
+  },
+  {
+    "shot": "02",
+    "title": "A signal acquires weight",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-02-v2.png",
+    "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. A short, incomplete wave of existing discs flips from black to white across the board. Very slow lateral camera movement, preserving board geometry. Individual mechanical ticks, then silence. No liquid-like flowing discs.",
+    "status": "prepared_not_submitted",
+    "edit_duration": "04\u201309s"
+  },
+  {
+    "shot": "03",
+    "title": "Something to turn",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-03-v2.png",
+    "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. A tiny, deliberate movement of the existing rotary encoder, less than one detent, as focus moves gently from the aluminium case edge to the three white dots. The device remains rigid. One detent click, low room tone. Do not add a hand.",
+    "status": "prepared_not_submitted",
+    "edit_duration": "09\u201315s"
+  },
+  {
+    "shot": "04",
+    "title": "The world answers back",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-04-v2.png",
+    "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. Locked macro camera. The existing dark diaphragm deforms slightly under an unseen force and returns slowly. Only a thin reflected highlight reveals the movement. A quiet material creak, no extra object.",
+    "status": "prepared_not_submitted",
+    "edit_duration": "15\u201322s"
+  },
+  {
+    "shot": "05",
+    "title": "A response, almost",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-05-v2.png",
+    "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. A very slow focus pull through the existing glass. The indistinct white signal becomes slightly more visible, then softens again without resolving into a person or object. The hardware remains perfectly still. Two isolated soft ticks.",
+    "status": "prepared_not_submitted",
+    "edit_duration": "22\u201326s"
+  },
+  {
+    "shot": "06",
+    "title": "The invitation arrives",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-06-v2.png",
+    "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. Locked straight-on camera. A sparse band of existing black discs flips white, pauses, then returns to black. Keep the display enclosure and grid completely rigid. Two short bursts of mechanical clicks, ending in silence. Leave the board without text; the exact date and title will be added in the edit.",
+    "status": "prepared_not_submitted",
+    "edit_duration": "26\u201330s"
+  }
+]

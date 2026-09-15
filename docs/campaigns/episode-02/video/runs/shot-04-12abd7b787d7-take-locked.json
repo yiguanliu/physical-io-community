@@ -1,0 +1,22 @@
+{
+  "shot": "04",
+  "title": "The world answers back",
+  "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-04-first-v3.png",
+  "image_sha256": "3e323f022c5ec089341f774a276d6bb3241ab00c81b0667cfd0fc4d4c20eeb49",
+  "prompt": "LOCKED CAMERA, fixed tripod, absolutely stationary camera and lens throughout. Identical crop, perspective, focus, exposure and lighting from first to last frame. Animate only the difference between the supplied first and end frames. A subtle unseen force deforms only the membrane; rim, light and camera stay fixed. Keep all rigid hardware perfectly fixed and unchanged. Black-and-white grainy physical hardware. Individual dry mechanical clicks and quiet room tone, no music or speech. Complete the transformation, then hold the exact end frame. No camera pan, tilt, zoom, dolly, shake, drift, focus pull, hand, person, glow, added objects or morphing.",
+  "model": "veo-3.1-fast-generate-preview",
+  "resolution": "720p",
+  "seconds": 8,
+  "aspect_ratio": "16:9",
+  "estimated_cost_usd": 0.8,
+  "price_checked": "2026-09-14",
+  "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-04-end-v3.png",
+  "end_image_sha256": "c5ba9f15017ca9b6e467815fef53b20f29fc1a4e0e9109b14a9e4fc7b7dcf9b4",
+  "negative_prompt": "camera movement, zoom, dolly, pan, tilt, camera shake, reframing, focus pull, hands, fingers, people, bending hardware, morphing, glow",
+  "state": "complete",
+  "submitted_at": "2026-09-14T21:22:31.649524+00:00",
+  "operation": "models/veo-3.1-fast-generate-preview/operations/f0b84cfv61e6",
+  "output": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/video/runs/shot-04-12abd7b787d7-take-locked.mp4",
+  "completed_at": "2026-09-14T21:23:50.884650+00:00"
+}

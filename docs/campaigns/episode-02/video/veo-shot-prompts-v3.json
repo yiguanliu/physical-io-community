@@ -1,0 +1,62 @@
+[
+  {
+    "shot": "01",
+    "title": "One bit of possibility",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-01-first-v3.png",
+    "prompt": "LOCKED CAMERA, fixed tripod, absolutely stationary camera and lens throughout. Identical crop, perspective, focus, exposure and lighting from first to last frame. Animate only the difference between the supplied first and end frames. Only the single disc turns on its axle; all other discs remain black. Keep all rigid hardware perfectly fixed and unchanged. Black-and-white grainy physical hardware. Individual dry mechanical clicks and quiet room tone, no music or speech. Complete the transformation, then hold the exact end frame. No camera pan, tilt, zoom, dolly, shake, drift, focus pull, hand, person, glow, added objects or morphing.",
+    "status": "frames_prepared",
+    "edit_duration": "00\u201304s",
+    "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-01-end-v3.png",
+    "negative_prompt": "camera movement, zoom, dolly, pan, tilt, camera shake, reframing, focus pull, hands, fingers, people, bending hardware, morphing, glow"
+  },
+  {
+    "shot": "02",
+    "title": "A signal acquires weight",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-02-first-v3.png",
+    "prompt": "LOCKED CAMERA, fixed tripod, absolutely stationary camera and lens throughout. Identical crop, perspective, focus, exposure and lighting from first to last frame. Animate only the difference between the supplied first and end frames. Discs flip individually in a random staggered order, settling into the exact end-frame pattern. Keep all rigid hardware perfectly fixed and unchanged. Black-and-white grainy physical hardware. Individual dry mechanical clicks and quiet room tone, no music or speech. Complete the transformation, then hold the exact end frame. No camera pan, tilt, zoom, dolly, shake, drift, focus pull, hand, person, glow, added objects or morphing.",
+    "status": "frames_prepared",
+    "edit_duration": "04\u201309s",
+    "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-02-end-v3.png",
+    "negative_prompt": "camera movement, zoom, dolly, pan, tilt, camera shake, reframing, focus pull, hands, fingers, people, bending hardware, morphing, glow"
+  },
+  {
+    "shot": "03",
+    "title": "Three dots respond",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-03-first-v3.png",
+    "prompt": "LOCKED CAMERA, fixed tripod, absolutely stationary camera and lens throughout. Identical crop, perspective, focus, exposure and lighting from first to last frame. Animate only the difference between the supplied first and end frames. Only the three target display discs flip black to white in random order. Knob remains still. No hand. Keep all rigid hardware perfectly fixed and unchanged. Black-and-white grainy physical hardware. Individual dry mechanical clicks and quiet room tone, no music or speech. Complete the transformation, then hold the exact end frame. No camera pan, tilt, zoom, dolly, shake, drift, focus pull, hand, person, glow, added objects or morphing.",
+    "status": "frames_prepared",
+    "edit_duration": "09\u201315s",
+    "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-03-end-v3.png",
+    "negative_prompt": "camera movement, zoom, dolly, pan, tilt, camera shake, reframing, focus pull, hands, fingers, people, bending hardware, morphing, glow"
+  },
+  {
+    "shot": "04",
+    "title": "The world answers back",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-04-first-v3.png",
+    "prompt": "LOCKED CAMERA, fixed tripod, absolutely stationary camera and lens throughout. Identical crop, perspective, focus, exposure and lighting from first to last frame. Animate only the difference between the supplied first and end frames. A subtle unseen force deforms only the membrane; rim, light and camera stay fixed. Keep all rigid hardware perfectly fixed and unchanged. Black-and-white grainy physical hardware. Individual dry mechanical clicks and quiet room tone, no music or speech. Complete the transformation, then hold the exact end frame. No camera pan, tilt, zoom, dolly, shake, drift, focus pull, hand, person, glow, added objects or morphing.",
+    "status": "frames_prepared",
+    "edit_duration": "15\u201322s",
+    "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-04-end-v3.png",
+    "negative_prompt": "camera movement, zoom, dolly, pan, tilt, camera shake, reframing, focus pull, hands, fingers, people, bending hardware, morphing, glow"
+  },
+  {
+    "shot": "05",
+    "title": "A mechanical response",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-05-first-v3.png",
+    "prompt": "LOCKED CAMERA, fixed tripod, absolutely stationary camera and lens throughout. Identical crop, perspective, focus, exposure and lighting from first to last frame. Animate only the difference between the supplied first and end frames. Four existing mechanical discs flip in an irregular sequence and settle. No glass or apparition. Keep all rigid hardware perfectly fixed and unchanged. Black-and-white grainy physical hardware. Individual dry mechanical clicks and quiet room tone, no music or speech. Complete the transformation, then hold the exact end frame. No camera pan, tilt, zoom, dolly, shake, drift, focus pull, hand, person, glow, added objects or morphing.",
+    "status": "frames_prepared",
+    "edit_duration": "22\u201326s",
+    "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-05-end-v3.png",
+    "negative_prompt": "camera movement, zoom, dolly, pan, tilt, camera shake, reframing, focus pull, hands, fingers, people, bending hardware, morphing, glow"
+  },
+  {
+    "shot": "06",
+    "title": "The invitation arrives",
+    "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-06-first-v3.png",
+    "prompt": "LOCKED CAMERA, fixed tripod, absolutely stationary camera and lens throughout. Identical crop, perspective, focus, exposure and lighting from first to last frame. Animate only the difference between the supplied first and end frames. Random mechanical flips resolve into the exact end-frame date and time, then hold. No board distortion. Keep all rigid hardware perfectly fixed and unchanged. Black-and-white grainy physical hardware. Individual dry mechanical clicks and quiet room tone, no music or speech. Complete the transformation, then hold the exact end frame. No camera pan, tilt, zoom, dolly, shake, drift, focus pull, hand, person, glow, added objects or morphing.",
+    "status": "frames_prepared",
+    "edit_duration": "26\u201330s",
+    "end_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-06-end-v3.png",
+    "negative_prompt": "camera movement, zoom, dolly, pan, tilt, camera shake, reframing, focus pull, hands, fingers, people, bending hardware, morphing, glow"
+  }
+]

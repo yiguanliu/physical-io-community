@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
+import {useRouter} from 'next/navigation';
 import {ArrowLeft,ArrowRight,Check,Moon,Sun} from 'lucide-react';
 import {Button,IconButton,Field,TextArea,Switch,ThemeProvider,defaultTheme} from '@/workspace-ui/src';
 import LogoMark from '@/workspace-ui/app/LogoMark';
@@ -24,8 +25,9 @@ const steps=[
 ] as const;
 type Key=typeof steps[number]['key'];
 const initial={firstName:'',lastName:'',email:'',city:'',role:'',experience:'',work:'',website:'',linkedin:'',goals:[] as string[],formats:[] as string[],suggestions:'',consent:false,updates:false,websiteTrap:''};
-export default function JoinFlow(){
- const [values,setValues]=useState(initial);const [step,setStep]=useState(0);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [done,setDone]=useState(false);const [dark,setDark]=useState(false);
+export default function JoinFlow({verifiedEmail,profileRequired=false}:{verifiedEmail?:string;profileRequired?:boolean}){
+ const router=useRouter();
+ const [values,setValues]=useState({...initial,email:verifiedEmail??''});const [step,setStep]=useState(0);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [done,setDone]=useState(false);const [dark,setDark]=useState(false);
  const heading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{try{const saved=localStorage.getItem('ohi-appearance');setDark(saved?saved==='dark':matchMedia('(prefers-color-scheme: dark)').matches);}catch{}},[]);
  function toggleTheme(){setDark(value=>{const next=!value;try{localStorage.setItem('ohi-appearance',next?'dark':'light');}catch{}return next;});}
@@ -39,7 +41,7 @@ export default function JoinFlow(){
  async function submit(){
   const parsed=joinSchema.safeParse(values);if(!parsed.success){setError(parsed.error.issues[0].message);return;}
   setBusy(true);setError('');
-  try{const response=await fetch('/api/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(parsed.data)});const data=await response.json();if(!response.ok)throw new Error(data.error);setDone(true);}
+  try{const response=await fetch('/api/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(parsed.data)});const data=await response.json();if(!response.ok)throw new Error(data.error);try{sessionStorage.setItem('member-join-email',parsed.data.email);}catch{}setDone(true);router.replace(data.redirectTo === '/members' ? '/members' : '/login?status=joined');}
   catch(e){setError(e instanceof Error?e.message:'Could not submit. Please try again.');}finally{setBusy(false);}
  }
  const current=steps[step];const review=step===steps.length;
@@ -47,8 +49,9 @@ export default function JoinFlow(){
  <header className={`${homeStyles['site-header']} ${styles.header}`}><Link className={homeStyles.brand} href="/" aria-label="Physical I/O home"><LogoMark/><img className={styles.wordmark} src="/assets/physical-io-wordmark.png" alt="Physical I/O" width={879} height={184}/></Link><IconButton label={dark?'Switch to light mode':'Switch to dark mode'} variant="ghost" onClick={toggleTheme}>{dark?<Sun size={20}/>:<Moon size={20}/>}</IconButton></header>
  {!done&&<div className={styles.progress} role="progressbar" aria-label="Signup progress" aria-valuemin={0} aria-valuemax={steps.length+1} aria-valuenow={step+1}><span style={{width:`${(step+1)/(steps.length+1)*100}%`}}/></div>}
  <section className={styles.content} key={done?'done':step}>
- {done?<><div className={styles.check}><Check size={28}/></div><h1 ref={heading} tabIndex={-1}>You’re in good company.</h1><p>Thanks for joining Physical I/O. If you’ve joined before, your existing membership stays unchanged.</p><Link className="ui-button ui-button-primary" href="/">Meet Ohi <ArrowRight size={18}/></Link></>:
+ {done?<><div className={styles.check}><Check size={28}/></div><h1 ref={heading} tabIndex={-1}>Check your email.</h1><p>We’ve sent your one-time code. Continue to member sign-in to confirm your email.</p><Link className="ui-button ui-button-primary" href="/login?status=joined">Member sign in <ArrowRight size={18}/></Link></>:
  <form onSubmit={e=>{e.preventDefault();if(review)void submit();else next();}}>
+ {profileRequired&&step===0&&<p role="status">Complete your member profile to access events and recordings.</p>}
  <div className={styles.counter}>{step+1} / {steps.length+1}</div>
  <h1 ref={heading} tabIndex={-1}>{review?'Make yourself at home.':current.title}</h1>
  {!review&&'hint'in current&&current.hint&&<p>{current.hint}</p>}
@@ -56,7 +59,7 @@ export default function JoinFlow(){
  current.type==='name'?<div className={styles.nameFields}><Field label="First name" autoComplete="given-name" required maxLength={160} value={values.firstName} onChange={e=>update('firstName',e.target.value)}/><Field label="Last name" autoComplete="family-name" required maxLength={160} value={values.lastName} onChange={e=>update('lastName',e.target.value)}/></div>:
  current.type==='choice'||current.type==='multi'?<div className={styles.choices} role="group" aria-label={current.title}>{current.options.map(option=>{const selected=current.type==='multi'?(values[current.key] as string[]).includes(option):values[current.key]===option;return <Button key={option} variant="secondary" aria-pressed={selected} onClick={()=>{if(current.type==='multi'){const list=values[current.key] as string[];update(current.key,selected?list.filter(x=>x!==option):[...list,option]);}else update(current.key,option);}}>{option}{selected&&<Check size={18}/>}</Button>;})}</div>:
  current.type==='long'?<TextArea label={current.title} value={values[current.key] as string} maxLength={2000} rows={4} onChange={e=>update(current.key,e.target.value)}/>:
- <><Field list={current.key==='city'?'join-cities':undefined} required={current.key==='linkedin'||current.key==='city'} label={current.title} type={current.type} value={values[current.key] as string} autoComplete={current.key==='email'?'email':current.key==='city'?'address-level2':'url'} maxLength={current.key==='website'||current.key==='linkedin'?500:254} onChange={e=>update(current.key,e.target.value)}/>{current.key==='city'&&<datalist id="join-cities">{cities.map(city=><option key={city} value={city}/>)}</datalist>}</>}
+ <><Field list={current.key==='city'?'join-cities':undefined} required={current.key==='linkedin'||current.key==='city'} readOnly={current.key==='email'&&Boolean(verifiedEmail)} label={current.title} type={current.type} value={values[current.key] as string} autoComplete={current.key==='email'?'email':current.key==='city'?'address-level2':'url'} maxLength={current.key==='website'||current.key==='linkedin'?500:254} onChange={e=>update(current.key,e.target.value)}/>{current.key==='city'&&<datalist id="join-cities">{cities.map(city=><option key={city} value={city}/>)}</datalist>}</>}
  <div className={styles.trap} aria-hidden="true"><input tabIndex={-1} autoComplete="off" name="company_fax" value={values.websiteTrap} onChange={e=>setValues(v=>({...v,websiteTrap:e.target.value}))}/></div>
  {error&&<p role="alert" className={styles.error}>{error}</p>}
  <footer className={styles.actions}>{step>0&&<Button variant="ghost" disabled={busy} onClick={()=>{setStep(s=>s-1);setError('');}}><ArrowLeft size={18}/>Back</Button>}<Button variant="primary" type="submit" busy={busy}>{review?'Join the community':'Continue'}<ArrowRight size={18}/></Button></footer>

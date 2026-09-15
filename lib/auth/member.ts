@@ -1,6 +1,7 @@
 import 'server-only';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { database } from '@/lib/admin/database';
 import { createClient } from '@/utils/supabase/server';
 
 export function memberAuthConfigured() {
@@ -16,8 +17,16 @@ export async function getMember() {
   } catch { return null; }
 }
 
+// Profile presence is checked server-side; authentication alone is not membership.
+export async function hasMemberProfile(email: string | undefined) {
+  if (!email) return false;
+  const result = await database().query('select id from public.members where email_normalized=$1 limit 1', [email.trim().toLowerCase()]);
+  return Boolean(result.rows.length);
+}
+
 export async function requireMember() {
   const member = await getMember();
   if (!member) redirect('/login');
+  if (!await hasMemberProfile(member.email)) redirect('/join?status=profile_required');
   return member;
 }

@@ -1,0 +1,19 @@
+{
+  "shot": "02",
+  "title": "A signal acquires weight",
+  "starting_image": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/visuals/assets/shot-02-v2.png",
+  "image_sha256": "a917605e13cddc3c7457d1fdb691761300e1c4a1e1b91d5c38f533ce020f51bd",
+  "prompt": "Use the supplied image as the starting frame. Preserve its exact monochrome palette, physical hardware, framing and material texture. Minimal black-and-white 16mm film, natural grain and subtle optical softness. Motion must be physically plausible, very small and deliberate. No color, humanoids, new objects, morphing, holograms, glow, music, narration or generated text. A short, incomplete wave of existing discs flips from black to white across the board. Very slow lateral camera movement, preserving board geometry. Individual mechanical ticks, then silence. No liquid-like flowing discs.",
+  "model": "veo-3.1-fast-generate-preview",
+  "resolution": "720p",
+  "seconds": 6,
+  "aspect_ratio": "16:9",
+  "estimated_cost_usd": 0.6,
+  "price_checked": "2026-09-14",
+  "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "state": "complete",
+  "submitted_at": "2026-09-14T20:58:28.149286+00:00",
+  "operation": "models/veo-3.1-fast-generate-preview/operations/0ydb6ek24zgl",
+  "output": "/Users/yiguanliu/Documents/Playground/physical-io-community/docs/campaigns/episode-02/video/runs/shot-02-08b8e6a3fe11-take-01.mp4",
+  "completed_at": "2026-09-14T20:59:15.635620+00:00"
+}

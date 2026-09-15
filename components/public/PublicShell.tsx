@@ -8,7 +8,7 @@ import { LINKEDIN_URL, INSTAGRAM_URL } from '@/lib/site';
 import '@/workspace-ui/src/styles.css';
 import './public.css';
 
-export default function PublicShell({ children }: { children: ReactNode }) {
+export default function PublicShell({ children, member = false }: { children: ReactNode; member?: boolean }) {
   const [dark, setDark] = useState(false);
   useEffect(() => {
     try {
@@ -25,14 +25,14 @@ export default function PublicShell({ children }: { children: ReactNode }) {
   return <ThemeProvider theme={{ ...defaultTheme, mode: dark ? 'dark' : 'light' }}>
     <div className="public-site">
       <a className="ui-skip" href="#public-main">Skip to content</a>
-      <PublicHeader dark={dark} onToggleTheme={toggleTheme} />
+      <PublicHeader member={member} dark={dark} onToggleTheme={toggleTheme} />
       <main id="public-main" tabIndex={-1} className="public-main">{children}</main>
-      <footer className="public-footer">
+      {!member && <footer className="public-footer">
         <div><Link href="/" className="public-footer-brand">Physical I/O</Link><p>Curiosity. Design. Engineering.</p><p>London · Connected everywhere.</p></div>
         <nav aria-label="Footer"><Link href="/about">About</Link><Link href="/events">Events</Link><Link href="/login">Member login</Link><Link href="/join">Join the community</Link><Link href="/askusanything">Get in touch</Link></nav>
         <nav aria-label="Social and legal"><a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Instagram ↗</a><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><Link href="/cookies">Cookies</Link></nav>
         <div className="public-footer-bottom"><span>© {new Date().getFullYear()} Physical I/O</span><span>Love Intelligence + Body.</span></div>
-      </footer>
+      </footer>}
     </div>
   </ThemeProvider>;
 }
