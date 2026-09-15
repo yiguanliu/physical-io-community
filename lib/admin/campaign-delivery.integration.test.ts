@@ -32,6 +32,7 @@ test('batch email: consent, fresh suppression, bounded batches, retry idempotenc
   await assert.rejects(()=>deliverBatch(isolated,{...request,requestId:crypto.randomUUID()},actor,transport,config),/Only a draft/);
   const uncertainId=crypto.randomUUID();await db.query("insert into campaigns(id,name,subject,body,idempotency_key,audience_filter) values($1,'Uncertain','Hello','Test',$1,$2)",[uncertainId,JSON.stringify({memberIds:['member-00']})]);const p=await previewDelivery(isolated,uncertainId);
   const outcome=await deliverBatch(isolated,{...request,id:uncertainId,requestId:crypto.randomUUID(),confirmation:p.confirmation},actor,async()=>{throw new DeliveryError('Timeout',true);},config);assert.equal(outcome.uncertain,1);assert.equal(outcome.sent,0);
+  const issuePreview=await previewDelivery(isolated,uncertainId);assert.equal(issuePreview.failures.length,1);assert.equal(issuePreview.failures[0].email,'0@example.invalid');assert.equal(issuePreview.failures[0].status,'uncertain');
   assert.equal((await db.query('select status from campaigns where id=$1',[uncertainId])).rows[0].status,'failed');
  }finally{await db.query('drop table if exists pg_temp.members,pg_temp.subscriptions,pg_temp.member_interests,pg_temp.campaigns,pg_temp.campaign_recipients,pg_temp.campaign_events,pg_temp.audit_log');db.release();await pool.end();}
 });

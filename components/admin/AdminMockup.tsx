@@ -19,7 +19,7 @@ import type { Member, Lead, Campaign, CommunityEvent, Activity, WorkspaceData, C
 const navigation = [{name:'Overview', icon:LayoutGrid},{name:'Members',icon:Users},{name:'Outreach',icon:Target},{name:'Communications',icon:Mail},{name:'Content',icon:ImageIcon},{name:'Events',icon:CalendarDays},{name:'OHI messages',icon:ImageIcon},{name:'Automations',icon:Workflow}];
 const baseTheme: Theme = {...defaultTheme, density:'compact', hierarchy:'quiet'};
 const options = (values: string[]) => values.map(value=>({value,label:value}));
-const tone = (status:string) => ['Active','Completed','Sent'].includes(status)?'success' as const:['Review','Needs review'].includes(status)?'warning' as const:'neutral' as const;
+const tone = (status:string) => status==='Failed'?'danger' as const:['Active','Completed','Sent'].includes(status)?'success' as const:['Review','Needs review'].includes(status)?'warning' as const:'neutral' as const;
 
 
 export default function AdminWorkspace({initialPage='Overview',accessPage,userPage}:{initialPage?:string;accessPage?:ReactNode;userPage?:ReactNode}) {
