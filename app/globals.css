@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: "Bitcount Grid Single";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/bitcount-grid-single/BitcountGridSingle-Variable.ttf") format("truetype");
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================
@@ -19,6 +27,7 @@
   --accent-deep: #ee4b1a;
   --radius: 14px;
   --nav-h: 64px;
+  --font-public: "Bitcount Grid Single", "Courier New", monospace;
   --font: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --background: #ffffff;
   --foreground: #171714;

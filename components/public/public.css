@@ -1,3 +1,5 @@
+/* Public typography also reaches themed dialogs and popovers. */
+.wui:has(> .public-site){font-size-adjust:from-font;--ui-brand-font:var(--font-public);--font:var(--font-public)}
 /* Public composition: homepage surfaces with the shared OHI control system. */
 .public-site{--public-title-body-gap:30px}
 /* Outrank the workspace text reset; keep this public-only, including mobile. */
@@ -9,7 +11,7 @@
 .public-site{--ui-bg:var(--ui-public-canvas);background:var(--ui-bg);color:var(--ui-text);font-size:16px;line-height:1.6;min-height:100dvh;padding-inline:3%}
 .public-site a{text-decoration:none}.public-site :where(h1,h2,h3){font-weight:500;letter-spacing:-.045em;text-wrap:balance}
 .public-header,.public-main,.public-footer{max-width:1280px;margin-inline:auto}
-.public-header{min-height:96px;display:flex;align-items:center;gap:32px;border-bottom:1px solid var(--ui-border)}
+.public-header{min-height:96px;display:flex;align-items:center;gap:32px;border-bottom:0}
 .public-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}.public-brand>svg{width:32px;height:24px}.public-brand>img{width:134px;height:auto;filter:brightness(0)}
 .wui[data-mode=dark] .public-brand>img{filter:none}
 .public-nav{display:flex;align-items:center;gap:28px;margin-inline-start:auto}.public-header .public-nav>a{display:flex;align-items:center;min-height:44px;font-size:14px;color:var(--ui-muted);position:relative}.public-header .public-nav>a[aria-current=page]{color:var(--ui-text)}.public-header .public-nav>a[aria-current=page]::after{content:'';position:absolute;bottom:4px;left:0;width:16px;height:2px;background:var(--ui-accent)}.public-header .public-nav>a:hover{color:var(--ui-text)}
@@ -33,3 +35,8 @@
 @media(max-width:900px){.public-header{gap:20px}.public-nav{gap:18px}.public-hero{padding-block:64px 48px}.public-bento>.public-card{grid-column:span 6}.public-bento>.public-card-wide,.public-bento>.public-card-full{grid-column:span 12}.public-tiers{grid-template-columns:1fr}.public-tier .public-tier-description{min-height:0}.public-event-list li{grid-template-columns:130px 1fr}.public-event-list li>.ui-button{grid-column:2;justify-self:start}}
 @media(max-width:600px){.public-site{padding-inline:20px}.public-header{flex-wrap:wrap;gap:8px 16px;padding-block:18px 10px;min-height:0}.public-brand{gap:8px}.public-brand>svg{width:25px}.public-brand>img{width:110px}.public-header-actions{margin-left:auto;gap:4px}.public-header-actions>.ui-button{padding-inline:14px;font-size:12px}.public-nav{order:3;width:100%;margin-left:0;gap:28px}.public-hero{padding-block:44px 36px}.public-hero h1{font-size:38px}.public-hero>p{font-size:15px}.public-section{margin-bottom:56px}.public-bento,.public-two-col{grid-template-columns:1fr}.public-site .public-card,.public-site .public-card-wide,.public-site .public-card-full{grid-column:auto;padding:24px;border-radius:20px}.public-site .public-two-col .public-card{padding:24px}.public-card-wide>svg{height:140px}.public-closing{flex-direction:column;align-items:flex-start;padding-block:32px;margin-block:48px}.public-closing h2{font-size:28px}.public-footer{grid-template-columns:1fr 1fr;gap:24px}.public-footer>div:first-child{grid-column:1/-1}.public-footer nav a{min-height:44px}.public-footer-bottom{flex-direction:column;gap:8px}.public-steps{grid-template-columns:1fr;gap:16px;margin-bottom:48px}.public-event-list li{grid-template-columns:1fr;gap:12px}.public-event-list li>.ui-button{grid-column:1}.public-event-list time span{display:inline;margin-left:10px}.public-empty{padding:24px}.public-section-end,.public-product-caption{align-items:flex-start;flex-direction:column;gap:8px}.public-product-visual{height:180px}}
 .public-footer nav a{display:inline-flex;align-items:center;gap:6px}.public-footer nav a>svg{flex-shrink:0}
+
+.public-card .public-love-mind-body{display:block;width:100%;height:auto;aspect-ratio:872/422;object-fit:contain;background:transparent;border-radius:12px;margin-block:8px 24px}
+.public-card p.public-card-followup{margin-top:16px}
+
+.wui[data-mode=light] .public-love-mind-body{filter:invert(1)}

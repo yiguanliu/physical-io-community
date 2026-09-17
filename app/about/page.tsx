@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import PublicShell from '@/components/public/PublicShell';
 import PixelArt from '@/components/public/PixelArt';
-import LoveMindBody from '@/components/public/LoveMindBody';
 import { Hero, ActionLink, SectionHeading, ClosingNote } from '@/components/public/Sections';
 import { Card } from '@/workspace-ui/src';
 import { BUSINESS_TIERS, MEMBER_BENEFITS, MEMBER_RIGHTS, SITE_DESCRIPTION, SITE_URL } from '@/lib/site';
@@ -22,7 +21,7 @@ export default function AboutPage() {
 
     <section className="public-section" aria-label="Our community">
       <div className="public-bento">
-        <Card className="public-card public-card-wide"><span className="public-eyebrow">01 / Our starting point</span><LoveMindBody /><h2>Curiosity. Design. Engineering.</h2><p>Ask what’s possible. Consider what should exist. Make it work. Different ways of thinking, brought together through the things we build.</p></Card>
+        <Card className="public-card public-card-wide"><span className="public-eyebrow">01 / Our starting point</span><img className="public-love-mind-body" src="/assets/brand/love-mind-body.png" alt="Pixel-art heart, brain and human figure representing love, mind and body" width={872} height={422} loading="lazy" /><h2>Love, Mind + Body</h2><p>Love means caring about people and the world we build for. Mind brings imagination, understanding and intelligence. Body turns ideas into things we can touch, use and experience.</p><p className="public-card-followup">Curiosity connects them: we ask questions, learn from different perspectives and try things together. It’s what leads us to explore how humans and intelligent systems can make life better in the physical world.</p></Card>
         <Card className="public-card"><PixelArt kind="people" /><h2>Find your people.</h2><p>Designers, engineers, researchers, founders and manufacturers. Experienced or just exploring, there’s room for your perspective.</p><ul className="public-pills" role="list">{['Designers', 'Engineers', 'Researchers', 'Founders', 'Manufacturers', 'Curious newcomers'].map(x => <li key={x}>{x}</li>)}</ul></Card>
         <Card className="public-card"><PixelArt kind="idea" /><h3>A reason to gather.</h3><p>A sense of belonging. An unexpected idea. Someone who can help you get unstuck. Progress often begins with a conversation.</p></Card>
         <Card className="public-card"><PixelArt kind="hackathon" /><h3>Meet. Share. Build.</h3><p>Speaker nights, hands-on workshops and shared experiments. Bring a question, a point of view or a work in progress.</p><Link className="public-card-link" href="/events">Find a gathering <ArrowRight size={16} aria-hidden="true" /></Link></Card>
