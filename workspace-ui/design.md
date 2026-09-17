@@ -141,3 +141,11 @@ Action buttons in equal-height card rows stay bottom-aligned, regardless of copy
 The public About, Events and Shop pages use the homepage's grey canvas via `--ui-public-canvas` (#eaeaea light, #111111 dark), Manrope and the same shared action tokens. `components/public/PublicShell.tsx` owns their navigation and appearance; `public.css` contains public composition only. Cards use the shared Card primitive, with 24px public corners and readable 14–17px prose. Inline pixel SVGs are static, theme-aware and decorative. The public pages use normal document scrolling, a responsive bento grid in reading order and no admin sidebar. Keep shared controls and dark-mode behavior intact when extending this composition.
 
 Member access uses `/login` and a server-protected `/members` replay collection. Public navigation omits Shop while it is under development and offers Member login. The collection uses shared Card, Button, Badge, Field and Alert primitives with semantic theme tokens, real episode artwork and a responsive 16:9 player. YouTube loads only when a member selects a replay. Account creation does not assign admin roles or marketing consent. The homepage editor remains visible only after server-confirmed admin access, refreshed when the tab becomes visible.
+
+## Public site typography and theme
+
+The public site uses Bitcount Grid Single as its default typography; the admin workspace retains its existing font settings. The home page starts in dark mode unless the visitor has explicitly saved a light preference. Public headers and footers use live navigation and text without banner artwork.
+
+## Public page motion
+
+Public pages share `components/public/usePublicMotion.ts`: GSAP fades arriving main content over 350ms while keeping navigation interactive. Editorial headings reveal word by word from a 6px blur; sections/cards fade up 18px once on entering the viewport. The home intro starts after its existing loading screen. SplitText preserves accessible heading labels, and interactive/live text is excluded. Keyboard focus completes a pending reveal immediately. Reduced-motion changes revert all effects and split markup; route unmounts remove animations and scroll triggers. Content is visible without JavaScript. This public-site blur treatment follows the explicit design request and does not change workspace transitions.

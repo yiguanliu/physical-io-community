@@ -19,7 +19,7 @@
 .panel .actions button[aria-pressed=true]{background:var(--ui-subtle)}
 .error{font-size:13px;color:#9c341c;margin:6px 0!important;flex-shrink:0}
 .robot{position:relative;min-height:0;height:100%}
-.workspace .robotTitle{position:absolute;top:12px;left:48px;right:48px;z-index:3;text-align:center;pointer-events:none;font-family:Manrope,sans-serif;font-size:clamp(14px,1.6vw,20px)!important;font-weight:500;line-height:1.2!important;letter-spacing:-.045em!important;margin:0!important;white-space:nowrap}
+.workspace .robotTitle{position:absolute;top:12px;left:48px;right:48px;z-index:3;text-align:center;pointer-events:none;font-family:var(--ui-font);font-size:clamp(14px,1.6vw,20px)!important;font-weight:500;line-height:1.2!important;letter-spacing:-.045em!important;margin:0!important;white-space:nowrap}
 .robotTitle span{color:var(--ui-action)}
 .robotIntro{position:absolute;top:46px;left:48px;right:48px;text-align:center;z-index:3;pointer-events:none}
 .robotIntro h2{font-size:20px!important;line-height:1.2!important;letter-spacing:-.04em!important;margin:0 0 4px!important}
@@ -232,3 +232,7 @@
 .eventsCalendar iframe{display:block;width:100%;height:min(560px,calc(100dvh - 200px));min-height:240px;border:0;border-radius:16px;background:var(--ui-bg)}
 .eventsCalendar>a{display:inline-flex;align-items:center;gap:6px;color:var(--ui-muted);font-size:13px;text-decoration:none;align-self:flex-end}
 .eventsCalendar>a:hover{color:var(--ui-text)}
+
+/* Quiet invitation anchored above the conversation controls. */
+.mobileNav .talkInvitation{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);width: min(420px,calc(100vw - 40px));margin:0;padding:4px 8px;border-radius:8px;background:var(--ui-bg);color:var(--ui-muted);font-size:12px;line-height:1.5;text-align:center;text-wrap:balance;pointer-events:none}
+@media(max-width:760px){.mobileNav{margin-top:48px}.robotIntro h2{text-wrap:balance}}
