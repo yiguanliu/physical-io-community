@@ -105,7 +105,9 @@ export function DataTable<T>({rows,columns,rowKey,label}:{rows:T[];columns:Colum
 export function WorkspaceShell({ sidebar, topbar, children }: { sidebar: React.ReactNode; topbar: React.ReactNode; children: React.ReactNode }) { return <div className="ui-shell"><a className="ui-skip" href="#workspace-main">Skip to content</a><aside className="ui-sidebar">{sidebar}</aside><div className="ui-workspace"><div className="ui-topbar">{topbar}</div><main id="workspace-main" tabIndex={-1}>{children}</main></div></div>; }
 export function NavItem({ active, children, ...props }: React.ComponentProps<'button'> & { active?: boolean }) { return <button type="button" {...props} className="ui-nav-item" aria-current={active ? 'page' : undefined}>{children}</button>; }
 
-export function ContextMenu({ trigger, label, description, items, tooltip }: {
+export function ContextMenu({ trigger, label, description, items, tooltip, side = "top", align = "start" }: {
+  side?: "top" | "right" | "bottom" | "left";
+  align?: "start" | "center" | "end";
   trigger: React.ReactElement;
   tooltip?: string;
   label: string;
@@ -116,7 +118,7 @@ export function ContextMenu({ trigger, label, description, items, tooltip }: {
   return <Menu.Root>
     {tooltip ? <Tooltip label={tooltip}><Menu.Trigger asChild>{trigger}</Menu.Trigger></Tooltip> : <Menu.Trigger asChild>{trigger}</Menu.Trigger>}
     <Menu.Portal container={container}>
-      <Menu.Content className="ui-context-menu" aria-label={label} side="top" align="start" sideOffset={10} collisionPadding={12}>
+      <Menu.Content className="ui-context-menu" aria-label={label} side={side} align={align} sideOffset={10} collisionPadding={12}>
         <Menu.Label className="ui-context-heading">{label}{description && <span>{description}</span>}</Menu.Label>
         <Menu.Separator className="ui-context-separator" />
         {items.map(item => <Menu.Item key={item.label} className="ui-context-item" onSelect={() => { setTimeout(item.onSelect, 0); }}>{item.icon}{item.label}</Menu.Item>)}

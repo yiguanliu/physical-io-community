@@ -144,8 +144,24 @@ Member access uses `/login` and a server-protected `/members` replay collection.
 
 ## Public site typography and theme
 
-The public site uses Bitcount Grid Single as its default typography; the admin workspace retains its existing font settings. The home page starts in dark mode unless the visitor has explicitly saved a light preference. Public headers and footers use live navigation and text without banner artwork.
+The public site uses Bitcount Grid Single as its default typography; the admin workspace retains its existing font settings. All public pages start in dark mode on every device unless the visitor has explicitly saved a light preference. Public headers and footers use live navigation and text without banner artwork.
 
 ## Public page motion
 
 Public pages share `components/public/usePublicMotion.ts`: GSAP fades arriving main content over 350ms while keeping navigation interactive. Editorial headings reveal word by word from a 6px blur; sections/cards fade up 18px once on entering the viewport. The home intro starts after its existing loading screen. SplitText preserves accessible heading labels, and interactive/live text is excluded. Keyboard focus completes a pending reveal immediately. Reduced-motion changes revert all effects and split markup; route unmounts remove animations and scroll triggers. Content is visible without JavaScript. This public-site blur treatment follows the explicit design request and does not change workspace transitions.
+
+## Compact public controls
+
+Public dot-font typography uses weight 600. The About triptych is a compact 140×70 top-left illustration, aligned with adjacent card icons. Public card copy is brief; event-format cards show a single description and action. Homepage chat and call use round icon buttons at the left middle of the stage (40px desktop, 44px mobile). Announcement actions use the shared ContextMenu behind one three-dot button, retaining pause, static reading and server-authorized editing.
+
+Public reading text (paragraphs and content lists) uses locally hosted Manrope Regular at 16px with 1.65 line height; supporting notes use 14px. Headings, navigation and buttons retain semibold Bitcount. This supersedes the all-dot body-text treatment.
+
+Public typography defaults to Manrope for headings and body. A round Text settings button in desktop and mobile headers opens the shared Dialog with separate shared Select controls for heading/body fonts (Manrope, Rokkitt, Bitcount), a live preview and reset. Preferences are validated and saved on the device; changes synchronize across mounted controls and browser tabs. Dot text uses weight 600, Rokkitt uses its bundled regular face. Admin typography remains independent.
+
+Public button labels and navigation controls follow the body-font preference, including homepage controls and public overlays. The setting is labeled “Body and button font”.
+
+Decorative eyebrows, card metadata and footer details also follow the body font. The control is labeled “Body, buttons and labels”.
+
+Public pages omit decorative eyebrow labels above hero/section headings and decorative card numbering. Keep meaningful product status, prices, and ordered instructions.
+
+Public headers expose one round Settings button. Its shared modal combines the light/dark theme selector and typography controls; no separate header theme toggle.

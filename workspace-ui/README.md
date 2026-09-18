@@ -119,3 +119,5 @@ Transient status messages use shared `Toast` (`message`, `onDismiss`, optional `
 ### Table sorting
 
 Provide `sortValue: row => row.name` on a `DataTable` column to show a small ascending/descending arrow button. Use numbers for dates (`Date.parse`) and numeric fields; missing values stay last. Sorting preserves the input rows and selection, and headers expose `aria-sort`. Selection and action columns omit sorting. The Community people gallery demonstrates the pattern.
+
+`ContextMenu` accepts optional `side` (top/right/bottom/left, default top) and `align` (start/center/end, default start). Announcement controls use left/center; collision handling keeps menus inside the viewport.

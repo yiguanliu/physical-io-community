@@ -1,9 +1,10 @@
-type ArtKind = 'community' | 'people' | 'idea' | 'build' | 'ticket' | 'speaker' | 'hackathon' | 'robot' | 'source';
+type ArtKind = 'community' | 'people' | 'idea' | 'build' | 'ticket' | 'speaker' | 'hackathon' | 'robot' | 'source' | 'mail';
 
 const sprites: Record<Exclude<ArtKind, 'community'>, string[]> = {
   people: ['..XXX.....XXX..', '..XXX.....XXX..', '...X.......X...', '.XXXXX...XXXXX.', 'XXXXXXX.XXXXXXX', 'X.XXX.X.X.XXX.X', '..XXX.....XXX..', '..X.X.....X.X..', '..X.X.....X.X..'],
   idea: ['.....XXX.....', '...XX...XX...', '..X.......X..', '..X..A.A..X..', '..X...A...X..', '...X.A.A.X...', '....X...X....', '....XXXXX....', '.....XXX.....', '.....XXX.....'],
   build: ['.....XX......', '....XXXX.....', '...XX..XX....', '....XX..XX...', '.....XX..XX..', '......XX..XX.', '..XXX..XXXX..', '..XXX...XX...', '...X....XX...', '.XXXXXXXXXX..', 'XXXXXXXXXXXX.'],
+  mail: ['XXXXXXXXXXXXX', 'XX.........XX', 'X.X.......X.X', 'X..X.....X..X', 'X...AAAAA...X', 'X..X.....X..X', 'X.X.......X.X', 'XXXXXXXXXXXXX'],
   ticket: ['XXXXXXXXXXXXX', 'X...........X', 'X.AAA.XXXXX.X', 'X.A.A.......X', '.AAA..XXXXX..', 'X...........X', 'X.A.A.A.A.A.X', 'XXXXXXXXXXXXX'],
   speaker: ['.....AAA.....', '....AAAAA....', '....AAAAA....', '....AAAAA....', '...X.AAA.X...', '...X.....X...', '....XXXXX....', '......X......', '......X......', '....XXXXX....'],
   hackathon: ['..XX.....XX..', '.XX.......XX.', 'XX...A.....XX', '.XX.AAA...XX.', '..XX.A...XX..', '.....A.......', '....AAA......'],

@@ -3,8 +3,8 @@ import { layoutMessageText } from '@/lib/robot/dot-matrix';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { Megaphone, Pause, Play, Pencil, ArrowRight } from 'lucide-react';
-import { Dialog, IconButton, Skeleton } from '@/workspace-ui/src';
+import { MoreHorizontal, Megaphone, Pause, Play, Pencil, ArrowRight } from 'lucide-react';
+import { ContextMenu, Dialog, IconButton, Skeleton } from '@/workspace-ui/src';
 import { displayMessageSchema, type DisplayMessage } from '@/lib/robot/playlist';
 import type { RobotPerformance } from '@/lib/robot/contracts';
 import './messages.css';
@@ -23,6 +23,7 @@ export function useProgrammedMessages(available: boolean) {
   const [active, setActive] = useState<RobotPerformance | null>(null);
   const firstAnnouncementAt = useRef<number | null>(null);
   const hasAnnounced = useRef(false);
+  const playImmediately = useRef(false);
 
   const refresh = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -58,27 +59,32 @@ export function useProgrammedMessages(available: boolean) {
     if (!playing || !enabled.length) return;
     let index = 0;
     let timer: ReturnType<typeof setTimeout>;
+    function showAnnouncement() {
+      const message = enabled[index];
+      hasAnnounced.current = true;
+      setActive({ id: Date.now(), reply: '', expression: 'friendly', gesture: 'none', display: 'text', displayText: layoutMessageText(message.text, message.lines), textStyle: 'matrix', scrollSpeed: message.speed });
+      timer = setTimeout(() => { index = (index + 1) % enabled.length; faceInterval(); }, message.duration * 1000);
+    }
     function faceInterval(delay = 5000) {
       setActive(null);
-      timer = setTimeout(() => {
-        const message = enabled[index];
-        hasAnnounced.current = true;
-        setActive({ id: Date.now(), reply: '', expression: 'friendly', gesture: 'none', display: 'text', displayText: layoutMessageText(message.text, message.lines), textStyle: 'matrix', scrollSpeed: message.speed });
-        timer = setTimeout(() => { index = (index + 1) % enabled.length; faceInterval(); }, message.duration * 1000);
-      }, delay);
+      timer = setTimeout(showAnnouncement, delay);
     }
-    // Loading the playlist/scene counts toward the initial three-second delay.
-    faceInterval(hasAnnounced.current ? 5000 : Math.max(0, (firstAnnouncementAt.current ?? performance.now()) - performance.now()));
+    if (playImmediately.current) {
+      playImmediately.current = false;
+      showAnnouncement();
+    } else {
+      // Loading the playlist/scene counts toward the initial three-second delay.
+      faceInterval(hasAnnounced.current ? 5000 : Math.max(0, (firstAnnouncementAt.current ?? performance.now()) - performance.now()));
+    }
     return () => clearTimeout(timer);
   }, [playing, messages]);
 
-  const controls = <>
-    {messages.length > 0 && <>
-      {!reduced && <IconButton label={paused ? 'Resume announcements' : 'Pause announcements'} title={paused ? 'Resume announcements' : 'Pause announcements'} variant="ghost" onClick={() => setPaused(value => !value)}>{paused ? <Play size={18} /> : <Pause size={18} />}</IconButton>}
-      <IconButton label="Read announcements" title="Read announcements" variant="ghost" onClick={() => setReading(true)}><Megaphone size={18} /></IconButton>
-    </>}
-    {canEdit && <IconButton label="Edit OHI messages" title="Edit OHI messages · Admin" variant="ghost" onClick={() => setEditing(true)}><Pencil size={18} /></IconButton>}
-  </>;
+  const announcementActions = [
+    ...(messages.length > 0 && !reduced ? [{ label: paused ? 'Resume announcements' : 'Pause announcements', icon: paused ? <Play size={18} /> : <Pause size={18} />, onSelect: () => { playImmediately.current = paused; setPaused(!paused); } }] : []),
+    ...(messages.length > 0 ? [{ label: 'Read announcements', icon: <Megaphone size={18} />, onSelect: () => setReading(true) }] : []),
+    ...(canEdit ? [{ label: 'Edit OHI messages', icon: <Pencil size={18} />, onSelect: () => setEditing(true) }] : []),
+  ];
+  const controls = announcementActions.length > 0 ? <ContextMenu label="Announcements" side="left" align="center" trigger={<IconButton label="Announcement options" title="Announcement options" variant="ghost"><MoreHorizontal size={18} /></IconButton>} items={announcementActions} /> : null;
   const dialogs = <>
     <Dialog open={reading} onOpenChange={setReading} title="OHI announcements" description="All current messages, without scrolling or animation."><div className="ohi-editor-stack">{messages.map(message => <p className="ohi-announcement-copy" key={message.id}>{message.text}</p>)}<div className="ohi-editor-actions"><Link href="/events#upcoming" className="ui-button ui-button-primary" onClick={() => setReading(false)}>View upcoming events <ArrowRight size={16} aria-hidden="true" /></Link></div></div></Dialog>
     {canEdit && <Dialog open={editing} onOpenChange={open => { if (open || !editorDirty || window.confirm('Close the editor? Any unpublished changes will be discarded.')) setEditing(open); }} title="OHI messages" description="Admin only · Edit and publish the homepage LED playlist.">{editing && <MessageEditor onPublished={() => void refresh()} onDirtyChange={setEditorDirty} />}</Dialog>}
