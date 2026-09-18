@@ -18,25 +18,6 @@ function replyContent(text:string){
   return match&&allowed.has(match[2])?<a key={index} href={match[2]} target="_blank" rel="noopener noreferrer">{match[1]} <ExternalLink size={13} aria-hidden className={styles.linkIcon}/></a>:part;
  });
 }
-function IdentityTitle({title='Love Intelligence + Body.',robot=false}:{title?:string;robot?:boolean}){
- const [display,setDisplay]=useState(title);
- const timer=useRef<ReturnType<typeof setInterval>|null>(null);
- function stop(){if(timer.current)clearInterval(timer.current);timer.current=null;setDisplay(title);}
- function play(){
-  stop();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  let tick=0;const glyphs='▌/_+—';
-  timer.current=setInterval(()=>{
-   tick++;const resolved=Math.floor(tick/2);
-   setDisplay(title.slice(0,resolved)+(resolved<title.length?glyphs[tick%glyphs.length]:''));
-   if(resolved>=title.length)stop();
-  },10);
- }
- useEffect(()=>()=>{if(timer.current)clearInterval(timer.current);},[]);
- const Heading=robot?'h2':'h1';
- return <Heading className={robot?styles.robotGlitchTitle:styles.chatTitle} tabIndex={0} aria-label={title} onMouseEnter={play} onMouseLeave={stop} onFocus={play} onBlur={stop}>
-  <span className={styles.titleSizer} aria-hidden>{title}</span><span className={styles.titleDisplay} aria-hidden>{display.slice(0,18)}<span>{display.slice(18)}</span></span>
- </Heading>;
-}
 const welcomeMessages:Message[]=[
  {role:'assistant',content:'👋 Hi, I’m Ohi, your AI Chief Community Officer. Ask me about Physical I/O, or tap the mic to talk. Move your pointer and I’ll follow.'},
  {role:'assistant',content:'✨ I can put ideas in lights, too. Here’s ours: Love Intelligence + Body.'},
@@ -150,7 +131,6 @@ function RobotExperienceContent({onReady,introEnabled=true,dark=false}:{onReady?
  return <section className={styles.workspace} data-window={mobile?'normal':windowMode} data-mobile-view={mobileView} data-morphing={morphing}>
   
   <div className={styles.panel} data-window={mobile?'normal':windowMode} data-started={messages.length>0||busy}>
-   <IdentityTitle/>
    <div className={styles.transitionSkeleton} aria-hidden="true"><div className={styles.skeletonHeading}><i/><span/></div><div className={styles.skeletonLines}><span/><span/><span/></div><div className={styles.skeletonComposer}/></div>
 
    
@@ -171,7 +151,7 @@ function RobotExperienceContent({onReady,introEnabled=true,dark=false}:{onReady?
    </form>
   </div>
   <div className={styles.robot}><div className={styles.robotIntro}><h2 data-motion-heading>A Physical AI Community</h2><p data-motion-reveal>Meet Ohi, Our Chief Community Officer</p></div><ContactObject centered={mobile||windowMode==='minimized'} dark={dark} performance={programmed.performance ?? performance} extraControls={programmed.controls} onInteract={programmed.pause} onReady={setSceneReady} configureDisabled={callActive} onConfigure={value=>{end();setPerformance(value);}}/></div>
-  <nav className={styles.mobileNav} aria-label="Ohi navigation"><p data-motion-reveal className={styles.talkInvitation}>OHi is alive, you are welcome to talk to it</p><Button ref={chatButtonRef} variant="ghost" aria-pressed={mobile?mobileView==='chat':windowMode!=='minimized'} onClick={()=>{if(mobile){setMobileView(view=>view==='chat'?'robot':'chat');return;}if(windowMode==='minimized')void changeWindow('normal');else void closeChat();}}><MessageCircle size={20}/>Chat</Button><div className={styles.mobileCallDock} ref={setActionDock}/></nav>
+  <nav className={styles.mobileNav} aria-label="Ohi navigation"><IconButton label="Chat with Ohi" title="Chat with Ohi" ref={chatButtonRef} variant="ghost" aria-pressed={mobile?mobileView==='chat':windowMode!=='minimized'} onClick={()=>{if(mobile){setMobileView(view=>view==='chat'?'robot':'chat');return;}if(windowMode==='minimized')void changeWindow('normal');else void closeChat();}}><MessageCircle size={18}/></IconButton><div className={styles.mobileCallDock} ref={setActionDock}/></nav>
   <Dialog open={eventsOpen} onOpenChange={setEventsOpen} title="Community events" description="Gatherings, talks and demos from Physical I/O."><div className={styles.eventsCalendar}><iframe src="https://luma.com/embed/calendar/cal-Qb2jFfezFMiVkF1/events" title="Physical I/O event calendar" width="600" height="450" allowFullScreen tabIndex={0}/><a href="https://luma.com/phyiscal-io" target="_blank" rel="noopener noreferrer">Open calendar in Luma <ExternalLink size={14} aria-hidden/></a></div></Dialog>
   {programmed.dialogs}
  </section>;

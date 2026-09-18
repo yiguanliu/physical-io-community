@@ -13,12 +13,12 @@ import './public.css';
 export default function PublicShell({ children, member = false }: { children: ReactNode; member?: boolean }) {
   const motionRoot = useRef<HTMLDivElement>(null);
   usePublicMotion(motionRoot, !member);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   useEffect(() => {
     try {
       const saved = localStorage.getItem('ohi-appearance');
-      setDark(saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
-    } catch { /* Use the light default when storage is unavailable. */ }
+      setDark(saved !== 'light');
+    } catch { /* Use the dark default when storage is unavailable. */ }
   }, []);
   function toggleTheme() {
     setDark(current => {

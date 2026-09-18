@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Moon, Sun, ArrowUpRight } from 'lucide-react';
-import { IconButton } from '@/workspace-ui/src';
+import { ArrowUpRight } from 'lucide-react';
 import LogoMark from '@/workspace-ui/app/LogoMark';
 import './public.css';
+import TypographySettings from './TypographySettings';
 
 export default function PublicHeader({ dark, onToggleTheme, member = false }: {
   member?: boolean;
@@ -21,7 +21,8 @@ export default function PublicHeader({ dark, onToggleTheme, member = false }: {
     </nav>}
     <div className="public-header-actions">
       {!member && <Link href="/join" className="ui-button ui-button-primary">Join free <ArrowUpRight size={16} aria-hidden="true" /></Link>}
-      <IconButton label={dark ? 'Switch to light mode' : 'Switch to dark mode'} variant="ghost" onClick={onToggleTheme}>{dark ? <Sun size={18} /> : <Moon size={18} />}</IconButton>
+      <TypographySettings dark={dark} onToggleTheme={onToggleTheme} />
+
     </div>
   </header>;
 }

@@ -135,7 +135,7 @@
 .mobileBack{display:none!important}
 .mobileNav{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex!important;align-items:center;justify-content:center;gap:12px;padding:8px;background:var(--ui-surface);border-radius:999px;box-shadow:0 6px 24px rgb(0 0 0 / 8%);width:min(calc(100% - 32px),320px);z-index:30}
 .mobileNav>button,.mobileCallDock>button{flex:1;min-height:48px;border-radius:999px;gap:8px;justify-content:center}
-.mobileNav>button[aria-pressed=true]{background:var(--ui-subtle)}
+.mobileNav>button[aria-pressed=true],.mobileNav:has(>button[aria-pressed=true]) .mobileCallDock{display:none}
 .mobileCallDock{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-width:0;gap:8px}
 .mobileCallDock>span{position:absolute;bottom:64px;right:0;padding:8px 12px;border-radius:12px;background:var(--ui-surface);font-size:12px;white-space:nowrap}
 .mobileCallDock .callPreview{top:auto;bottom:72px;right:0}
@@ -236,3 +236,12 @@
 /* Quiet invitation anchored above the conversation controls. */
 .mobileNav .talkInvitation{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);width: min(420px,calc(100vw - 40px));margin:0;padding:4px 8px;border-radius:8px;background:var(--ui-bg);color:var(--ui-muted);font-size:12px;line-height:1.5;text-align:center;text-wrap:balance;pointer-events:none}
 @media(max-width:760px){.mobileNav{margin-top:48px}.robotIntro h2{text-wrap:balance}}
+
+/* Compact conversation controls at the left edge of the stage. */
+.workspace .mobileNav{grid-area:auto;position:absolute;left:16px;top:50%;bottom:auto;transform:translateY(-50%);flex-direction:column;width:auto;padding:0;margin:0;gap:12px;background:transparent;box-shadow:none}
+.mobileNav>button,.mobileCallDock>button{flex:none;width:40px;height:40px;min-height:40px;padding:0;border-radius:50%}
+.mobileNav>button,.mobileCallDock>button:global(.ui-button-ghost){background:var(--ui-surface)}
+.mobileCallDock{flex:none}
+.mobileCallDock>span,.mobileCallDock .callError{left:52px;right:auto;bottom:0;white-space:normal;width:200px}
+.mobileCallDock .callPreview{left:52px;right:auto;bottom:0}
+@media(max-width:760px){.workspace .mobileNav{left:12px}.mobileNav>button,.mobileCallDock>button{width:44px;height:44px;min-height:44px}.workspace[data-mobile-view=chat] .mobileNav{display:none!important}.workspace,.workspace[data-window=expanded],.workspace[data-window=minimized]{grid-template-rows:minmax(0,1fr)}}

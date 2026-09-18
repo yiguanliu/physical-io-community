@@ -48,3 +48,10 @@
 .navigationMenu :global(.ui-popover-heading){gap:12px;align-items:center}
 .navigationMenu :global(.ui-popover-heading>strong){min-width:0;flex:1}
 .navigationMenu :global(.ui-popover-heading>.ui-icon-button){width:44px;min-width:44px;height:44px;min-height:44px;max-height:44px;padding:0;flex:0 0 44px;aspect-ratio:1}
+
+.page,.page *{font-weight:600!important}
+
+.page :is(h1,h2,h3,h4,h5,h6),.page :is(h1,h2,h3,h4,h5,h6) *{font-family:var(--font-public-heading);font-weight:var(--font-public-heading-weight)!important;font-size-adjust:none}
+.page p,.page p *{font-family:var(--font-public-body);font-weight:var(--font-public-body-weight)!important;font-size-adjust:none}
+.page :is(button,a,:global(.ui-context-item)),.page :is(button,a,:global(.ui-context-item)) :where(span){font-family:var(--font-public-body);font-weight:var(--font-public-body-weight)!important;font-size-adjust:none}
+.page :global(.ui-context-heading),.page :global(.ui-popover-heading)>strong{font-family:var(--font-public-heading);font-weight:var(--font-public-heading-weight)!important;font-size-adjust:none}
