@@ -153,3 +153,7 @@
 .ticket-tools .ticket-actions{flex-wrap:nowrap;gap:4px}
 .public-site .ticket-tools .ticket-actions .ui-button{padding-inline:14px}
 @media(max-width:380px){.ticket-tools .ticket-actions{flex-wrap:wrap}}
+
+/* Edit details sits beside the ticket title. */
+.ticket-title-row{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px}
+.ticket-title-row>.ui-button{flex-shrink:0}
