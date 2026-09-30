@@ -834,27 +834,6 @@ h1, h2, h3 {
    ABOUT — minimal centered layout
    ============================================ */
 
-/* Animated PixelBlast background, fixed behind the page content. */
-.about-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.about-bg .pixel-blast-container {
-  width: 100%;
-  height: 100%;
-}
-
-/* Content sits above the animated background; sections stay transparent so
-   it shows through, while the hero image and solid cards/footer cover it. */
-.page-about > *:not(.about-bg) {
-  position: relative;
-  z-index: 1;
-}
-
 /* Group each section's content in a frosted card that pops over the animated
    background (the hero keeps its own image backdrop, so it's excluded). */
 .page-about .section > .narrow,
