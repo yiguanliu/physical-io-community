@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, CalendarDays, Download, MapPin, Printer, Share2, UserRound, Video } from 'lucide-react';
-import { Alert, Button, Card, Select } from '@/workspace-ui/src';
+import { Alert, Button, Card, Field, Select } from '@/workspace-ui/src';
 import { LABEL_SIZES, labelSize, renderLabelSvg, type LabelData } from '@/lib/rsvp/label';
 
 type Episode = { slug: string; number: string; title: string; theme: string; date: string; time: string; venue: string; cover: string; lumaUrl: string };
@@ -10,6 +10,19 @@ type Account = { kind: 'join' | 'member' | 'profile'; href: string };
 const SIZE_KEY = 'pio-label-size';
 // 12 px/mm ≈ 300 dpi: sharp for photos, and an exact multiple of common 203/300 dpi print heads.
 const PNG_PX_PER_MM = 12;
+
+// Clipboard API first; the legacy copy command covers browsers that block it.
+async function copyText(value: string) {
+  try { await navigator.clipboard.writeText(value); return true; } catch { /* Fall back below. */ }
+  const area = Object.assign(document.createElement('textarea'), { value, readOnly: true });
+  area.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+  document.body.appendChild(area);
+  area.select();
+  let copied = false;
+  try { copied = document.execCommand('copy'); } catch { /* Shown as a manual link instead. */ }
+  area.remove();
+  return copied;
+}
 
 async function labelPng(svg: string, widthMm: number, heightMm: number) {
   const image = new Image();
@@ -34,6 +47,7 @@ export default function TicketView({ label, episode, isOwner, ticketUrl, meetUrl
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState<'image' | 'share' | null>(null);
+  const [manualLink, setManualLink] = useState(false);
   useEffect(() => { try { const saved = localStorage.getItem(SIZE_KEY); if (saved && LABEL_SIZES.some(size => size.id === saved)) setSizeId(saved); } catch {} }, []);
   const size = labelSize(sizeId);
   const svg = useMemo(() => renderLabelSvg(label, sizeId), [label, sizeId]);
@@ -57,12 +71,15 @@ export default function TicketView({ label, episode, isOwner, ticketUrl, meetUrl
     } catch (e) { if ((e as Error).name !== 'AbortError') setError('Could not create the image. Try printing to PDF instead.'); } finally { setBusy(null); }
   }
   async function share() {
-    setBusy('share'); setError(''); setNotice('');
+    setBusy('share'); setError(''); setNotice(''); setManualLink(false);
     try {
-      if (navigator.share) { await navigator.share({ title: shareText, text: shareText, url: ticketUrl }); return; }
-      await navigator.clipboard.writeText(ticketUrl);
-      setNotice('Ticket link copied.');
-    } catch (e) { if ((e as Error).name !== 'AbortError') setError(`Copy this link: ${ticketUrl}`); } finally { setBusy(null); }
+      if (navigator.share) {
+        try { await navigator.share({ title: shareText, text: shareText, url: ticketUrl }); return; }
+        catch (e) { if ((e as Error).name === 'AbortError') return; /* Share sheet refused: copy instead. */ }
+      }
+      if (await copyText(ticketUrl)) setNotice('Ticket link copied.');
+      else setManualLink(true);
+    } finally { setBusy(null); }
   }
 
   return <div className="ticket-page">
@@ -88,6 +105,7 @@ export default function TicketView({ label, episode, isOwner, ticketUrl, meetUrl
           </div>
           {!online && <p className="ticket-hint">For thermal printers, choose the matching label size, set margins to none and scale to 100%.</p>}
           {notice && <Alert title="Done" tone="success">{notice}</Alert>}
+          {manualLink && <Field label="Copy your ticket link" readOnly value={ticketUrl} onFocus={e => e.currentTarget.select()} hint="Select the link and copy it to share your ticket." />}
           {error && <Alert title="Something went wrong" tone="danger">{error}</Alert>}
         </div>
       </section>
