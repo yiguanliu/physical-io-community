@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { ThemeProvider, defaultTheme } from '@/workspace-ui/src';
 import PublicHeader from './PublicHeader';
+import TypographySettings from './TypographySettings';
 import MemberLoginLink, { MemberLoginModal } from '@/components/members/MemberLoginLink';
 import { usePublicMotion } from './usePublicMotion';
 import { LINKEDIN_URL, INSTAGRAM_URL } from '@/lib/site';
@@ -30,8 +31,9 @@ export default function PublicShell({ children, member = false }: { children: Re
   return <ThemeProvider theme={{ ...defaultTheme, mode: dark ? 'dark' : 'light' }}>
     <div ref={motionRoot} className="public-site">
       <a className="ui-skip" href="#public-main">Skip to content</a>
-      <PublicHeader member={member} dark={dark} onToggleTheme={toggleTheme} />
+      <PublicHeader member={member} />
       <MemberLoginModal />
+      <div className="public-settings-dock"><TypographySettings dark={dark} onToggleTheme={toggleTheme} /></div>
       <main id="public-main" tabIndex={-1} className="public-main">{children}</main>
       {!member && <footer className="public-footer">
         <div><Link href="/" className="public-footer-brand">Physical I/O</Link><p>Curiosity. Design. Engineering.</p><p>London · Connected everywhere.</p></div>

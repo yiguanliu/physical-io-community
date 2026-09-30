@@ -65,3 +65,16 @@
 .public-header .public-nav>a.public-login-pill{min-height:44px;padding:10px 20px;border-radius:999px;background:color-mix(in srgb,var(--ui-text) 8%,transparent);color:var(--ui-text);transition:background-color var(--ui-fast) var(--ui-ease)}
 .public-header .public-nav>a.public-login-pill:hover{background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
 .public-header .public-nav>a.public-login-pill[aria-current=page]::after{content:none}
+
+/* About and Events: round icon buttons beside the Login pill; the current page is filled. */
+.public-header .public-nav>a.public-nav-icon{width:44px;height:44px;min-height:44px;padding:0;justify-content:center;border-radius:50%;background:color-mix(in srgb,var(--ui-text) 8%,transparent);color:var(--ui-text);transition:background-color var(--ui-fast) var(--ui-ease),color var(--ui-fast) var(--ui-ease)}
+.public-header .public-nav>a.public-nav-icon:hover{background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
+.public-header .public-nav>a.public-nav-icon[aria-current=page]{background:var(--ui-text);color:var(--ui-bg)}
+.public-header .public-nav>a.public-nav-icon[aria-current=page]::after{content:none}
+.public-header .public-nav:has(.public-nav-icon){gap:8px}
+
+/* Settings: one floating button, bottom right, on desktop and mobile. Toasts sit above it. */
+.public-settings-dock{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));z-index:45}
+.public-settings-dock .public-settings-button.ui-icon-button{width:48px;height:48px;min-height:48px;max-height:48px;background:var(--ui-surface);color:var(--ui-text);box-shadow:0 4px 16px rgb(0 0 0 / 18%);border:0}
+.public-settings-dock .public-settings-button.ui-icon-button:hover{background:var(--ui-subtle)}
+.wui:has(.public-settings-dock) .ui-toast-viewport{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 60px)}
