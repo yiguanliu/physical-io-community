@@ -21,12 +21,11 @@ export default async function EventsPage() {
   const next = upcoming[0];
   const seats = next?.rsvp ? await publicSeats(next.slug) : null;
   return <PublicShell>
-    <Hero title={<>Community Events<br />for Curious People</>} actions={<><ActionLink href="/join" primary>Join free</ActionLink><ActionLink href="#episodes">Browse episodes</ActionLink></>}>Come for a talk, meet a collaborator, or make your first robot.</Hero>
+    <Hero title={<>Community Events<br />for Curious People</>}>Come for a talk, meet a collaborator, or make your first robot.</Hero>
     <div id="episodes">
       {next && <EpisodeFeature episode={next} seats={seats} />}
       <EpisodeShelf title="Season one" episodes={season} note={`${season.length} episodes · replays free for members`} />
     </div>
-    <ol className="public-steps"><li><span>01</span>Join the community free</li><li><span>02</span>Find a gathering that interests you</li><li><span>03</span>Register and come along</li></ol>
     <section className="public-section"><SectionHeading title="Ideas are better in good company." /><div className="public-tiers">{EVENT_FORMATS.map(format => <Card className="public-card public-format" key={format.name}><PixelArt kind={format.art} /><h3>{format.name}</h3><p>{format.description}</p><ActionLink href="/askusanything">Get involved</ActionLink></Card>)}</div><p className="public-footnote">These are our programme formats. Confirmed dates, session levels and equipment arrangements appear in each event listing.</p></section>
     <section className="public-section" id="upcoming"><SectionHeading title="See you at the next one." /><LumaCalendar /><div className="public-section-end"><a className="public-calendar-link" href={LUMA_URL} target="_blank" rel="noopener noreferrer">Full calendar on Luma <ArrowUpRight size={16} aria-hidden="true" /></a><p id="luma-privacy-note">Luma receives connection information and may use its own browser storage. Its registration and privacy settings apply.</p></div></section>
     <section className="public-section"><div className="public-two-col"><Card className="public-card"><PixelArt kind="ticket" /><h3>Free, with a place reserved.</h3><p>Join free, then register for each event to reserve your place.</p></Card><Card className="public-card"><PixelArt kind="mail" /><h3>Keep in touch, on your terms.</h3><p>Choose the updates you want. Unsubscribe anytime. Event registration messages are separate.</p><ActionLink href="/join">Join the community</ActionLink></Card></div></section>

@@ -70,3 +70,7 @@
 .socialLinks a>span:first-child{display:grid;place-items:center;width:18px}
 .xIcon{font-size:18px;line-height:1}
 .linkedinIcon{font-size:16px;font-weight:700;line-height:1}
+
+/* Robot tools collapse behind one toggle; expanded, they stack like the dock. */
+.controlGroup{display:flex;flex-direction:column;align-items:center;gap:8px}
+.controlGroup[hidden]{display:none}

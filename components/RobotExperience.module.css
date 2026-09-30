@@ -245,3 +245,11 @@
 .mobileCallDock>span,.mobileCallDock .callError{left:52px;right:auto;bottom:0;white-space:normal;width:200px}
 .mobileCallDock .callPreview{left:52px;right:auto;bottom:0}
 @media(max-width:760px){.workspace .mobileNav{left:12px}.mobileNav>button,.mobileCallDock>button{width:44px;height:44px;min-height:44px}.workspace[data-mobile-view=chat] .mobileNav{display:none!important}.workspace,.workspace[data-window=expanded],.workspace[data-window=minimized]{grid-template-rows:minmax(0,1fr)}}
+
+/* Call sits at the top right of the message box, in the action (orange) colour. */
+.composer{position:relative}
+.callDock{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ui-muted)}
+.callDock :global(.ui-icon-button){width:40px;height:40px;min-height:40px;max-height:40px;padding:0;border-radius:50%}
+.callDock .callPreview{top:auto;right:0;bottom:calc(100% + 8px);width:140px}
+.composer textarea{padding-right:64px}
+@media(max-width:760px){.callDock :global(.ui-icon-button){width:44px;height:44px;min-height:44px;max-height:44px}}

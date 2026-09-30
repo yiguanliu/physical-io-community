@@ -48,3 +48,54 @@
    Applies to overlays opened from public pages too. Choice buttons keep their own styling. */
 .wui:has(> .public-site) .ui-button-secondary:not([aria-pressed]){background:transparent;border-color:transparent;box-shadow:none}
 .wui:has(> .public-site) .ui-button-secondary:not([aria-pressed]):not(:disabled):hover{background:color-mix(in srgb,var(--ui-text) 8%,transparent)}
+
+/* Settings dialog: theme as a day/night switch; both font choices on one row. */
+.public-font-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-control)}
+@media(max-width:480px){.public-font-row{grid-template-columns:1fr}}
+
+/* Separator lines on public pages sit at 20% of the text colour in both themes. */
+.public-site{--ui-border:color-mix(in srgb,var(--ui-text) 20%,transparent)}
+
+/* Format cards: the action sits at the bottom of every card, with room above it. */
+.public-format>.ui-button{margin-top:auto}
+.public-site .public-format>p{margin-block-end:32px}
+
+/* Member login: a quiet rounded pill in the header navigation. */
+.public-header .public-nav>a.public-login-pill{min-height:44px;padding:10px 20px;border-radius:999px;background:color-mix(in srgb,var(--ui-text) 8%,transparent);color:var(--ui-text);transition:background-color var(--ui-fast) var(--ui-ease)}
+.public-header .public-nav>a.public-login-pill:hover{background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
+.public-header .public-nav>a.public-login-pill[aria-current=page]::after{content:none}
+
+/* One header everywhere: nav icons, Login and Join free form a single evenly spaced group,
+   right-aligned; on narrow screens the group wraps below the logo, still right-aligned. */
+.public-header-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-inline-start:auto;min-width:0}
+.public-header .public-header-controls>.public-nav{margin-inline-start:0;gap:8px}
+.public-header .public-header-controls>.public-header-actions{margin-inline-start:0;gap:8px}
+@media(max-width:600px){
+  .public-header .public-header-controls{order:2;width:100%;flex-wrap:wrap}
+  .public-header .public-header-controls>.public-nav{order:0;width:auto}
+  .public-header .public-header-actions>.ui-button{padding-inline:16px;font-size:14px}
+}
+
+/* Header menu (About, Events, theme, settings) behind one round button beside Login. */
+.public-header .public-menu-button.ui-icon-button{width:44px;height:44px;min-height:44px;max-height:44px;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--ui-text) 8%,transparent);color:var(--ui-text)}
+.public-header .public-menu-button.ui-icon-button:not(:disabled):hover,.public-header .public-menu-button.ui-icon-button[data-state=open]{background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
+.public-menu{display:grid;gap:var(--ui-space-control)}
+.public-menu nav{display:grid;gap:2px}
+.public-menu :is(nav a,.public-menu-item){display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--ui-text);font-size:14px;text-align:left;cursor:pointer}
+.public-menu :is(nav a,.public-menu-item):hover{background:var(--ui-subtle)}
+.public-menu nav a[aria-current=page]{background:var(--ui-subtle);font-weight:600}
+.wui:has(> .public-site) .public-menu :is(nav a,.public-menu-item){font-family:var(--font-public-body)}
+.public-menu nav{padding-bottom:var(--ui-space-control);border-bottom:1px solid var(--ui-border)}
+
+/* Night mode toggle in settings: the shared Switch, without an outline. */
+.public-theme-toggle .ui-switch-field{min-height:44px;font-weight:600}
+.public-theme-toggle .ui-switch{border-color:transparent;background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
+.public-theme-toggle .ui-switch[data-state=checked]{background:var(--ui-action)}
+
+/* Pinned header: hides while scrolling down, returns on scroll up. */
+.public-header{position:sticky;top:0;z-index:30;transition:transform var(--ui-normal) var(--ui-ease)}
+/* Edge-to-edge backing without clipping: menus and popovers below the header stay visible. */
+.public-header::before{content:'';position:absolute;inset:0 calc(50% - 50vw);background:var(--ui-bg);z-index:-1;pointer-events:none}
+.public-site{overflow-x:clip}
+.public-header[data-hidden]{transform:translateY(-100%)}
+@media(prefers-reduced-motion:reduce){.public-header{transition:none}}

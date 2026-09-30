@@ -1,7 +1,7 @@
 "use client";
 import {useNotification} from "@/workspace-ui/src";
-import { useEffect, useRef, useState } from "react";
-import { ScanFace, SlidersHorizontal, Share2, Camera, Play, ArrowUpRight } from 'lucide-react';
+import { useEffect, useId, useRef, useState } from "react";
+import { ScanFace, SlidersHorizontal, Share2, Camera, Play, ArrowUpRight, MoreHorizontal, X } from 'lucide-react';
 import { Button, IconButton, Popover, Dialog } from "@/workspace-ui/src";
 import { X_URL, YOUTUBE_URL, INSTAGRAM_URL, LINKEDIN_URL } from "@/lib/site";
 import styles from "./ContactObject.module.css";
@@ -36,6 +36,8 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
   const [loadingMessage,setLoadingMessage] = useState("Waiting for device permission…");
   const [ready,setReady] = useState(false);
   const [headFocused,setHeadFocused] = useState(true);
+  const [toolsOpen,setToolsOpen] = useState(false);
+  const toolsId = useId();
   const [error,setError] = useState("");
   const [environmentStatus,setEnvironmentStatus]=useState("");
   useEffect(()=>{if(error)notify(error);},[error,notify]);
@@ -115,6 +117,9 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
   return <div className={styles.object}>
     <div className={styles.stage} ref={host} tabIndex={0} role="img" aria-label={performance?.textStyle==="matrix"?`OHI announcement: ${performance.displayText}`:"Interactive dark robot with a circular amber display. Move your pointer or use arrow keys to turn its head. Drag to orbit the robot."} />
     {!previewOnly&&<div className={styles.controlDock}>
+    {/* Share, focus and robot controls collapse behind one button to keep the stage clear. */}
+    <IconButton label={toolsOpen?"Hide robot tools":"Show robot tools"} title={toolsOpen?"Hide robot tools":"Robot tools"} variant="ghost" aria-expanded={toolsOpen} aria-controls={toolsId} className={styles.controlTrigger} onClick={()=>setToolsOpen(open=>!open)}>{toolsOpen?<X size={20}/>:<MoreHorizontal size={20}/>}{!toolsOpen&&(mode!=="idle"||pending)&&<span className={styles.activeDot}/>}</IconButton>
+    <div id={toolsId} className={styles.controlGroup} hidden={!toolsOpen}>
     <Popover side="left" align="start" title="Follow Physical I/O" closeLabel="Close social links" trigger={<IconButton label="Social links" title="Social links" variant="ghost" className={styles.controlTrigger}><Share2 size={20}/></IconButton>}>
       <nav aria-label="Social links"><ul className={styles.socialLinks}>
         {[{name:'Instagram',href:INSTAGRAM_URL,icon:<Camera size={18}/>},{name:'LinkedIn',href:LINKEDIN_URL,icon:<span className={styles.linkedinIcon}>in</span>},{name:'YouTube',href:YOUTUBE_URL,icon:<Play size={18}/>},{name:'X',href:X_URL,icon:<span className={styles.xIcon}>𝕏</span>}].map(social=><li key={social.name}><a href={social.href} target="_blank" rel="noopener noreferrer"><span aria-hidden="true">{social.icon}</span><span>{social.name}</span><ArrowUpRight size={16} aria-hidden="true"/></a></li>)}
@@ -132,6 +137,7 @@ export default function ContactObject({performance,onReady,onInteract,onConfigur
     </div>
     </Popover>
     {extraControls}
+    </div>
     </div>
     }
     {!previewOnly&&onConfigure&&<Dialog open={studioOpen} onOpenChange={setStudioOpen} title="Expression studio" description="Shape Ohi’s expression. Changes preview live."><div className={styles.studio}><div className={styles.studioPreview}><ContactObject previewOnly environmentSettings={activeEnvironment} dark={dark} performance={performance}/></div><aside className={styles.studioSettings} aria-label="Expression settings"><ExpressionCreator expanded disabled={configureDisabled} onChange={value=>{stop();onConfigure(value);}}/></aside></div></Dialog>}
