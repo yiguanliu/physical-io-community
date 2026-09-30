@@ -16,13 +16,13 @@ export default function PublicHeader({ member = false, dark, onToggleTheme }: { 
   return <header className="public-header" data-hidden={hidden || undefined}>
     <Link href="/" className="public-brand" aria-label="Physical I/O home"><LogoMark /><img src="/assets/physical-io-wordmark.png" alt="Physical I/O" width="879" height="184" /></Link>
     <div className="public-header-controls">
-    <SiteMenu dark={dark} onToggleTheme={onToggleTheme} member={member} />
     {!member && <nav aria-label="Account" className="public-nav">
       <MemberLoginLink className="public-login-pill" aria-current={pathname === '/login' ? 'page' : undefined}>Login</MemberLoginLink>
     </nav>}
     <div className="public-header-actions">
       {!member && <Link href="/join" className="ui-button ui-button-primary">Join free <ArrowUpRight size={16} aria-hidden="true" /></Link>}
     </div>
+    <SiteMenu dark={dark} onToggleTheme={onToggleTheme} member={member} />
     </div>
   </header>;
 }
