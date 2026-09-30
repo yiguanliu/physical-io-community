@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, CalendarDays, Download, MapPin, Printer, Share2, UserRound, Video } from 'lucide-react';
 import { Alert, Button, Card, Field, Select } from '@/workspace-ui/src';
@@ -24,15 +24,15 @@ async function copyText(value: string) {
   return copied;
 }
 
-async function labelPng(svg: string, widthMm: number, heightMm: number) {
+async function labelPng(svg: string, widthMm: number, heightMm: number, pxPerMm = PNG_PX_PER_MM) {
   const image = new Image();
   const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   try {
     image.src = url;
     await image.decode();
     const canvas = document.createElement('canvas');
-    canvas.width = Math.round(widthMm * PNG_PX_PER_MM);
-    canvas.height = Math.round(heightMm * PNG_PX_PER_MM);
+    canvas.width = Math.round(widthMm * pxPerMm);
+    canvas.height = Math.round(heightMm * pxPerMm);
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Canvas unavailable');
     context.fillStyle = '#fff';
@@ -42,18 +42,37 @@ async function labelPng(svg: string, widthMm: number, heightMm: number) {
   } finally { URL.revokeObjectURL(url); }
 }
 
-export default function TicketView({ label, episode, isOwner, ticketUrl, meetUrl, account }: { label: LabelData; episode: Episode; isOwner: boolean; ticketUrl: string; meetUrl: string | null; account: Account }) {
+export default function TicketView({ label, episode, isOwner, emailPending = false, ticketUrl, meetUrl, account }: { label: LabelData; episode: Episode; isOwner: boolean; emailPending?: boolean; ticketUrl: string; meetUrl: string | null; account: Account }) {
   const [sizeId, setSizeId] = useState<string>(LABEL_SIZES[0].id);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState<'image' | 'share' | null>(null);
   const [manualLink, setManualLink] = useState(false);
+  const [emailState, setEmailState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const emailStarted = useRef(false);
   useEffect(() => { try { const saved = localStorage.getItem(SIZE_KEY); if (saved && LABEL_SIZES.some(size => size.id === saved)) setSizeId(saved); } catch {} }, []);
   const size = labelSize(sizeId);
   const svg = useMemo(() => renderLabelSvg(label, sizeId), [label, sizeId]);
   const online = label.attendance === 'online';
   const fileName = `physical-io-ep${episode.number}-${label.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
   const shareText = `${label.name} · Physical I/O Episode ${episode.number}: ${episode.title}, ${episode.date}`;
+
+  // First visit after RSVP: draw the label in the browser (same image as "Save image") and
+  // ask the server to email the ticket, copying the team. The server sends once per ticket type.
+  useEffect(() => {
+    if (!emailPending || emailStarted.current) return;
+    emailStarted.current = true;
+    setEmailState('sending');
+    (async () => {
+      const data = new FormData();
+      data.set('event', episode.slug);
+      data.set('ticket', ticketUrl.slice(ticketUrl.lastIndexOf('/') + 1));
+      try { data.set('image', await labelPng(renderLabelSvg(label, '100x150'), 100, 150, 8), 'ticket.png'); } catch { /* Email still sends with the link. */ }
+      const response = await fetch('/api/rsvp/ticket-email', { method: 'POST', body: data });
+      const result = await response.json().catch(() => ({}));
+      setEmailState(response.ok && result.sent ? 'sent' : response.ok ? 'idle' : 'failed');
+    })().catch(() => setEmailState('failed'));
+  }, [emailPending, episode.slug, label, ticketUrl]);
 
   function chooseSize(value: string) { setSizeId(value); try { localStorage.setItem(SIZE_KEY, value); } catch {} }
   async function saveImage() {
@@ -91,6 +110,7 @@ export default function TicketView({ label, episode, isOwner, ticketUrl, meetUrl
       <p className="public-eyebrow"><i />Episode {episode.number} · {online ? 'Online ticket' : 'In-person ticket'}</p>
       <h1>{isOwner ? `You’re in, ${label.name.split(' ')[0]}.` : `${label.name}’s ticket`}</h1>
       <p>{online ? 'Join the livestream from anywhere. Keep this page to find the Google Meet link.' : 'Show this ticket or your printed label at check-in.'}</p>
+      {emailState !== 'idle' && <p className="ticket-email-status" role="status">{emailState === 'sending' ? 'Emailing your ticket…' : emailState === 'sent' ? 'We’ve emailed your ticket to you.' : 'We couldn’t email your ticket just now. Save the image or share the link below.'}</p>}
     </header>
 
     <div className="ticket-layout">

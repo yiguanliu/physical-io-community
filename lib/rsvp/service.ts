@@ -51,7 +51,12 @@ export async function publicSeats(eventSlug: string) {
 }
 
 export async function findRegistration(db: Pick<PoolClient, 'query'>, eventSlug: string, email: string) {
-  const result = await db.query(`select ${FIELDS} from public.event_registrations where event_slug=$1 and email_normalized=$2`, [eventSlug, email.trim().toLowerCase()]);
+  // Prefill LinkedIn from the member record when the Luma answer is empty.
+  const result = await db.query(
+    `select ${FIELDS.replace('linkedin_url', `coalesce(nullif(r.linkedin_url,''),(select m.linkedin_url from public.members m where m.email_normalized=r.email_normalized),'') linkedin_url`)}
+     from public.event_registrations r where event_slug=$1 and email_normalized=$2`,
+    [eventSlug, email.trim().toLowerCase()],
+  );
   return result.rows[0] ? toRegistration(result.rows[0]) : null;
 }
 
@@ -86,6 +91,8 @@ export async function submitRsvp(db: PoolClient, input: RsvpInput) {
       if ((error as { code?: string }).code !== '23505' || attempt === 4) throw error;
     }
   }
+  // A LinkedIn confirmed on the badge also fills an empty member record.
+  if (badge && input.linkedin) await db.query("update public.members set linkedin_url=$2,updated_at=now() where email_normalized=$1 and linkedin_url=''", [input.email, input.linkedin]);
   return { ticketSlug: slug, ownerToken: String(current.rows[0].owner_token), registrationId: registration.id };
 }
 
@@ -93,13 +100,13 @@ export async function submitRsvp(db: PoolClient, input: RsvpInput) {
 const TICKET_FIELDS = FIELDS.replace('email,', '');
 export async function getTicket(eventSlug: string, slug: string, ownerToken?: string) {
   const result = await database().query(
-    `select ${TICKET_FIELDS},(owner_token=$3) is_owner,exists(select 1 from public.members m where m.email_normalized=r.email_normalized) has_member,
+    `select ${TICKET_FIELDS},(owner_token=$3) is_owner,ticket_emailed_attendance,exists(select 1 from public.members m where m.email_normalized=r.email_normalized) has_member,
       (select m.public_slug from public.members m where m.email_normalized=r.email_normalized and m.profile_public) profile_slug
      from public.event_registrations r where event_slug=$1 and ticket_slug=$2 and attendance in ('in_person','online')`,
     [eventSlug, slug, ownerToken ?? ''],
   );
   const row = result.rows[0];
-  return row ? { ...toRegistration(row), isOwner: Boolean(row.is_owner), hasMember: Boolean(row.has_member), profileSlug: (row.profile_slug as string | null) ?? null } : null;
+  return row ? { ...toRegistration(row), isOwner: Boolean(row.is_owner), hasMember: Boolean(row.has_member), profileSlug: (row.profile_slug as string | null) ?? null, emailedAttendance: (row.ticket_emailed_attendance as string | null) ?? null } : null;
 }
 
 export async function ownedRegistration(eventSlug: string, ownerToken: string | undefined) {
@@ -123,7 +130,7 @@ export async function importGuests(db: PoolClient, eventSlug: string, guests: Lu
         first_name=excluded.first_name,last_name=excluded.last_name,
         organisation=case when event_registrations.rsvp_at is null then excluded.organisation else event_registrations.organisation end,
         job_title=case when event_registrations.rsvp_at is null then excluded.job_title else event_registrations.job_title end,
-        linkedin_url=case when event_registrations.rsvp_at is null then excluded.linkedin_url else event_registrations.linkedin_url end,
+        linkedin_url=case when event_registrations.rsvp_at is null or event_registrations.linkedin_url='' then excluded.linkedin_url else event_registrations.linkedin_url end,
         member_id=coalesce(event_registrations.member_id,excluded.member_id),updated_at=now()
        returning (xmax=0) inserted`,
       [eventSlug, g.email, g.fullName, g.firstName, g.lastName, g.organisation, g.jobTitle, g.linkedin, g.motivation, g.guestId || null, g.status, g.registeredAt],

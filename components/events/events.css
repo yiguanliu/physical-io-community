@@ -128,3 +128,4 @@
 .profile-tabs .ui-tabs{justify-content:center;margin-bottom:24px}
 .profile-tabs .ui-tab-content{min-width:0}
 .profile-settings-signout{display:grid;gap:var(--ui-space-control);justify-items:start;border-top:1px solid var(--ui-border);padding-top:var(--ui-space-card)}
+.public-site .public-main .ticket-heading .ticket-email-status{font-size:13px;margin-block-start:10px;color:var(--ui-muted)}

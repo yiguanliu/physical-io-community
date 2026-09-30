@@ -39,6 +39,7 @@ export default async function TicketPage(props: Params) {
   return <PublicShell>
     <TicketView
       isOwner={registration.isOwner}
+      emailPending={registration.isOwner && registration.emailedAttendance !== registration.attendance}
       ticketUrl={`${SITE_URL}${path}`}
       meetUrl={attendance === 'online' ? meetUrl(episode.slug) : null}
       account={registration.profileSlug ? { kind: 'profile', href: `/members/${registration.profileSlug}` } : registration.hasMember ? { kind: 'member', href: '/login' } : { kind: 'join', href: `/join?event=${episode.slug}` }}

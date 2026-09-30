@@ -3,7 +3,7 @@ import { renderEmailHtml } from './template';
 import { SITE_URL } from '@/lib/site';
 export function deliverySettings(){return {from:process.env.RESEND_FROM||'Physical I/O <updates@physical-io.com>',site:SITE_URL};}
 
-export type EmailPayload={to:string;subject:string;text:string;html?:string;from:string;reply_to?:string;headers:Record<string,string>};
+export type EmailPayload={to:string;cc?:string[];subject:string;text:string;html?:string;from:string;reply_to?:string;headers:Record<string,string>};
 export type EmailTransport=(payload:EmailPayload,key:string)=>Promise<{id:string}>;
 export class DeliveryError extends Error{constructor(message:string,public uncertain=false){super(message);}}
 export function emailConfiguration(){return {configured:Boolean(process.env.RESEND_API_KEY),message:'Configure a Resend API key to enable delivery.'};}

@@ -62,7 +62,10 @@ export function parseLumaCsv(text: string): { guests: LumaGuest[]; errors: strin
   if (!header) return { guests: [], errors: ['The file is empty.'] };
   const names = header.map(h => h.trim().toLowerCase());
   const exact = (name: string) => names.indexOf(name);
-  const find = (pattern: RegExp) => names.findIndex(name => pattern.test(name));
+  // Custom registration questions only: Luma's own export has tracking columns such as
+  // linkedin_click_id and utm_* that would otherwise match first.
+  const tracking = /^(utm_|.*_click_id$|.*_id$|qr_code_url$|referr)/;
+  const find = (pattern: RegExp) => names.findIndex(name => !tracking.test(name) && pattern.test(name));
   const col = {
     guestId: exact('guest_id'), email: exact('email'), name: exact('name'), first: exact('first_name'), last: exact('last_name'),
     status: exact('approval_status'), created: exact('created_at'),
