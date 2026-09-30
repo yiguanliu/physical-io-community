@@ -1,13 +1,14 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, CalendarDays, Download, MapPin, Printer, Share2, UserRound, Video } from 'lucide-react';
-import { Alert, Button, Card, Field, Select } from '@/workspace-ui/src';
-import { LABEL_SIZES, labelSize, renderLabelSvg, type LabelData } from '@/lib/rsvp/label';
+import { ArrowRight, ArrowUpRight, CalendarDays, Download, MapPin, Share2, Video } from 'lucide-react';
+import { Alert, Button, Card, Field } from '@/workspace-ui/src';
+import { labelSize, renderLabelSvg, type LabelData } from '@/lib/rsvp/label';
+import TicketEdit from './TicketEdit';
+import { ClosingNote } from '@/components/public/Sections';
 
 type Episode = { slug: string; number: string; title: string; theme: string; date: string; time: string; venue: string; cover: string; lumaUrl: string };
 type Account = { kind: 'join' | 'member' | 'profile'; href: string };
-const SIZE_KEY = 'pio-label-size';
 // 12 px/mm ≈ 300 dpi: sharp for photos, and an exact multiple of common 203/300 dpi print heads.
 const PNG_PX_PER_MM = 12;
 
@@ -43,16 +44,15 @@ async function labelPng(svg: string, widthMm: number, heightMm: number, pxPerMm 
 }
 
 export default function TicketView({ label, episode, isOwner, emailPending = false, ticketUrl, meetUrl, account }: { label: LabelData; episode: Episode; isOwner: boolean; emailPending?: boolean; ticketUrl: string; meetUrl: string | null; account: Account }) {
-  const [sizeId, setSizeId] = useState<string>(LABEL_SIZES[0].id);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState<'image' | 'share' | null>(null);
   const [manualLink, setManualLink] = useState(false);
   const [emailState, setEmailState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const emailStarted = useRef(false);
-  useEffect(() => { try { const saved = localStorage.getItem(SIZE_KEY); if (saved && LABEL_SIZES.some(size => size.id === saved)) setSizeId(saved); } catch {} }, []);
-  const size = labelSize(sizeId);
-  const svg = useMemo(() => renderLabelSvg(label, sizeId), [label, sizeId]);
+  // One standard label (100 × 150 mm) for the preview and saved image.
+  const size = labelSize('100x150');
+  const svg = useMemo(() => renderLabelSvg(label, size.id), [label, size.id]);
   const online = label.attendance === 'online';
   const fileName = `physical-io-ep${episode.number}-${label.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
   const shareText = `${label.name} · Physical I/O Episode ${episode.number}: ${episode.title}, ${episode.date}`;
@@ -74,7 +74,6 @@ export default function TicketView({ label, episode, isOwner, emailPending = fal
     })().catch(() => setEmailState('failed'));
   }, [emailPending, episode.slug, label, ticketUrl]);
 
-  function chooseSize(value: string) { setSizeId(value); try { localStorage.setItem(SIZE_KEY, value); } catch {} }
   async function saveImage() {
     setBusy('image'); setError(''); setNotice('');
     try {
@@ -107,8 +106,11 @@ export default function TicketView({ label, episode, isOwner, emailPending = fal
     <div className="ticket-print" aria-hidden dangerouslySetInnerHTML={{ __html: svg }} />
 
     <header className="ticket-heading">
-      <p className="public-eyebrow"><i />Episode {episode.number} · {online ? 'Online ticket' : 'In-person ticket'}</p>
-      <h1>{isOwner ? `You’re in, ${label.name.split(' ')[0]}.` : `${label.name}’s ticket`}</h1>
+      <div className="ticket-chips"><span className="ticket-chip" data-tone="episode">Episode {episode.number}</span><span className="ticket-chip" data-tone={online ? 'online' : 'in-person'}>{online ? 'Online ticket' : 'In-person ticket'}</span></div>
+      <div className="ticket-title-row">
+        <h1>{isOwner ? `You’re in, ${label.name.split(' ')[0]}.` : `${label.name}’s ticket`}</h1>
+        {isOwner && <TicketEdit eventSlug={episode.slug} lumaUrl={episode.lumaUrl} attendance={label.attendance} details={{ fullName: label.name, category: label.category, jobTitle: label.jobTitle, organisation: label.organisation, linkedin: label.linkedin }} />}
+      </div>
       <p>{online ? 'Join the livestream from anywhere. Keep this page to find the Google Meet link.' : 'Show this ticket or your printed label at check-in.'}</p>
       {emailState !== 'idle' && <p className="ticket-email-status" role="status">{emailState === 'sending' ? 'Emailing your ticket…' : emailState === 'sent' ? 'We’ve emailed your ticket to you.' : 'We couldn’t email your ticket just now. Save the image or share the link below.'}</p>}
     </header>
@@ -117,13 +119,10 @@ export default function TicketView({ label, episode, isOwner, emailPending = fal
       <section className="ticket-label-column" aria-label="Event label">
         <div className="ticket-label" style={{ aspectRatio: `${size.width} / ${size.height}` }} dangerouslySetInnerHTML={{ __html: svg }} />
         <div className="ticket-tools">
-          {!online && <Select label="Label size" value={sizeId} onValueChange={chooseSize} options={LABEL_SIZES.map(option => ({ value: option.id, label: option.label }))} />}
           <div className="ticket-actions">
-            {!online && <Button variant="primary" onClick={() => window.print()}><Printer size={16} aria-hidden />Print label</Button>}
             <Button busy={busy === 'image'} onClick={saveImage}><Download size={16} aria-hidden />Save image</Button>
             <Button busy={busy === 'share'} onClick={share}><Share2 size={16} aria-hidden />Share</Button>
           </div>
-          {!online && <p className="ticket-hint">For thermal printers, choose the matching label size, set margins to none and scale to 100%.</p>}
           {notice && <Alert title="Done" tone="success">{notice}</Alert>}
           {manualLink && <Field label="Copy your ticket link" readOnly value={ticketUrl} onFocus={e => e.currentTarget.select()} hint="Select the link and copy it to share your ticket." />}
           {error && <Alert title="Something went wrong" tone="danger">{error}</Alert>}
@@ -150,23 +149,13 @@ export default function TicketView({ label, episode, isOwner, emailPending = fal
           </div>
         </Card>
 
-        {isOwner && <Card className="public-card ticket-card">
-          <UserRound size={28} aria-hidden />
-          {account.kind === 'profile' ? <>
-            <h2>Your profile is live.</h2>
-            <p>Share your Physical I/O profile with the people you meet.</p>
-            <Link className="ui-button ui-button-primary" href={account.href}>View my profile <ArrowRight size={16} aria-hidden /></Link>
-          </> : account.kind === 'member' ? <>
-            <h2>Welcome back.</h2>
-            <p>You’re already a member. Sign in to publish your profile page and watch past recordings.</p>
-            <Link className="ui-button ui-button-primary" href={account.href}>Member sign in <ArrowRight size={16} aria-hidden /></Link>
-          </> : <>
-            <h2>Join the community.</h2>
-            <p>Create your free member account in a minute. We’ll fill in what you told us on Luma, and you can publish a profile page showing the episodes you’ve attended.</p>
-            <Link className="ui-button ui-button-primary" href={account.href}>Create my account <ArrowRight size={16} aria-hidden /></Link>
-          </>}
-        </Card>}
       </div>
     </div>
+
+    {isOwner && (account.kind === 'profile'
+      ? <ClosingNote title="Your profile is live." href={account.href} action="View my profile">Share your Physical I/O profile with the people you meet.</ClosingNote>
+      : account.kind === 'member'
+        ? <ClosingNote title="Welcome back." href={account.href} action="Member sign in">You’re already a member. Sign in to publish your profile page and watch past recordings.</ClosingNote>
+        : <ClosingNote title="Join the community." href={account.href} action="Create my account">Create your free member account in a minute. We’ll fill in what you told us on Luma, and you can publish a profile page showing the episodes you’ve attended.</ClosingNote>)}
   </div>;
 }

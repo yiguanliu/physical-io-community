@@ -60,7 +60,7 @@ export async function findRegistration(db: Pick<PoolClient, 'query'>, eventSlug:
   return result.rows[0] ? toRegistration(result.rows[0]) : null;
 }
 
-export type RsvpInput = { eventSlug: string; email: string; attendance: Attendance; category: string; fullName: string; organisation: string; jobTitle: string; linkedin: string };
+export type RsvpInput = { eventSlug: string; email: string; attendance: Attendance; category: string; fullName: string; organisation: string; jobTitle: string; linkedin: string; details?: boolean };
 /** Caller owns the transaction. The capacity row lock serialises in-person seat claims. */
 export async function submitRsvp(db: PoolClient, input: RsvpInput) {
   const current = await db.query(`select ${FIELDS},owner_token from public.event_registrations where event_slug=$1 and email_normalized=$2 for update`, [input.eventSlug, input.email]);
@@ -71,7 +71,8 @@ export async function submitRsvp(db: PoolClient, input: RsvpInput) {
     const state = await seats(db, input.eventSlug, true);
     if (state && state.full) throw new SeatsFull();
   }
-  const badge = input.attendance === 'in_person';
+  // Badge details come from the in-person step, or from the ticket's edit form for either ticket type.
+  const badge = input.attendance === 'in_person' || Boolean(input.details && input.attendance !== 'not_going');
   let slug = registration.ticketSlug;
   for (let attempt = 0; attempt < 5; attempt++) {
     const candidate = slug ?? ticketSlug(badge && input.fullName ? input.fullName : registration.fullName);

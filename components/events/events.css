@@ -45,7 +45,7 @@
 .ticket-heading{max-width:720px;margin-bottom:32px}.ticket-heading h1{font-size:clamp(34px,4.4vw,56px);line-height:1.05}
 .public-site .public-main .ticket-heading>p:last-child{color:var(--ui-muted);margin-block-start:16px}
 .ticket-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
-.ticket-label-column{display:grid;gap:20px;justify-items:center;padding:32px;border-radius:24px;background:var(--ui-subtle)}
+.ticket-label-column{display:grid;gap:20px;justify-items:center;padding:32px;border-radius:24px;background:var(--ui-surface)}
 .ticket-label{width:min(100%,420px);background:#fff;border-radius:6px;box-shadow:0 1px 2px rgb(0 0 0 / 8%),0 18px 40px rgb(0 0 0 / 14%);overflow:hidden}
 .ticket-label svg{display:block;width:100%;height:100%}
 .ticket-tools{width:min(100%,420px);display:grid;gap:var(--ui-space-control)}
@@ -129,3 +129,34 @@
 .profile-tabs .ui-tab-content{min-width:0}
 .profile-settings-signout{display:grid;gap:var(--ui-space-control);justify-items:start;border-top:1px solid var(--ui-border);padding-top:var(--ui-space-card)}
 .public-site .public-main .ticket-heading .ticket-email-status{font-size:13px;margin-block-start:10px;color:var(--ui-muted)}
+
+/* Ticket header chips: episode and ticket type, in place of the small eyebrow text. */
+.ticket-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.wui:has(> .public-site) .public-site .ticket-chip{display:inline-flex;align-items:center;min-height:30px;padding:4px 12px;border-radius:999px;font-family:var(--font-public-body);font-size:13px;font-weight:600!important;line-height:1}
+.ticket-chip[data-tone=episode]{background:color-mix(in srgb,var(--ui-accent) 16%,transparent);color:var(--ui-text)}
+.ticket-chip[data-tone=in-person]{background:var(--ui-success-bg);color:var(--ui-success)}
+.ticket-chip[data-tone=online]{background:color-mix(in srgb,var(--verified-blue,#48acf2) 18%,transparent);color:var(--ui-text)}
+
+/* Ticket edit dialog. */
+.ticket-edit{display:grid;gap:var(--ui-space-card)}
+.ticket-edit-attendance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border:0;margin:0;padding:0}
+.ticket-edit-attendance legend{font-weight:600;margin-bottom:8px;padding:0}
+.ticket-edit-attendance button{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;min-height:64px;padding:10px 12px;border:0;border-radius:12px;background:var(--ui-subtle);color:var(--ui-text);text-align:left;cursor:pointer}
+.ticket-edit-attendance button span{display:grid;gap:2px}.ticket-edit-attendance button small{font-size:12px;opacity:.8}
+.ticket-edit-attendance button[aria-pressed=true]{background:var(--ui-action);color:var(--ui-on-action)}
+.ticket-edit-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-control)}
+.ticket-edit-actions{display:flex;justify-content:flex-end;gap:8px}
+@media(max-width:600px){.ticket-edit-attendance,.ticket-edit-row{grid-template-columns:1fr}}
+
+/* Label sits directly on the page (no panel); its three actions share one row. */
+.ticket-layout .ticket-label-column{background:transparent;padding:0;border-radius:0;justify-items:start}
+.ticket-tools .ticket-actions{flex-wrap:nowrap;gap:4px}
+.public-site .ticket-tools .ticket-actions .ui-button{padding-inline:14px}
+@media(max-width:380px){.ticket-tools .ticket-actions{flex-wrap:wrap}}
+
+/* Edit details sits beside the ticket title. */
+.ticket-title-row{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px}
+.ticket-title-row>.ui-button{flex-shrink:0}
+.ticket-page .ticket-heading{max-width:none}
+.ticket-title-row{justify-content:space-between}
+.public-site .public-main .ticket-heading>p{max-width:60ch}
