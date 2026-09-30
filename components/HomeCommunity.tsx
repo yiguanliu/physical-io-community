@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { MemberLoginModal } from '@/components/members/MemberLoginLink';
 import RobotExperience from "./RobotExperience";
 import PublicHeader from "./public/PublicHeader";
-import TypographySettings from "./public/TypographySettings";
 import { usePublicMotion } from "./public/usePublicMotion";
 import { ThemeProvider, defaultTheme } from "@/workspace-ui/src";
 import "@/workspace-ui/src/styles.css";
@@ -26,4 +25,4 @@ export default function HomeCommunity() {
   return()=>clearTimeout(fallback);
  },[]);
  useEffect(()=>{if(!leaving)return;const timer=setTimeout(()=>setLoading(false),450);return()=>clearTimeout(timer);},[leaving]);
- return <div className={styles.page} data-mode={dark?"dark":"light"}>{loading&&<div className={styles.loadingScreen} data-leaving={leaving} role="status" aria-label="Loading Physical I/O"><div className={styles.loadingMark} onAnimationEnd={()=>setLogoShown(true)}><LogoMark/></div></div>}<ThemeProvider theme={{...defaultTheme,mode:dark?"dark":"light"}}><a className={styles["skip"]} href="#main">Skip to content</a><MemberLoginModal/><div className="public-settings-dock"><TypographySettings dark={dark} onToggleTheme={toggleTheme}/></div><div className={styles.desktopHeader}><PublicHeader/></div><main id="main" ref={motionRoot} tabIndex={-1}><RobotExperience dark={dark} onReady={onReady} introEnabled={!loading}/></main></ThemeProvider></div>; }
+ return <div className={styles.page} data-mode={dark?"dark":"light"}>{loading&&<div className={styles.loadingScreen} data-leaving={leaving} role="status" aria-label="Loading Physical I/O"><div className={styles.loadingMark} onAnimationEnd={()=>setLogoShown(true)}><LogoMark/></div></div>}<ThemeProvider theme={{...defaultTheme,mode:dark?"dark":"light"}}><a className={styles["skip"]} href="#main">Skip to content</a><MemberLoginModal/><div className={styles.desktopHeader}><PublicHeader dark={dark} onToggleTheme={toggleTheme}/></div><main id="main" ref={motionRoot} tabIndex={-1}><RobotExperience dark={dark} onReady={onReady} introEnabled={!loading}/></main></ThemeProvider></div>; }

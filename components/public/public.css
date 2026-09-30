@@ -66,19 +66,6 @@
 .public-header .public-nav>a.public-login-pill:hover{background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
 .public-header .public-nav>a.public-login-pill[aria-current=page]::after{content:none}
 
-/* About and Events: round icon buttons beside the Login pill; the current page is filled. */
-.public-header .public-nav>a.public-nav-icon{width:44px;height:44px;min-height:44px;padding:0;justify-content:center;border-radius:50%;background:color-mix(in srgb,var(--ui-text) 8%,transparent);color:var(--ui-text);transition:background-color var(--ui-fast) var(--ui-ease),color var(--ui-fast) var(--ui-ease)}
-.public-header .public-nav>a.public-nav-icon:hover{background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
-.public-header .public-nav>a.public-nav-icon[aria-current=page]{background:var(--ui-text);color:var(--ui-bg)}
-.public-header .public-nav>a.public-nav-icon[aria-current=page]::after{content:none}
-.public-header .public-nav:has(.public-nav-icon){gap:8px}
-
-/* Settings: one floating button, bottom right, on desktop and mobile. Toasts sit above it. */
-.public-settings-dock{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));z-index:45}
-.public-settings-dock .public-settings-button.ui-icon-button{width:48px;height:48px;min-height:48px;max-height:48px;background:var(--ui-surface);color:var(--ui-text);box-shadow:0 4px 16px rgb(0 0 0 / 18%);border:0}
-.public-settings-dock .public-settings-button.ui-icon-button:hover{background:var(--ui-subtle)}
-.wui:has(.public-settings-dock) .ui-toast-viewport{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 60px)}
-
 /* One header everywhere: nav icons, Login and Join free form a single evenly spaced group,
    right-aligned; on narrow screens the group wraps below the logo, still right-aligned. */
 .public-header-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-inline-start:auto;min-width:0}
@@ -89,3 +76,14 @@
   .public-header .public-header-controls>.public-nav{order:0;width:auto}
   .public-header .public-header-actions>.ui-button{padding-inline:16px;font-size:14px}
 }
+
+/* Header menu (About, Events, theme, settings) behind one round button beside Login. */
+.public-header .public-menu-button.ui-icon-button{width:44px;height:44px;min-height:44px;max-height:44px;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--ui-text) 8%,transparent);color:var(--ui-text)}
+.public-header .public-menu-button.ui-icon-button:not(:disabled):hover,.public-header .public-menu-button.ui-icon-button[data-state=open]{background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
+.public-menu{display:grid;gap:var(--ui-space-control)}
+.public-menu nav{display:grid;gap:2px}
+.public-menu :is(nav a,.public-menu-item){display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--ui-text);font-size:14px;text-align:left;cursor:pointer}
+.public-menu :is(nav a,.public-menu-item):hover{background:var(--ui-subtle)}
+.public-menu nav a[aria-current=page]{background:var(--ui-subtle);font-weight:600}
+.public-menu .public-theme-row{padding:4px 4px 4px 12px;border-block:1px solid var(--ui-border);padding-block:10px;font-size:14px}
+.wui:has(> .public-site) .public-menu :is(nav a,.public-menu-item,.public-theme-row span){font-family:var(--font-public-body)}

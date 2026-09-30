@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Moon, Settings2, Sun } from 'lucide-react';
-import { Button, Dialog, IconButton, Select, ViewSwitch } from '@/workspace-ui/src';
+import { Moon, Sun } from 'lucide-react';
+import { Button, Dialog, Select, ViewSwitch } from '@/workspace-ui/src';
 
 const fonts = {
   manrope: '"Manrope", Arial, Helvetica, sans-serif',
@@ -27,8 +27,13 @@ function apply(value: Preferences) {
   document.documentElement.style.setProperty('--font-public-body-weight', value.body === 'dot' ? '600' : '400');
   document.documentElement.style.setProperty('--font-public-heading-weight', value.headings === 'rokkitt' ? '400' : '600');
 }
-export default function TypographySettings({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () => void }) {
-  const [open, setOpen] = useState(false);
+/** Day/night switch shared by the site menu and the settings dialog. */
+export function ThemeSwitch({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () => void }) {
+  return <div className="public-theme-row"><span>Theme</span><ViewSwitch label="Theme" value={dark ? 'dark' : 'light'} onValueChange={mode => { if ((mode === 'dark') !== dark) onToggleTheme(); }} items={[{ value: 'light', label: 'Day', icon: <Sun size={17} aria-hidden /> }, { value: 'dark', label: 'Night', icon: <Moon size={17} aria-hidden /> }]} /></div>;
+}
+
+/** Theme and font settings. Always mounted so saved fonts apply on every page. */
+export default function TypographySettings({ dark, onToggleTheme, open, onOpenChange: setOpen }: { dark: boolean; onToggleTheme: () => void; open: boolean; onOpenChange: (open: boolean) => void }) {
   const [value, setValue] = useState<Preferences>(defaults);
   useEffect(() => {
     const sync = () => { const next = read(); setValue(next); apply(next); };
@@ -44,10 +49,9 @@ export default function TypographySettings({ dark, onToggleTheme }: { dark: bool
     window.dispatchEvent(new CustomEvent('ohi-typography-change', { detail: next }));
   }
   return <>
-    <IconButton className="public-settings-button" label="Settings" title="Settings" variant="ghost" onClick={() => setOpen(true)}><Settings2 size={18} /></IconButton>
     <Dialog open={open} onOpenChange={setOpen} title="Settings" description="Choose your theme and fonts. Changes appear immediately and are remembered on this device.">
       <div className="public-text-settings">
-        <div className="public-theme-row"><span id="public-theme-label">Theme</span><ViewSwitch label="Theme" value={dark ? 'dark' : 'light'} onValueChange={mode => { if ((mode === 'dark') !== dark) onToggleTheme(); }} items={[{ value: 'light', label: 'Day', icon: <Sun size={17} aria-hidden /> }, { value: 'dark', label: 'Night', icon: <Moon size={17} aria-hidden /> }]} /></div>
+        <ThemeSwitch dark={dark} onToggleTheme={onToggleTheme} />
         <div className="public-font-row">
           <Select label="Heading font" options={options} value={value.headings} onValueChange={font => { if (isFont(font)) change({ ...value, headings: font }); }} />
           <Select label="Body, buttons and labels" options={options} value={value.body} onValueChange={font => { if (isFont(font)) change({ ...value, body: font }); }} />
