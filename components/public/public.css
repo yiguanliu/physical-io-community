@@ -60,3 +60,8 @@
 /* Format cards: the action sits at the bottom of every card, with room above it. */
 .public-format>.ui-button{margin-top:auto}
 .public-site .public-format>p{margin-block-end:32px}
+
+/* Member login: a quiet rounded pill in the header navigation. */
+.public-header .public-nav>a.public-login-pill{min-height:44px;padding:10px 20px;border-radius:999px;background:color-mix(in srgb,var(--ui-text) 8%,transparent);color:var(--ui-text);transition:background-color var(--ui-fast) var(--ui-ease)}
+.public-header .public-nav>a.public-login-pill:hover{background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
+.public-header .public-nav>a.public-login-pill[aria-current=page]::after{content:none}
