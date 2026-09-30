@@ -17,6 +17,12 @@ const schema = z.discriminatedUnion('action', [
     category: z.union([z.enum(ATTENDEE_CATEGORIES), z.literal('')]).default(''), fullName: text.default(''), organisation: text.default(''), jobTitle: text.default(''),
     linkedin: z.string().trim().max(500).default('').refine(value => !value || Boolean(normalizeLinkedin(value)), 'Enter your LinkedIn profile link (linkedin.com/in/your-name).'),
   }).refine(value => value.attendance !== 'in_person' || (value.fullName && value.category), { message: 'Add your name and choose what best describes you.' }),
+  // Ticket holders editing their ticket: identified by the RSVP cookie on this device, not by email.
+  z.object({
+    action: z.literal('update'), event: z.string().max(80), attendance: z.enum(ATTENDANCE),
+    category: z.union([z.enum(ATTENDEE_CATEGORIES), z.literal('')]).default(''), fullName: text.default(''), organisation: text.default(''), jobTitle: text.default(''),
+    linkedin: z.string().trim().max(500).default('').refine(value => !value || Boolean(normalizeLinkedin(value)), 'Enter your LinkedIn profile link (linkedin.com/in/your-name).'),
+  }).refine(value => value.attendance === 'not_going' || (value.fullName && value.category), { message: 'Add your name and choose what best describes you.' }),
 ]);
 
 export async function POST(request: Request) {
@@ -56,7 +62,14 @@ export async function POST(request: Request) {
         lumaUrl: episode.lumaUrl,
       });
     }
-    const result = await submitRsvp(db, { ...input, eventSlug: episode.slug, linkedin: normalizeLinkedin(input.linkedin) });
+    let email = input.action === 'submit' ? input.email : '';
+    if (input.action === 'update') {
+      const token = (await cookies()).get(ownerCookie(episode.slug))?.value ?? '';
+      const owned = /^[a-f0-9]{48}$/.test(token) ? await db.query('select email_normalized from public.event_registrations where event_slug=$1 and owner_token=$2', [episode.slug, token]) : null;
+      if (!owned?.rowCount) { await db.query('rollback'); return json({ error: 'Only the ticket holder can edit this ticket, on the device used to RSVP.' }, 403); }
+      email = owned.rows[0].email_normalized;
+    }
+    const result = await submitRsvp(db, { ...input, email, details: input.action === 'update', eventSlug: episode.slug, linkedin: normalizeLinkedin(input.linkedin) });
     await db.query('commit');
     (await cookies()).set(ownerCookie(episode.slug), result.ownerToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 120 });
     if (input.attendance === 'not_going') return json({ ok: true, redirectTo: episode.lumaUrl });
