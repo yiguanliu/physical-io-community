@@ -3,11 +3,11 @@ export const emailTheme = {
   font: '"Manrope", Arial, Helvetica, sans-serif',
   headingFont: '"Manrope", Arial, Helvetica, sans-serif',
   accent: "#000000",
-  link: "#111111",
-  ink: "#111111",
-  muted: "#555555",
-  line: "#dddddd",
-  canvas: "#ffffff",
+  link: "#ffffff",
+  ink: "#ffffff",
+  muted: "#ffffff",
+  line: "#444444",
+  canvas: "#000000",
 };
 
 export function escapeHtml(value: string) {
@@ -38,32 +38,34 @@ export function renderEmailHtml(input: {
     ? `<p style="margin:12px 0 0;font-size:13px;">You can <a href="${escapeHtml(input.unsubscribeUrl)}" style="color:${t.muted};text-decoration:underline;">unsubscribe from these emails</a> at any time.</p>` : "";
   return `<!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(input.previewText ?? "Physical I/O")}</title>
+<head><meta charset="utf-8"><meta name="color-scheme" content="dark"><meta name="supported-color-schemes" content="dark"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(input.previewText ?? "Physical I/O")}</title>
 <!--[if !mso]><!--><style>
-:root{color-scheme:light dark;supported-color-schemes:light dark;}
+:root{color-scheme:dark;supported-color-schemes:dark;}
+.email-canvas{background:#000000!important;color:#ffffff!important;}
+.email-content,.email-content *,.email-footer,.email-footer *{color:#ffffff!important;}
 @media (prefers-color-scheme: dark){
  .email-canvas{background:#000000!important;color:#ffffff!important;}
  .email-content,.email-content *{color:#ffffff!important;border-color:#444444!important;}
  .email-content code{background:#222222!important;}
- .email-footer,.email-footer *{color:#bdbdbd!important;}
+ .email-footer,.email-footer *{color:#ffffff!important;}
  .email-rule{border-color:#444444!important;}
 }
 [data-ogsc] .email-canvas{background:#000000!important;color:#ffffff!important;}
 [data-ogsc] .email-content,[data-ogsc] .email-content *{color:#ffffff!important;border-color:#444444!important;}
 [data-ogsc] .email-content code{background:#222222!important;}
-[data-ogsc] .email-footer,[data-ogsc] .email-footer *{color:#bdbdbd!important;}
+[data-ogsc] .email-footer,[data-ogsc] .email-footer *{color:#ffffff!important;}
 [data-ogsc] .email-rule{border-color:#444444!important;}
 @font-face{font-family:Manrope;font-style:normal;font-weight:200 800;font-display:swap;src:url('https://www.physical-io.com/fonts/manrope/Manrope-Variable.ttf') format('truetype');}</style><!--<![endif]-->
 </head>
-<body class="email-canvas" style="margin:0;padding:0;background:${t.canvas};font-family:${escapeHtml(t.font)};color:${t.ink};-webkit-text-size-adjust:100%;">
+<body bgcolor="#000000" class="email-canvas" style="margin:0;padding:0;background:${t.canvas};font-family:${escapeHtml(t.font)};color:${t.ink};-webkit-text-size-adjust:100%;">
 <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${escapeHtml(input.previewText ?? "")}</div>
-<table class="email-canvas" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${t.canvas};"><tr><td align="center" style="padding:24px 12px;">
+<table class="email-canvas" bgcolor="#000000" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${t.canvas};"><tr><td align="center" style="padding:24px 12px;">
 <!--[if mso]><table role="presentation" width="600"><tr><td><![endif]-->
-<table class="email-canvas" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:${t.canvas};">
-<tr><td style="padding:0;background:${t.accent};"><img src="https://www.physical-io.com/assets/email/physical-io-banner.png" width="600" alt="Physical I/O" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></td></tr>
-<tr><td class="email-content email-rule" style="color:${t.ink};padding:32px 24px 24px;border-top:1px solid ${t.line};font-family:${escapeHtml(t.font)};">${body}</td></tr>
+<table class="email-canvas" bgcolor="#000000" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:${t.canvas};">
+<tr><td style="padding:0;background:${t.accent};"><img src="https://www.physical-io.com/assets/email/physical-io-banner-top-black.png" width="600" alt="Physical I/O" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></td></tr>
+<tr><td bgcolor="#000000" class="email-content email-rule" style="background:${t.canvas};color:${t.ink};padding:32px 24px 24px;border-top:1px solid ${t.line};font-family:${escapeHtml(t.font)};">${body}</td></tr>
 <tr><td class="email-rule" style="background:#000000;padding:0;border-top:1px solid ${t.line};"><img src="https://www.physical-io.com/assets/email/physical-io-footer.png" width="600" alt="Love, Mind + Body. A community led by curiosity, design and engineering." style="display:block;width:100%;max-width:600px;height:auto;border:0;"></td></tr>
-<tr><td class="email-footer email-rule" align="center" style="text-align:center;padding:24px 24px 32px;border-top:1px solid ${t.line};font-family:${escapeHtml(t.font)};font-size:13px;line-height:1.6;color:${t.muted};">
+<tr><td bgcolor="#000000" class="email-footer email-rule" align="center" style="background:${t.canvas};text-align:center;padding:24px 24px 32px;border-top:1px solid ${t.line};font-family:${escapeHtml(t.font)};font-size:13px;line-height:1.6;color:${t.muted};">
 <p style="margin:0 0 16px;font-weight:400;color:${t.muted};">Physical I/O · London</p>
 ${unsubscribe}
 </td></tr>

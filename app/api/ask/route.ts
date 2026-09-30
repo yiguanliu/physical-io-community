@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { RESEND_CONFIGURATION_ERROR } from "@/lib/email/send";
+import { renderEmailHtml } from "@/lib/email/template";
 
 // Physical I/O team inboxes that receive "Ask Us Anything" submissions.
 // Kept server-side only so the addresses are never shipped to the browser.
@@ -50,15 +51,6 @@ function parseAsk(body: unknown): { data: ParsedAsk } | { error: string } {
   return { data: { name, email, category, message, company } };
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 export async function POST(request: Request) {
   let body: unknown;
 
@@ -104,22 +96,7 @@ export async function POST(request: Request) {
     message,
   ].join("\n");
 
-  const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #0a0a0a; line-height: 1.6;">
-      <p style="font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #ee4b1a; margin: 0 0 16px; font-weight: 600;">
-        Ask Us Anything
-      </p>
-      <table style="border-collapse: collapse; margin: 0 0 20px;">
-        <tr><td style="padding: 4px 16px 4px 0; color: rgba(0,0,0,0.55);">Name</td><td style="padding: 4px 0;"><strong>${escapeHtml(name)}</strong></td></tr>
-        <tr><td style="padding: 4px 16px 4px 0; color: rgba(0,0,0,0.55);">Email</td><td style="padding: 4px 0;"><a href="mailto:${escapeHtml(email)}" style="color: #0a0a0a;">${escapeHtml(email)}</a></td></tr>
-        <tr><td style="padding: 4px 16px 4px 0; color: rgba(0,0,0,0.55);">Category</td><td style="padding: 4px 0;">${escapeHtml(category)}</td></tr>
-      </table>
-      <div style="border-top: 1px solid rgba(0,0,0,0.12); padding-top: 20px;">
-        <p style="color: rgba(0,0,0,0.55); margin: 0 0 8px; font-size: 14px;">Message</p>
-        <p style="white-space: pre-wrap; margin: 0;">${escapeHtml(message)}</p>
-      </div>
-    </div>
-  `;
+  const html = renderEmailHtml({ previewText: subject, body: text });
 
   try {
     // Call the Resend REST API directly (no SDK dependency needed).
