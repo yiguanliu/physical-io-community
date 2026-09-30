@@ -14,6 +14,12 @@ describe('Luma guest import', () => {
     expect(errors).toEqual([]);
     expect(guests[0]).toMatchObject({ guestId: 'gst-1', email: 'ada@example.com', fullName: 'Ada Lovelace', status: 'approved', organisation: 'Analytical Engines, Ltd', jobTitle: 'Robotics Engineer', linkedin: 'https://linkedin.com/in/ada', motivation: 'Curious about "bodies"' });
   });
+  it('reads the LinkedIn question, not Luma tracking columns (real export header)', () => {
+    const header = 'guest_id,name,first_name,last_name,email,phone_number,created_at,approval_status,checked_in_at,utm_source,utm_medium,utm_campaign,utm_term,utm_content,google_click_id,meta_click_id,x_click_id,linkedin_click_id,tiktok_click_id,reddit_click_id,yandex_click_id,referrer,referred_by,qr_code_url,amount,amount_tax,amount_discount,currency,coupon_code,eth_address,solana_address,survey_response_rating,survey_response_feedback,ticket_type_id,ticket_name,What organisation are you affiliated with?,What is your job title?,What is your LinkedIn profile?,What makes you want to join the event?';
+    const row = 'gst-1,Ada Lovelace,Ada,Lovelace,ada@example.com,,2026-09-20T10:00:00.000Z,approved,,,,,,,,,,,,,,London,,https://luma.com/check-in/x,$0.00,$0.00,$0.00,usd,,,,,,ttype-1,Members,Analytical Engines,Robotics Engineer,https://www.linkedin.com/in/ada-lovelace,Curious';
+    const { guests } = parseLumaCsv(`${header}\n${row}`);
+    expect(guests[0]).toMatchObject({ linkedin: 'https://www.linkedin.com/in/ada-lovelace', organisation: 'Analytical Engines', jobTitle: 'Robotics Engineer', motivation: 'Curious' });
+  });
   it('skips invalid emails and duplicate rows', () => {
     const { guests, errors } = parseLumaCsv(`${LUMA_HEADER}\n1,A,,,a@example.com,,,,,,,,,,\n2,B,,,not-an-email,,,,,,,,,,\n3,A again,,,a@example.com,,,,,,,,,,`);
     expect(guests).toHaveLength(1);

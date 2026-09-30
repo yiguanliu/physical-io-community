@@ -42,6 +42,7 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
   const [seats, setSeats] = useState(initialSeats);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [openedLuma, setOpenedLuma] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { try { const saved = localStorage.getItem('ohi-appearance'); setDark(saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches); } catch {} }, []);
   useEffect(() => { heading.current?.focus(); }, [step, lookup]);
@@ -68,8 +69,7 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
     setBusy(true); setError('');
     try {
       const result = await post({ action: 'submit', event: episode.slug, email, attendance: choice, ...(choice === 'in_person' ? badge : {}) });
-      if (choice === 'not_going') window.location.assign(result.redirectTo);
-      else router.push(result.redirectTo);
+      router.push(result.redirectTo);
     } catch (e) {
       const failure = e as Error & { seatsFull?: boolean };
       if (failure.seatsFull) { setSeats(current => current ? { ...current, left: 0, full: true } : current); setAttendance('online'); setStep('attendance'); }
@@ -92,7 +92,12 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
       if (badge.linkedin.trim() && !normalizeLinkedin(badge.linkedin)) { setError('Enter your LinkedIn profile link (linkedin.com/in/your-name).'); return; }
       void submit('in_person'); return;
     }
-    void submit('not_going');
+  }
+  // Cancelling happens on Luma: open it in a new tab straight away and record the choice in the
+  // background, so a slow or failed request can never block the person from leaving.
+  function cancelOnLuma() {
+    setOpenedLuma(true);
+    void fetch('/api/rsvp', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'submit', event: episode.slug, email, attendance: 'not_going' }) }).catch(() => {});
   }
   function back() { setError(''); setStep(step === 'badge' || step === 'leaving' ? 'attendance' : step === 'attendance' ? 'found' : 'email'); if (step === 'found') setLookup(null); }
 
@@ -158,12 +163,14 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
         </>}
         {step === 'leaving' && <>
           <h1 ref={heading} tabIndex={-1}>Sorry to miss you.</h1>
-          <p>We’ll note that you can’t make it, then open Luma so you can cancel your registration and free your place for someone on the waitlist.</p>
+          <p>{openedLuma ? 'We’ve opened the event on Luma in a new tab. Choose “Can’t make it” there to cancel and free your place for someone on the waitlist.' : 'Cancel your registration on Luma to free your place for someone on the waitlist. It opens in a new tab.'}</p>
         </>}
         {error && <p role="alert" className={styles.error}>{error}</p>}
         <footer className={styles.actions}>
           {step !== 'email' && <Button variant="ghost" disabled={busy} onClick={back}><ArrowLeft size={18} />Back</Button>}
-          <Button variant="primary" type="submit" busy={busy}>{step === 'email' ? 'Find my registration' : step === 'badge' ? 'Get my ticket' : step === 'leaving' ? 'Cancel on Luma' : step === 'attendance' && attendance === 'online' ? 'Get my online ticket' : 'Continue'}{step === 'leaving' ? <ArrowUpRight size={18} /> : <ArrowRight size={18} />}</Button>
+          {step === 'leaving'
+            ? <a className="ui-button ui-button-primary" href={episode.lumaUrl} target="_blank" rel="noopener noreferrer" onClick={cancelOnLuma}>{openedLuma ? 'Open Luma again' : 'Cancel on Luma'}<ArrowUpRight size={18} /></a>
+            : <Button variant="primary" type="submit" busy={busy}>{step === 'email' ? 'Find my registration' : step === 'badge' ? 'Get my ticket' : step === 'attendance' && attendance === 'online' ? 'Get my online ticket' : 'Continue'}<ArrowRight size={18} /></Button>}
         </footer>
       </form>}
     </section>
