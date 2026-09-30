@@ -1,0 +1,120 @@
+/* Episodes, tickets and member profiles: public compositions on shared --ui-* tokens. */
+
+/* Episode detail */
+.episode-page{padding-block:48px 0}
+.episode-hero{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:48px;align-items:center;margin-bottom:88px}
+.episode-hero-cover{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:24px;display:block}
+.episode-hero-copy h1{font-size:clamp(44px,6vw,88px);line-height:1;letter-spacing:-.05em}
+.public-site .public-main .episode-hero-copy .episode-question{font-size:20px;line-height:1.4;color:var(--ui-muted);margin-block-start:20px;max-width:30ch}
+.episode-facts{display:grid;gap:0;margin-top:28px;width:100%}
+.episode-facts>div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding-block:14px;border-top:1px solid var(--ui-border)}
+.episode-facts dt{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ui-muted);align-self:start;padding-top:2px}
+.episode-facts dd{font-size:15px;margin:0;overflow-wrap:anywhere}.episode-facts dd span{display:block;color:var(--ui-muted);font-size:13px;margin-top:2px}
+.episode-about{max-width:720px}.public-site .public-main .episode-about>p{font-size:17px;color:var(--ui-muted);margin-block-start:16px}.public-site .public-main .episode-about>header+p{margin-block-start:0}
+.episode-schedule{list-style:none;border-bottom:1px solid var(--ui-border);max-width:880px}
+.episode-schedule li{display:grid;grid-template-columns:120px 1fr;gap:24px;padding-block:18px;border-top:1px solid var(--ui-border);font-size:17px}
+.episode-schedule time{font-variant-numeric:tabular-nums;color:var(--ui-muted)}
+.episode-notes{list-style:none;margin-top:24px;display:grid;gap:8px;max-width:880px}.episode-notes li{font-size:14px;color:var(--ui-muted)}
+.episode-luma-note{font-size:12px;color:var(--ui-muted);margin:-40px 0 72px}.episode-luma-note a{display:inline-flex;align-items:center;gap:4px;color:var(--ui-text);text-decoration:underline;text-underline-offset:3px;margin-right:8px}
+
+/* Episode shelves (Netflix-style rows) */
+.episode-feature{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;border-radius:24px;overflow:hidden;background:var(--ui-surface);margin-bottom:56px}
+.episode-feature img{width:100%;height:100%;min-height:320px;object-fit:cover;display:block}
+.episode-feature-copy{padding:40px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.episode-feature-copy h2{font-size:clamp(34px,4vw,56px);line-height:1.02;letter-spacing:-.05em}
+.public-site .public-main .episode-feature-copy>p{color:var(--ui-muted);margin-block-start:16px;max-width:44ch}
+.episode-feature-meta{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--ui-muted);margin-top:20px}
+.episode-shelf{margin-bottom:56px}
+.episode-shelf>header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px}
+.episode-shelf h2{font-size:22px;letter-spacing:-.03em}
+.episode-shelf>header span{font-size:13px;color:var(--ui-muted)}
+.episode-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,calc((100% - 48px)/3.4));gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:12px;overscroll-behavior-x:contain;scrollbar-width:thin}
+.episode-tile{scroll-snap-align:start;display:grid;gap:10px;color:var(--ui-text);border-radius:16px;outline-offset:4px}
+.episode-tile-art{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;background:var(--ui-subtle)}
+.episode-tile-art img{width:100%;height:100%;object-fit:cover;display:block;transition:transform var(--ui-normal) var(--ui-ease)}
+.episode-tile:hover .episode-tile-art img,.episode-tile:focus-visible .episode-tile-art img{transform:scale(1.035)}
+.episode-tile-status{justify-self:start}
+.episode-tile h3{font-size:17px;line-height:1.25;letter-spacing:-.02em}
+.episode-tile p{font-size:13px;color:var(--ui-muted)}
+.episode-tile-label{display:block;font-size:12px;color:var(--ui-muted);letter-spacing:.04em;margin-bottom:2px}
+.public-site .public-main .episode-tile h3+p{margin-block-start:0}
+.episode-tile-placeholder{display:grid;place-items:center;height:100%;color:var(--ui-muted);font-size:12px;border:1px dashed var(--ui-control);border-radius:16px}
+
+/* Ticket */
+.ticket-page{padding-block:48px 88px}
+.ticket-heading{max-width:720px;margin-bottom:32px}.ticket-heading h1{font-size:clamp(34px,4.4vw,56px);line-height:1.05}
+.public-site .public-main .ticket-heading>p:last-child{color:var(--ui-muted);margin-block-start:16px}
+.ticket-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
+.ticket-label-column{display:grid;gap:20px;justify-items:center;padding:32px;border-radius:24px;background:var(--ui-subtle)}
+.ticket-label{width:min(100%,420px);background:#fff;border-radius:6px;box-shadow:0 1px 2px rgb(0 0 0 / 8%),0 18px 40px rgb(0 0 0 / 14%);overflow:hidden}
+.ticket-label svg{display:block;width:100%;height:100%}
+.ticket-tools{width:min(100%,420px);display:grid;gap:var(--ui-space-control)}
+.ticket-actions{display:flex;flex-wrap:wrap;gap:8px}
+.ticket-hint{font-size:12px;color:var(--ui-muted);line-height:1.6}
+.ticket-side{display:grid;gap:12px}
+.public-site .ticket-card{gap:0}.ticket-card>h2{font-size:28px;line-height:1.15}.public-site .public-main .ticket-card>h2+p{margin-block-start:8px}
+.ticket-card>svg{margin-bottom:16px}.ticket-card>.ui-button{margin-top:20px}.ticket-card .public-actions{margin-top:20px}
+.ticket-cover{width:96px;height:96px;border-radius:14px;object-fit:cover;margin-bottom:20px}
+.ticket-print{display:none}
+
+@media print{
+  html,body{background:#fff!important;margin:0!important}
+  .ui-skip,.public-header,.public-footer,.ui-toast-viewport,.ticket-page>:not(.ticket-print){display:none!important}
+  .public-site,.public-main,.ticket-page{padding:0!important;margin:0!important;max-width:none!important;min-height:0!important;background:#fff!important}
+  .ticket-print{display:block;break-inside:avoid;page-break-after:avoid}
+  .ticket-print svg{display:block}
+}
+
+/* Member profile */
+.profile-page{max-width:935px;margin-inline:auto;padding-block:48px 88px}
+.profile-header{display:grid;grid-template-columns:160px minmax(0,1fr);gap:40px;align-items:center;padding-bottom:40px;border-bottom:1px solid var(--ui-border)}
+.profile-avatar{width:160px;height:160px;border-radius:50%;display:grid;place-items:center;background:var(--ui-text);color:var(--ui-bg);font-size:52px;font-weight:600;letter-spacing:-.04em}
+.profile-title-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.profile-title-row h1{font-size:clamp(26px,3vw,34px);line-height:1.15}
+.profile-stats{display:flex;flex-wrap:wrap;gap:8px 32px;list-style:none;margin-top:20px;font-size:15px}
+.profile-stats strong{font-weight:700;margin-right:6px}
+.profile-role{font-weight:600;margin-top:20px;font-size:15px}
+.public-site .public-main .profile-bio{margin-block-start:6px;font-size:15px;color:var(--ui-muted);white-space:pre-line;max-width:60ch;overflow-wrap:anywhere}
+.profile-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.profile-page .profile-grid-heading{display:flex;justify-content:center;gap:8px;align-items:center;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:16px 0;border-top:1px solid var(--ui-text);margin-top:-1px;width:fit-content;margin-inline:auto}
+.profile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.profile-grid a{position:relative;display:block;aspect-ratio:1;overflow:hidden;background:var(--ui-subtle);color:#fff}
+.profile-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-grid-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;gap:2px;background:linear-gradient(to top,rgb(0 0 0 / 72%),transparent 60%);opacity:0;transition:opacity var(--ui-fast) var(--ui-ease)}
+.profile-grid a:hover .profile-grid-overlay,.profile-grid a:focus-visible .profile-grid-overlay{opacity:1}
+.profile-grid-overlay strong{font-size:17px;letter-spacing:-.02em}.profile-grid-overlay span{font-size:12px}
+.profile-grid-tag{position:absolute;top:10px;right:10px;font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:999px;background:#000;color:#fff}
+.profile-empty{padding:48px 0;text-align:center;color:var(--ui-muted);font-size:14px}
+
+@media(max-width:900px){
+  .episode-hero,.episode-feature,.ticket-layout{grid-template-columns:1fr}
+  .episode-hero{gap:28px;margin-bottom:56px}.episode-hero-cover{max-width:520px}
+  .episode-feature img{min-height:0;aspect-ratio:1}
+  .episode-row{grid-auto-columns:minmax(200px,42%)}
+}
+@media(max-width:600px){
+  .episode-page,.ticket-page,.profile-page{padding-block:24px 56px}
+  .episode-facts>div{grid-template-columns:96px minmax(0,1fr);gap:12px}
+  .episode-schedule li{grid-template-columns:64px 1fr;gap:12px;font-size:15px}
+  .episode-feature-copy{padding:24px}
+  .episode-row{grid-auto-columns:72%}
+  .episode-luma-note{margin:-24px 0 48px}
+  .ticket-label-column{padding:16px;border-radius:20px}
+  .profile-header{grid-template-columns:88px minmax(0,1fr);gap:20px;align-items:start;padding-bottom:24px}
+  .profile-avatar{width:88px;height:88px;font-size:30px}
+  .profile-stats{gap:6px 20px;margin-top:12px;font-size:14px}
+  .profile-grid{gap:2px}.profile-grid-overlay{opacity:1;padding:10px}.profile-grid-overlay strong{font-size:13px}.profile-grid-tag{top:6px;right:6px}
+}
+@media(prefers-reduced-motion:reduce){.episode-tile-art img,.profile-grid-overlay{transition:none}}
+
+/* Reading text follows the visitor's body-font preference, like other public copy (globals.css). */
+.wui:has(> .public-site) .public-site :is(.episode-schedule li,.episode-notes li,.episode-feature-meta,.episode-shelf>header span,.episode-tile-label,.profile-stats li,.profile-role,.profile-grid-overlay,.profile-grid-heading,.profile-empty),
+.wui:has(> .public-site) .public-site :is(.episode-schedule li,.episode-notes li,.episode-feature-meta,.episode-shelf>header span,.profile-stats li,.profile-grid-overlay) :where(span,strong,time){
+  font-family:var(--font-public-body);font-weight:var(--font-public-body-weight)!important;font-size-adjust:none;letter-spacing:normal;
+}
+.wui:has(> .public-site) .public-site .profile-stats strong{font-weight:700!important}
+
+/* Member photos on public profiles. */
+.profile-avatar{overflow:hidden}.profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-page .profile-name{display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px 10px}
+.profile-page>.ui-alert{margin-bottom:24px}

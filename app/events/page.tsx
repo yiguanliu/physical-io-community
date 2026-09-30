@@ -6,13 +6,26 @@ import LumaCalendar from '@/components/public/LumaCalendar';
 import { Hero, ActionLink, SectionHeading, ClosingNote } from '@/components/public/Sections';
 import { Card } from '@/workspace-ui/src';
 import { EVENT_FORMATS, LUMA_URL } from '@/lib/site';
+import { EpisodeFeature, EpisodeShelf } from '@/components/events/EpisodeShelf';
+import { EPISODES, isUpcoming } from '@/lib/events/catalog';
+import { publicSeats } from '@/lib/rsvp/service';
+import '@/components/events/events.css';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Events | Physical I/O', description: 'Free community gatherings for curious minds. Speaker nights, hackathons and robotics workshops from Physical I/O.', alternates: { canonical: '/events' }, openGraph: { description: 'Free community gatherings for curious minds. Speaker nights, hackathons and robotics workshops from Physical I/O.', title: 'Meet. Share. Build. | Physical I/O', url: '/events' } };
 
-export default function EventsPage() {
+export default async function EventsPage() {
+  const now = Date.now();
+  const upcoming = EPISODES.filter(episode => isUpcoming(episode, now)).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  const season = [...EPISODES].sort((a, b) => a.number.localeCompare(b.number));
+  const next = upcoming[0];
+  const seats = next?.rsvp ? await publicSeats(next.slug) : null;
   return <PublicShell>
-    <Hero title={<>Good people.<br />New possibilities.</>} actions={<><ActionLink href="/join" primary>Join free</ActionLink><ActionLink href="#upcoming">Upcoming events</ActionLink></>}>Free gatherings for people curious about physical intelligence. Come for a talk, meet a collaborator, or make your first robot.</Hero>
+    <Hero title={<>Good people.<br />New possibilities.</>} actions={<><ActionLink href="/join" primary>Join free</ActionLink><ActionLink href="#episodes">Browse episodes</ActionLink></>}>Free gatherings for people curious about physical intelligence. Come for a talk, meet a collaborator, or make your first robot.</Hero>
+    <div id="episodes">
+      {next && <EpisodeFeature episode={next} seats={seats} />}
+      <EpisodeShelf title="Season one" episodes={season} note={`${season.length} episodes · replays free for members`} />
+    </div>
     <ol className="public-steps"><li><span>01</span>Join the community free</li><li><span>02</span>Find a gathering that interests you</li><li><span>03</span>Register and come along</li></ol>
     <section className="public-section"><SectionHeading title="Ideas are better in good company." /><div className="public-tiers">{EVENT_FORMATS.map(format => <Card className="public-card public-format" key={format.name}><PixelArt kind={format.art} /><h3>{format.name}</h3><p>{format.description}</p><ActionLink href="/askusanything">Get involved</ActionLink></Card>)}</div><p className="public-footnote">These are our programme formats. Confirmed dates, session levels and equipment arrangements appear in each event listing.</p></section>
     <section className="public-section" id="upcoming"><SectionHeading title="See you at the next one." /><LumaCalendar /><div className="public-section-end"><a className="public-calendar-link" href={LUMA_URL} target="_blank" rel="noopener noreferrer">Full calendar on Luma <ArrowUpRight size={16} aria-hidden="true" /></a><p id="luma-privacy-note">Luma receives connection information and may use its own browser storage. Its registration and privacy settings apply.</p></div></section>

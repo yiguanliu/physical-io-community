@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import {eventCommands,type Episode} from '@/lib/events/model';
-export type Member = {id:string;name:string;email:string;role:string;city:string;joined:string;status:string;topics:string[];notes?:string;website?:string;linkedin?:string;emailStatus?:string;accountCreatedAt?:string|null;lastSignInAt?:string|null;emailConfirmedAt?:string|null;subscriptions?:{topic:string;status:string}[]};
+export type Member = {id:string;name:string;email:string;role:string;city:string;joined:string;status:string;topics:string[];notes?:string;website?:string;linkedin?:string;emailStatus?:string;accountCreatedAt?:string|null;lastSignInAt?:string|null;emailConfirmedAt?:string|null;subscriptions?:{topic:string;status:string}[];photoUrl?:string;communityAdmin?:boolean};
 export type Lead = {id:string;company:string;contact:string;email:string;role:string;stage:string;value:string;score:number;next:string;last:string;tone:string};
 export type Campaign = {id:string;name:string;type:string;audience:string;status:string;date:string;delivery:string;body:string};
 export type CommunityEvent = Episode;
@@ -16,7 +16,7 @@ export const commandSchema=z.discriminatedUnion('action',[
  z.object({action:z.literal('member.subscription'),id,topic:z.enum(['newsletter','events','announcements']),status:z.enum(['subscribed','unsubscribed','consent_unknown']),evidence:z.string().trim().min(5).max(1000)}),
  z.object({action:z.literal('member.activate'),ids:z.array(id).min(1).max(1000)}),
  z.object({action:z.literal('lead.save'),id:id.optional(),company:text,contact:text,email:z.union([z.literal(''),z.string().trim().email().max(254)]),role:optionalText,stage:z.enum(['Research','Contacted','Meeting','Proposal','Agreement','Closed']),value:z.string().regex(/^\d+$/, 'Enter a whole-pound GBP amount, for example 12000.').refine(s=>Number(s)<=100000000,'Amount is too large.'),next:z.string().trim().max(2000)}),
- z.object({action:z.literal('campaign.save'),id:id.optional(),name:text,body:z.string().trim().min(1).max(50000),memberIds:z.array(id).max(1000).optional(),audience:z.union([z.literal('Selected members'),z.literal('All opted-in'),z.literal('Email list'),z.literal('Saved audience'),z.string().uuid()])}),
+ z.object({action:z.literal('campaign.save'),id:id.optional(),name:text,body:z.string().trim().min(1).max(50000),memberIds:z.array(id).max(1000).optional(),guestIds:z.array(id).max(2000).optional(),event:z.string().regex(/^[a-z0-9-]{1,80}$/).optional(),audience:z.union([z.literal('Selected members'),z.literal('Event guests'),z.literal('All opted-in'),z.literal('Email list'),z.literal('Saved audience'),z.string().uuid()])}),
  z.object({action:z.literal('event.save'),id:id.optional(),name:text,date:z.string().datetime({offset:true}),location:text,description:z.string().trim().max(10000)})
 ]);
 export const requestSchema=z.object({requestId:z.string().uuid(),command:commandSchema});

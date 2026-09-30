@@ -1,0 +1,5 @@
+/* Certified community admin seal. The blue is the supplied seal colour, used only for this mark. */
+:root{--verified-blue:#48acf2}
+.community-admin-mark{display:inline-flex;align-items:center;gap:8px}
+.verified-seal{flex:none;display:block}
+.wui:has(> .public-site) .public-site .community-admin-badge,.community-admin-badge{font-family:var(--font-public-body);font-weight:600!important;font-size:12px;letter-spacing:.01em;line-height:1;padding:6px 10px;border-radius:999px;background:var(--ui-subtle);color:var(--ui-text);white-space:nowrap}

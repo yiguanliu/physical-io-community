@@ -38,6 +38,11 @@ Admin users:
 | `/` | One-screen home stage with brand, positioning, focus areas, audience, and join CTA. | Indexed |
 | `/about` | Long-form explanation of why the community exists, how it operates, who it serves, roadmap, FAQ, and final CTA. | Indexed |
 | `/network` | Visual prototype of the member network. | Noindex |
+| `/events` | Featured next episode, a Netflix-style season row and the Luma calendar. | Indexed |
+| `/[episode-slug]` | Episode page from `lib/events/catalog.ts` (e.g. `/event-02-robotics`). | Indexed |
+| `/[episode-slug]/rsvp` | Typeform-style RSVP for guests on the imported Luma list: in person, online or not going. | Noindex |
+| `/[episode-slug]/ticket/[name-xxxx]` | Shareable ticket and printable thermal label. The random suffix prevents guessing tickets from names. | Noindex |
+| `/members/[slug]` | Opt-in public member profile; shown only after the member verifies their email. | Indexed |
 | `/unsubscribe` | Email unsubscribe flow. | Public utility |
 | `/admin/login` | Admin sign-in and access request. | Noindex |
 | `/admin` | Workspace overview with setup warnings, metrics, sponsor pipeline, campaign activity, and audit log. | Protected |
@@ -427,3 +432,21 @@ Latest email direction: all live text uses Manrope with Arial/Helvetica sans-ser
 All shared email templates now use a white canvas with near-black live text, neutral gray supporting text and underlined links. Supported dark-mode clients receive a black canvas with white live text and lighter gray footer text. This supersedes the orange email canvas. Use inline light-mode fallback colors, color-scheme metadata, prefers-color-scheme overrides and Outlook data-ogsc overrides; never depend on CSS variables or JavaScript in delivered emails. Email clients may apply their own inversion when these rules are unsupported.
 
 The exact supplied Branding/Email/Banner - Top.png and Banner - Bottom.png replace the public email banner assets. Preserve their black backgrounds and white artwork in both themes; do not invert or recolor the images. The bottom banner reads “Love, Mind + Body.” Account templates, Markdown newsletters and transactional text share the wrapper. Preserve authentication placeholders and marketing unsubscribe links. Publish assets and apply regenerated hosted authentication templates before release.
+
+## Episode RSVP, tickets and profiles (30 September 2026)
+
+- Public episode facts live in `lib/events/catalog.ts`. Online joining links stay server-side (`MEET_URL_<EPISODE_SLUG>` overrides the default) and only render on online tickets.
+- Guests come from the Luma guest CSV, imported on the admin episode dashboard. A Luma registration is not marketing consent, so guests are never added to Members or email lists. Only `approved` guests can RSVP.
+- In-person capacity is set per episode by admins. The RSVP locks the `event_settings` row while claiming a seat. When the event is full, the in-person option is disabled with a clear "join online" message. Existing tickets are never revoked.
+- Thermal labels are one pure black-and-white SVG in millimetres, used for screen, `@page` printing (100×150, 100×180 or 62×100 mm, zero margin) and 12 px/mm PNG export. The QR code links to the guest's LinkedIn; the Code 128 barcode encodes the check-in code. The label uses Helvetica, like the reference pack labels, with inline `!important` so public typography rules can't restyle it.
+- Ticket pages and public profiles never read email addresses into the page. Owner-only actions (such as the join prefill) require the device's httpOnly RSVP cookie.
+- Event guest email reuses the campaign pipeline with an `eventGuests` audience. Member suppressions and topic opt-outs still apply. Non-members get an event-service footer in place of an unsubscribe link.
+
+## Member photos, admin onboarding and community admins (30 September 2026)
+
+- One photo per person: the member headshot is the public profile avatar and the admin avatar. `/join` includes an optional "Add a profile photo" step (required for admin onboarding) with headshot guidance, a circular preview and a 640 px square crop in the browser. Photos chosen before email verification wait in the browser and upload only after verification, so anonymous visitors can't place files in public storage.
+- Without an upload, people show `public/assets/default-headshot.svg` (a side-profile line head on a light backing, visible in both themes). Companies keep initials.
+- Administrators must be members. Admins without a member profile or photo see an onboarding banner linking to `/join?onboarding=admin` (the same form, tied to their account email) or to their members page.
+- Access management is for super admins only (founders + `ADMIN_ALLOWLIST`). Add admin searches existing members and invites members who have no account yet.
+- Super admins can certify an admin with a profile photo as a **Community admin**. Their public profile, the Members table and the Access list show the supplied blue verified seal (12 rounded lobes, `#48acf2`, white rounded check) and a "Community admin" text badge. Removing admin access removes the certification.
+- Selected choice buttons keep the filled action colour with white text on hover (darker action shade); unselected choices use the subtle surface.

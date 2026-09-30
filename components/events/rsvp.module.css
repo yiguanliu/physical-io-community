@@ -1,0 +1,15 @@
+/* RSVP extends the /join Typeform composition; only RSVP-specific pieces live here. */
+.event{font-size:12px;letter-spacing:.04em;color:var(--ui-muted);margin:0 0 6px}
+.seats{display:grid;gap:8px;font-size:14px}
+.seats>span{display:block;height:4px;border-radius:999px;background:linear-gradient(to right,var(--ui-action) 0 var(--seats-taken),var(--ui-bg) var(--seats-taken) 100%)}
+.seats[data-full]{color:var(--ui-text)}
+.choices button{min-height:72px}
+.choices button:disabled{opacity:1;color:var(--ui-muted);cursor:not-allowed;background:repeating-linear-gradient(135deg,var(--ui-bg) 0 8px,var(--ui-subtle) 8px 16px)}
+.choice{display:grid;gap:4px;min-width:0}
+.choice strong{font-weight:600;font-size:15px}
+.choice small{font-size:13px;font-weight:500;opacity:.8;line-height:1.45}
+.fields{display:grid;gap:var(--ui-space-card)}
+/* /join hides single-question labels; multi-field steps need persistent labels. */
+.fields :global(.ui-field)>label{position:static!important;width:auto!important;height:auto!important;clip:auto!important;overflow:visible!important;font-size:13px;color:var(--ui-muted)}
+.fields :global(.ui-field) input,.fields :global(.ui-select-trigger){font-size:16px!important;padding:14px 16px!important;min-height:52px}
+.fields :global(.ui-select-trigger){border:0;border-radius:20px;background:var(--ui-bg);font-weight:500}

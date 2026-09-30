@@ -266,30 +266,46 @@ export async function saveEventAction(formData: FormData) {
   revalidateAdmin();
 }
 
+// Access management is for super admins only. Actions return messages because
+// Next.js hides thrown error text from the browser in production.
+type AccessResult = { error?: string; notice?: string };
+async function accessAction(run: (admin: { id: string; name: string }) => Promise<string | void>): Promise<AccessResult> {
+  const { requireSuperAdmin } = await import("@/lib/auth/session");
+  let admin;
+  try { admin = await requireSuperAdmin(); } catch (e) { return { error: e instanceof Error ? e.message : "Only super admins can manage access." }; }
+  try { const notice = await run(admin); return notice ? { notice } : {}; }
+  catch (e) { return { error: e instanceof Error && e.message.length < 200 ? e.message : "Unable to update access. Please retry." }; }
+  finally { revalidatePath("/admin/access"); }
+}
+
 export async function approveAccessAction(formData: FormData) {
-  const admin = await requireAdmin();
-  const { setUserRole } = await import("@/lib/admin/access");
-  await setUserRole({ userId: text(formData, "userId"), role: "admin", actor: admin });
-  revalidatePath("/admin/access");
+  return accessAction(async (admin) => { const { setUserRole } = await import("@/lib/admin/access"); await setUserRole({ userId: text(formData, "userId"), role: "admin", actor: admin }); });
 }
 
 export async function declineAccessAction(formData: FormData) {
-  const admin = await requireAdmin();
-  const { setUserRole } = await import("@/lib/admin/access");
-  await setUserRole({ userId: text(formData, "userId"), role: "denied", actor: admin });
-  revalidatePath("/admin/access");
+  return accessAction(async (admin) => { const { setUserRole } = await import("@/lib/admin/access"); await setUserRole({ userId: text(formData, "userId"), role: "denied", actor: admin }); });
 }
 
-export async function changeAccessAction(formData:FormData){
- const admin=await requireAdmin();
- const {z}=await import('zod');
- const value=z.object({userId:z.string().uuid(),role:z.enum(['admin','pending','denied'])}).parse({userId:text(formData,'userId'),role:text(formData,'role')});
- const {setUserRole}=await import('@/lib/admin/access');
- await setUserRole({...value,actor:admin});revalidatePath('/admin/access');
+export async function changeAccessAction(formData: FormData) {
+  return accessAction(async (admin) => {
+    const { z } = await import("zod");
+    const value = z.object({ userId: z.string().uuid(), role: z.enum(["admin", "pending", "denied"]), certified: z.enum(["true", "false"]).optional() })
+      .parse({ userId: text(formData, "userId"), role: text(formData, "role"), certified: text(formData, "certified") || undefined });
+    const { setUserRole, setCommunityAdmin } = await import("@/lib/admin/access");
+    const { listAdminProfiles } = await import("@/lib/auth/profiles");
+    const current = (await listAdminProfiles()).find((user) => user.id === value.userId);
+    if (!current) throw new Error("User not found.");
+    if (current.role !== value.role) await setUserRole({ userId: value.userId, role: value.role, actor: admin });
+    if (value.role === "admin" && value.certified) await setCommunityAdmin({ userId: value.userId, certified: value.certified === "true", actor: admin });
+  });
 }
-export async function inviteAccessAction(formData:FormData){
- const admin=await requireAdmin();const {z}=await import('zod');
- const email=z.string().trim().email().max(254).parse(text(formData,'email')).toLowerCase();
- const {inviteAdministrator}=await import('@/lib/admin/access');
- try{await inviteAdministrator(email,admin);}finally{revalidatePath('/admin/access');}
+
+export async function inviteAccessAction(formData: FormData) {
+  return accessAction(async (admin) => {
+    const { z } = await import("zod");
+    const email = z.string().trim().email().max(254).parse(text(formData, "email")).toLowerCase();
+    const { grantAdminToMember } = await import("@/lib/admin/access");
+    const { invited } = await grantAdminToMember(email, admin);
+    return invited ? `Invitation sent to ${email}.` : `${email} now has administrator access.`;
+  });
 }
