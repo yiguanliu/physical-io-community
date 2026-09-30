@@ -1,8 +1,6 @@
 'use client';
 import { useActionState, useState } from 'react';
-import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
-import { Alert, Button, Card, Field, Switch, TextArea } from '@/workspace-ui/src';
+import { Alert, Button, Field, Switch, TextArea } from '@/workspace-ui/src';
 import { saveProfile, type ProfileState } from '@/app/members/actions';
 import type { OwnProfile } from '@/lib/members/profile';
 import HeadshotPicker, { uploadMemberPhoto } from './HeadshotPicker';
@@ -29,11 +27,8 @@ export default function ProfileSettings({ profile }: { profile: OwnProfile }) {
       setPhoto(null); setPhotoMessage({ tone: 'success', text: 'Your photo is removed.' });
     } catch (e) { setPhotoMessage({ tone: 'danger', text: (e as Error).message }); } finally { setPhotoBusy(false); }
   }
-  const slug = state.slug ?? profile.slug;
-  const live = (state.notice ? isPublic : profile.isPublic) && slug;
-  return <Card className="member-profile-settings">
+  return <div className="member-profile-settings">
     <form action={action} className="member-stack">
-      <div className="member-heading"><h2>Your public profile</h2>{live && <Link className="ui-button ui-button-ghost" href={`/members/${slug}`}>View profile <ArrowUpRight size={16} aria-hidden /></Link>}</div>
       <p className="member-note">Your profile shows your photo, name, job title, company, bio and the episodes you attend. Your email is never shown.</p>
       {profile.communityAdmin && <p className="member-note"><CommunityAdminMark size={18} /></p>}
       <HeadshotPicker name={profile.name} preview={photo} busy={photoBusy} onChange={changePhoto} onRemove={removePhoto} />
@@ -44,10 +39,11 @@ export default function ProfileSettings({ profile }: { profile: OwnProfile }) {
       </div>
       <TextArea label="Bio" name="bio" rows={3} maxLength={600} defaultValue={profile.bio} hint="Up to 600 characters." />
       <Switch label="Show my profile publicly" checked={isPublic} onCheckedChange={setIsPublic} />
+      <p className="member-note">{isPublic ? 'Anyone with the link can see your profile. Recordings and upcoming events stay members-only.' : 'Private: only you can see your profile.'}</p>
       {isPublic && <input type="hidden" name="public" value="on" />}
       {state.error && <Alert title="Profile not saved" tone="danger">{state.error}</Alert>}
       {state.notice && <Alert title="Saved" tone="success">{state.notice}</Alert>}
       <div className="member-actions"><Button type="submit" variant="primary" busy={pending}>Save profile</Button></div>
     </form>
-  </Card>;
+  </div>;
 }

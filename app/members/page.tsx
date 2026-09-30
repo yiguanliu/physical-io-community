@@ -1,15 +1,28 @@
 import type { Metadata } from 'next';
 import PublicShell from '@/components/public/PublicShell';
-import Library from '@/components/members/Library';
+import ProfileView from '@/components/members/ProfileView';
+import ProfileSettingsButton from '@/components/members/ProfileSettingsButton';
+import PendingPhotoUpload from '@/components/members/PendingPhotoUpload';
+import { MemberEvents, MemberRecordings } from '@/components/members/Library';
 import { requireMember } from '@/lib/auth/member';
 import { memberEpisodes } from '@/lib/member-content';
-import { getOwnProfile } from '@/lib/members/profile';
-import ProfileSettings from '@/components/members/ProfileSettings';
-import PendingPhotoUpload from '@/components/members/PendingPhotoUpload';
+import { getMemberProfile } from '@/lib/members/profile';
 import '@/components/members/members.css';
-export const metadata: Metadata = { title: 'Members | Physical I/O', robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: 'Your profile | Physical I/O', robots: { index: false, follow: false } };
+export const dynamic = 'force-dynamic';
+
+// Signing in lands members on their own profile: the same page the public sees,
+// plus settings, visibility and members-only tabs.
 export default async function MembersPage() {
   const member = await requireMember();
-  const profile = await getOwnProfile(member.email ?? '');
-  return <PublicShell member><Library episodes={memberEpisodes} profile={profile && <><PendingPhotoUpload /><ProfileSettings profile={profile} /></>} /></PublicShell>;
+  const profile = await getMemberProfile(member.email ?? '');
+  if (!profile) return null;
+  return <PublicShell member>
+    <PendingPhotoUpload />
+    <ProfileView profile={profile} owner={{
+      settings: <ProfileSettingsButton profile={{ slug: profile.slug, name: profile.name, jobTitle: profile.jobTitle, company: profile.company, bio: profile.bio, isPublic: profile.isPublic, photoUrl: profile.photoUrl, communityAdmin: profile.communityAdmin }} />,
+      recordings: <MemberRecordings episodes={memberEpisodes} />,
+      events: <MemberEvents />,
+    }} />
+  </PublicShell>;
 }

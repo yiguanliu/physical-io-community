@@ -118,3 +118,13 @@
 .profile-avatar{overflow:hidden}.profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .profile-page .profile-name{display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px 10px}
 .profile-page>.ui-alert{margin-bottom:24px}
+
+/* Owner view: settings icon, visibility and members-only tabs share the public profile layout. */
+.profile-page .profile-settings-button{width:40px;height:40px;min-height:40px;border-radius:50%}
+.public-site .public-main .profile-visibility{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-block-start:10px;font-size:13px;color:var(--ui-muted)}
+.profile-visibility a{color:var(--ui-text);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.profile-visibility-dot{width:8px;height:8px;border-radius:50%;background:var(--ui-control);flex:none}
+.profile-visibility[data-public] .profile-visibility-dot{background:var(--ui-success)}
+.profile-tabs .ui-tabs{justify-content:center;margin-bottom:24px}
+.profile-tabs .ui-tab-content{min-width:0}
+.profile-settings-signout{display:grid;gap:var(--ui-space-control);justify-items:start;border-top:1px solid var(--ui-border);padding-top:var(--ui-space-card)}
