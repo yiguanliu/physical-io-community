@@ -44,3 +44,7 @@
 /* The shared button hover swaps to a light surface; selected choices keep the filled action colours. */
 .choices button[aria-pressed=true]:not(:disabled):hover{background:var(--ui-action-hover);color:var(--ui-on-action)}
 .choices button[aria-pressed=false]:not(:disabled):hover{background:var(--ui-subtle);color:var(--ui-text)}
+
+/* Quiet secondary actions (e.g. Choose a headshot): no outline, soft tint on hover. */
+.page :global(.ui-button-secondary):not([aria-pressed]){background:transparent;border-color:transparent;box-shadow:none}
+.page :global(.ui-button-secondary):not([aria-pressed]):not(:disabled):hover{background:color-mix(in srgb,var(--ui-text) 8%,transparent)}

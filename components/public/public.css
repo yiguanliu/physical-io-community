@@ -43,3 +43,8 @@
 .wui[data-mode=light] .public-love-mind-body{filter:invert(1)}
 
 .public-format>p{margin-block-end:var(--ui-space-section)}
+
+/* Quiet secondary actions, as in the admin workspace: no outline at rest, a soft tint on hover.
+   Applies to overlays opened from public pages too. Choice buttons keep their own styling. */
+.wui:has(> .public-site) .ui-button-secondary:not([aria-pressed]){background:transparent;border-color:transparent;box-shadow:none}
+.wui:has(> .public-site) .ui-button-secondary:not([aria-pressed]):not(:disabled):hover{background:color-mix(in srgb,var(--ui-text) 8%,transparent)}
