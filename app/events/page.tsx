@@ -21,7 +21,7 @@ export default async function EventsPage() {
   const next = upcoming[0];
   const seats = next?.rsvp ? await publicSeats(next.slug) : null;
   return <PublicShell>
-    <Hero title={<>Good people.<br />New possibilities.</>} actions={<><ActionLink href="/join" primary>Join free</ActionLink><ActionLink href="#episodes">Browse episodes</ActionLink></>}>Free gatherings for people curious about physical intelligence. Come for a talk, meet a collaborator, or make your first robot.</Hero>
+    <Hero title={<>Community Events<br />for Curious People</>} actions={<><ActionLink href="/join" primary>Join free</ActionLink><ActionLink href="#episodes">Browse episodes</ActionLink></>}>Free gatherings for people curious about physical intelligence. Come for a talk, meet a collaborator, or make your first robot.</Hero>
     <div id="episodes">
       {next && <EpisodeFeature episode={next} seats={seats} />}
       <EpisodeShelf title="Season one" episodes={season} note={`${season.length} episodes · replays free for members`} />
