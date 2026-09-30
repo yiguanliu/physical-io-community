@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import PublicShell from "@/components/public/PublicShell";
-import PixelBackdrop from "@/components/public/PixelBackdrop";
 import "./ask.css";
 import AskForm from "@/components/AskForm";
 import { SITE_URL } from "@/lib/site";
@@ -31,7 +30,6 @@ const contactPageJsonLd = {
 export default function AskUsAnythingPage() {
   return (
     <PublicShell>
-      <PixelBackdrop />
       <div className="page-ask">
         <script
           type="application/ld+json"
