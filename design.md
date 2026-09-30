@@ -42,6 +42,7 @@ Admin users:
 | `/[episode-slug]` | Episode page from `lib/events/catalog.ts` (e.g. `/event-02-robotics`). | Indexed |
 | `/[episode-slug]/rsvp` | Typeform-style RSVP for guests on the imported Luma list: in person, online or not going. | Noindex |
 | `/[episode-slug]/ticket/[name-xxxx]` | Shareable ticket and printable thermal label. The random suffix prevents guessing tickets from names. | Noindex |
+| `/members` | Signed-in member's own profile: the public layout plus a settings icon (photo, details, public/private, sign out), a visibility indicator and members-only Recordings and Upcoming events tabs. | Noindex |
 | `/members/[slug]` | Opt-in public member profile; shown only after the member verifies their email. | Indexed |
 | `/unsubscribe` | Email unsubscribe flow. | Public utility |
 | `/admin/login` | Admin sign-in and access request. | Noindex |
@@ -450,3 +451,5 @@ The exact supplied Branding/Email/Banner - Top.png and Banner - Bottom.png repla
 - Access management is for super admins only (founders + `ADMIN_ALLOWLIST`). Add admin searches existing members and invites members who have no account yet.
 - Super admins can certify an admin with a profile photo as a **Community admin**. Their public profile, the Members table and the Access list show the supplied blue verified seal (12 rounded lobes, `#48acf2`, white rounded check) and a "Community admin" text badge. Removing admin access removes the certification.
 - Selected choice buttons keep the filled action colour with white text on hover (darker action shade); unselected choices use the subtle surface.
+
+- Signing in lands members on their own profile (`/members`). It uses the same `ProfileView` as the public page; the only differences are owner controls and members-only tabs. Profile settings open in a drawer from the settings icon beside the name.

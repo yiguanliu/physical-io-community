@@ -43,7 +43,7 @@
 .member-episode h3{font-size:18px}
 
 /* Member-owned public profile settings. */
-.member-profile-settings{padding:var(--ui-space-section)}
+.member-profile-settings{padding:0}
 .member-profile-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-control)}
-@media(max-width:600px){.member-profile-settings{padding:var(--ui-space-card)}.member-profile-fields{grid-template-columns:1fr}}
+@media(max-width:600px){.member-profile-fields{grid-template-columns:1fr}}
 
