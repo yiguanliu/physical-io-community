@@ -27,14 +27,17 @@ it("renders escaped underlined links", () => {
   expect(renderEmailLink("Unsafe", "javascript:alert(1)")).toBe("Unsafe");
 });
 
-it("adapts live text and backgrounds together while retaining email-client fallbacks", () => {
+it("keeps live text white and backgrounds black while retaining email-client fallbacks", () => {
   const html = renderEmailHtml({ body: "Welcome", unsubscribeUrl: "https://example.com/unsubscribe" });
-  expect(html).toContain('name="color-scheme" content="light dark"');
+  expect(html).toContain('name="color-scheme" content="dark"');
   expect(html).toContain('@media (prefers-color-scheme: dark)');
   expect(html).toContain('[data-ogsc] .email-content');
   expect(html).toContain('background:#000000!important;color:#ffffff!important');
-  expect(html).toContain('color:#111111;');
-  expect(html).toContain('color:#555555;');
+  expect(html).not.toContain('color:#111111;');
+  expect(html).toContain('bgcolor="#000000"');
+  expect(html).toContain('physical-io-banner-top-black.png');
+  expect(html).toContain('color:#ffffff;');
+  expect(html).not.toContain('background:#ffffff');
   expect(html).toContain('class="email-content email-rule"');
   expect(html).toContain('class="email-footer email-rule"');
   expect(html).toContain('unsubscribe from these emails');

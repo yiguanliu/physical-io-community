@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { authEmailTemplates } from './auth-templates';
 describe('account email templates',()=>{
  for(const template of authEmailTemplates) it(`${template.name} shares the newsletter style and generated file`,()=>{
-  expect(template.html).toContain('background:#ffffff');
+  expect(template.html).toContain('background:#000000');
   expect(template.html).toContain('Manrope');
-  expect(template.html).toContain('physical-io-banner.png');
+  expect(template.html).toContain('physical-io-banner-top-black.png');
   expect(template.html).toContain('physical-io-footer.png');
   expect(template.html).not.toContain('unsubscribe from');
   expect(readFileSync(`supabase/templates/${template.file??template.name}.html`,'utf8')).toBe(template.html+'\n');
