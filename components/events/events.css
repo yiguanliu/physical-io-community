@@ -147,3 +147,9 @@
 .ticket-edit-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-control)}
 .ticket-edit-actions{display:flex;justify-content:flex-end;gap:8px}
 @media(max-width:600px){.ticket-edit-attendance,.ticket-edit-row{grid-template-columns:1fr}}
+
+/* Label sits directly on the page (no panel); its three actions share one row. */
+.ticket-layout .ticket-label-column{background:transparent;padding:0;border-radius:0;justify-items:start}
+.ticket-tools .ticket-actions{flex-wrap:nowrap;gap:4px}
+.public-site .ticket-tools .ticket-actions .ui-button{padding-inline:14px}
+@media(max-width:380px){.ticket-tools .ticket-actions{flex-wrap:wrap}}
