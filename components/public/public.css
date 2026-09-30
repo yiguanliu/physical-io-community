@@ -1,5 +1,6 @@
 /* Public typography also reaches themed dialogs and popovers. */
-.wui:has(> .public-site){font-size-adjust:from-font;--ui-brand-font:var(--font-public);--font:var(--font-public)}
+/* Unlisted text (badges, alert titles, labels, small print) follows the body-font preference, not the dot face. */
+.wui:has(> .public-site){font-size-adjust:from-font;--ui-brand-font:var(--font-public-body);--font:var(--font-public-body)}
 /* Public composition: homepage surfaces with the shared OHI control system. */
 .public-site{--public-title-body-gap:30px}
 /* Outrank the workspace text reset; keep this public-only, including mobile. */
