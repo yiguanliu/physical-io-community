@@ -100,13 +100,13 @@ export async function submitRsvp(db: PoolClient, input: RsvpInput) {
 const TICKET_FIELDS = FIELDS.replace('email,', '');
 export async function getTicket(eventSlug: string, slug: string, ownerToken?: string) {
   const result = await database().query(
-    `select ${TICKET_FIELDS},(owner_token=$3) is_owner,exists(select 1 from public.members m where m.email_normalized=r.email_normalized) has_member,
+    `select ${TICKET_FIELDS},(owner_token=$3) is_owner,ticket_emailed_attendance,exists(select 1 from public.members m where m.email_normalized=r.email_normalized) has_member,
       (select m.public_slug from public.members m where m.email_normalized=r.email_normalized and m.profile_public) profile_slug
      from public.event_registrations r where event_slug=$1 and ticket_slug=$2 and attendance in ('in_person','online')`,
     [eventSlug, slug, ownerToken ?? ''],
   );
   const row = result.rows[0];
-  return row ? { ...toRegistration(row), isOwner: Boolean(row.is_owner), hasMember: Boolean(row.has_member), profileSlug: (row.profile_slug as string | null) ?? null } : null;
+  return row ? { ...toRegistration(row), isOwner: Boolean(row.is_owner), hasMember: Boolean(row.has_member), profileSlug: (row.profile_slug as string | null) ?? null, emailedAttendance: (row.ticket_emailed_attendance as string | null) ?? null } : null;
 }
 
 export async function ownedRegistration(eventSlug: string, ownerToken: string | undefined) {
