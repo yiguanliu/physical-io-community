@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import PublicShell from '@/components/public/PublicShell';
+import PixelBackdrop from '@/components/public/PixelBackdrop';
 import PixelArt from '@/components/public/PixelArt';
 import LumaCalendar from '@/components/public/LumaCalendar';
 import { Hero, ActionLink, SectionHeading, ClosingNote } from '@/components/public/Sections';
@@ -21,6 +22,7 @@ export default async function EventsPage() {
   const next = upcoming[0];
   const seats = next?.rsvp ? await publicSeats(next.slug) : null;
   return <PublicShell>
+    <PixelBackdrop />
     <Hero title={<>Community Events<br />for Curious People</>}>Come for a talk, meet a collaborator, or make your first robot.</Hero>
     <div id="episodes">
       {next && <EpisodeFeature episode={next} seats={seats} />}

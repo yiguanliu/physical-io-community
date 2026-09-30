@@ -1,0 +1,10 @@
+.pixel-blast-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* About page trial: a fixed dithered backdrop behind the page content. */
+.public-main:has(>.public-pixel-backdrop){position:relative;isolation:isolate}
+.public-pixel-backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.25}

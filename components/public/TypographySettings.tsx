@@ -23,7 +23,7 @@ function read(): Preferences {
 function apply(value: Preferences) {
   document.documentElement.style.setProperty('--font-public-heading', fonts[value.headings]);
   document.documentElement.style.setProperty('--font-public-body', fonts[value.body]);
-  document.documentElement.style.setProperty('--font-public-body-weight', value.body === 'dot' ? '600' : '400');
+  document.documentElement.style.setProperty('--font-public-body-weight', value.body === 'dot' ? '600' : '500');
   document.documentElement.style.setProperty('--font-public-heading-weight', value.headings === 'rokkitt' ? '400' : '600');
 }
 /** Night mode on/off, using the shared Switch toggle. */

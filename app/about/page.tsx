@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import PublicShell from '@/components/public/PublicShell';
 import PixelArt from '@/components/public/PixelArt';
+import PixelBackdrop from '@/components/public/PixelBackdrop';
 import { Hero, ActionLink, SectionHeading, ClosingNote } from '@/components/public/Sections';
 import { Card } from '@/workspace-ui/src';
 import { BUSINESS_TIERS, MEMBER_BENEFITS, MEMBER_RIGHTS, SITE_DESCRIPTION, SITE_URL } from '@/lib/site';
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return <PublicShell>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'AboutPage', name: 'About Physical I/O', url: SITE_URL + '/about', description: SITE_DESCRIPTION }) }} />
+    <PixelBackdrop />
     <Hero title={<>Curious minds.<br />Physical possibilities.</>} actions={<><ActionLink href="/join" primary>Join the community</ActionLink><ActionLink href="/events">Explore events</ActionLink></>}>
       A community led by curiosity, design and engineering. We bring people together to explore how humans and intelligent systems can coexist in the physical world.
     </Hero>
