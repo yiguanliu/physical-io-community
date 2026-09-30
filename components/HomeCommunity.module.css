@@ -57,3 +57,7 @@
 .page :global(.ui-context-heading),.page :global(.ui-popover-heading)>strong{font-family:var(--font-public-heading);font-weight:var(--font-public-heading-weight)!important;font-size-adjust:none}
 
 @media(max-width:600px){.desktopHeader{padding-inline:20px}}
+
+/* Learn more: a pill at the bottom centre of the stage, leading to the events page. */
+.page main{position:relative}
+.page .learnMore{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:5;border-radius:999px;min-height:40px;padding:10px 22px;font-size:14px;white-space:nowrap;border:0}
