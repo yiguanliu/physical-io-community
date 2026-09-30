@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ADMIN_ROLE, canAccessAdmin, isAdminRole } from "@/lib/auth/allowlist";
+import { ADMIN_ROLE, canAccessAdmin, isAdminRole, isSuperAdmin } from "@/lib/auth/allowlist";
 import { hasSupabaseAdminEnv } from "@/lib/auth/guards";
 import { ensureAdminProfile, profileFromAuthUser, setAdminRole } from "@/lib/auth/profiles";
 import { createClient } from "@/utils/supabase/server";
@@ -50,4 +50,11 @@ export async function hasAdminUsers() {
   const { data, error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
   if (error) throw error;
   return data.users.some((user) => user.app_metadata?.admin_role === ADMIN_ROLE);
+}
+
+/** Access management is limited to super admins. */
+export async function requireSuperAdmin() {
+  const admin = await requireAdmin();
+  if (!isSuperAdmin(admin.email)) throw new Error("Only super admins can manage administrator access.");
+  return admin;
 }

@@ -6,10 +6,15 @@ export const joinSchema=z.object({
  role:short,experience:short,work:z.string().trim().min(1,'Tell us a little about your work.').max(2000),
  website:optionalUrl,linkedin:optionalUrl.refine(value=>{if(!value)return false;try{const u=new URL(value);return (u.hostname==='linkedin.com'||u.hostname.endsWith('.linkedin.com'))&&/^\/in\/[^/]+/.test(u.pathname);}catch{return false;}},'Enter your LinkedIn profile link (linkedin.com/in/your-name).'),
  goals:z.array(short).min(1,'Choose at least one.').max(10),formats:z.array(short).min(1,'Choose at least one.').max(10),
- suggestions:z.string().trim().max(2000),consent:z.literal(true,{error:'Please confirm before joining.'}),
+ suggestions:z.string().trim().max(2000),
+ // Optional profile details, prefilled from an event RSVP when available.
+ jobTitle:z.string().trim().max(160).default(''),company:z.string().trim().max(160).default(''),
+ publicProfile:z.boolean().default(false),rsvpEvent:z.string().trim().max(80).regex(/^[a-z0-9-]*$/).default(''),
+ consent:z.literal(true,{error:'Please confirm before joining.'}),
  updates:z.boolean(),websiteTrap:z.string().max(0).optional()
 });
 export type JoinInput=z.infer<typeof joinSchema>;
+export const profileChoices=['Yes, create my public profile','Not now'];
 export const roles=['Engineer / Developer','Researcher / Academic','Designer / Creative','Founder / Entrepreneur','Product / Strategy','Investor','Student','Curious / Exploring'];
 export const experiences=['Less than a year','1–3 years','4–6 years','7–10 years','More than 10 years'];
 export const goals=['Meeting collaborators / co-founders','Learning from talks & demos','Sharing my work','Finding opportunities','Making friends in the field'];

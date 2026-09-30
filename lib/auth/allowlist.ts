@@ -20,6 +20,11 @@ export function isAllowlistedAdmin(email: string, envValue?: string) {
   return adminAllowlist(envValue).includes(email.trim().toLowerCase());
 }
 
+/** Super admins (founders + ADMIN_ALLOWLIST) manage who has admin access; they cannot be removed. */
+export function isSuperAdmin(email: string, envValue?: string) {
+  return isAllowlistedAdmin(email, envValue);
+}
+
 export function canAccessAdmin(email: string, role?: string | null, envValue?: string) {
   return isAdminRole(role) || isAllowlistedAdmin(email, envValue);
 }

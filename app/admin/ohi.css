@@ -278,3 +278,24 @@
 .user-details-page{width:100%;max-width:720px;margin-inline:auto}
 
 .admin-user-menu .ui-avatar{width:28px;height:28px;font-size:11px}
+
+/* Event guest list: Luma import, in-person capacity and RSVP follow-up. */
+.event-guests .ui-table-scroll{max-height:560px}
+.event-guest-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--ui-space-control);margin:0}
+.event-guests .ui-table td:first-child,.event-guests .ui-table th:first-child{width:56px}.event-guests .ui-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--ui-action)}
+.event-guest-stats>div{padding:var(--ui-space-card);border-radius:var(--ui-radius);background:var(--ui-subtle)}
+.event-guest-stats dt{font-size:12px;color:var(--ui-muted)}.event-guest-stats small{font-size:12px;color:var(--ui-muted)}.event-guest-stats dd{margin:4px 0 0;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.event-guest-controls{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--ui-space-control)}
+.event-guest-controls .ui-field{width:300px}.event-guests .ui-toolbar .ui-search{flex:1;min-width:240px}.event-guest-controls>.ui-button{margin-bottom:22px}
+.event-guest-name{display:grid;gap:2px;min-width:180px}.event-guest-name span{font-size:12px}
+@media(max-width:900px){.event-guest-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.event-guest-controls>.ui-button{margin-bottom:0}}
+
+/* Access management: member-linked administrators and certification. */
+.access-person{display:flex;align-items:center;gap:10px;min-width:0}.access-person>span{display:grid;gap:2px;min-width:0}
+.access-person strong{display:inline-flex;align-items:center;gap:6px}.access-person small{font-size:12px;color:var(--ui-muted)}
+.access-candidates{display:grid;gap:4px;max-height:360px;overflow:auto}
+.access-candidate{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 10px;border:1px solid transparent;border-radius:var(--ui-radius);background:transparent;color:var(--ui-text);text-align:left}
+.access-candidate>span{display:grid;gap:2px;min-width:0}.access-candidate small{font-size:12px;color:var(--ui-muted);overflow:hidden;text-overflow:ellipsis}
+.access-candidate:hover{background:var(--ui-subtle)}.access-candidate[aria-selected=true]{border-color:var(--ui-action);background:var(--ui-subtle)}
+.admin-onboarding{margin-bottom:var(--ui-space-section)}.admin-onboarding .ui-alert p{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.admin-member-name{display:inline-flex;align-items:center;gap:6px}

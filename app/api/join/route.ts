@@ -7,6 +7,7 @@ import {createHash} from 'node:crypto';
 import {database} from '@/lib/admin/database';
 import {joinSchema} from '@/lib/join/schema';
 import {saveSignup,deliverJoinNotifications,JoinRateLimit} from '@/lib/join/service';
+import {ownerCookie} from '@/lib/rsvp/service';
 export const runtime='nodejs';
 export const maxDuration=300;
 export async function POST(request:Request){
@@ -24,16 +25,21 @@ export async function POST(request:Request){
  try{
   db=await database().connect();await db.query('begin');
   const key=createHash('sha256').update(request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'local').digest('hex');
-  await saveSignup(db,input.data,key);await db.query('commit');
+  const memberId=await saveSignup(db,input.data,key);
+  // Joining from a ticket links that RSVP, but only for the device that made it and the same email.
+  if(input.data.rsvpEvent){const token=(await cookies()).get(ownerCookie(input.data.rsvpEvent))?.value;if(token)await db.query('update public.event_registrations set member_id=coalesce(member_id,(select id from public.members where email_normalized=$3)),updated_at=now() where event_slug=$1 and owner_token=$2 and email_normalized=$3',[input.data.rsvpEvent,token,input.data.email]);}
+  const profile=memberId&&input.data.publicProfile?(await db.query('select public_slug from public.members where id=$1',[memberId])).rows[0]?.public_slug as string|undefined:undefined;
+  await db.query('commit');
   after(async()=>{let delivery;try{delivery=await database().connect();await deliverJoinNotifications(delivery);}catch{console.error('Join notification queue unavailable');}finally{delivery?.release();}});
-  if(sameVerifiedEmail)return Response.json({ok:true,redirectTo:'/members'});
+  const next=profile?`/members/${profile}`:undefined;
+  if(sameVerifiedEmail)return Response.json({ok:true,redirectTo:next??'/members'});
   try{
    const {error}=await createClient(await cookies()).auth.signInWithOtp({email:input.data.email,options:{shouldCreateUser:true,emailRedirectTo:memberAuthRedirect(origin)}});
    if(error)throw error;
   }catch{
    return Response.json({error:'Your profile is saved, but we couldn’t send your email code. Wait a minute and submit again to retry.'},{status:503});
   }
-  return Response.json({ok:true});
+  return Response.json(next?{ok:true,next}:{ok:true});
  }catch(error){
   await db?.query('rollback');
   if(error instanceof JoinRateLimit)return Response.json({error:'Please try again in an hour.'},{status:429});

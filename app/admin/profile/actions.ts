@@ -26,8 +26,10 @@ export async function saveHeadshot(form:FormData){
   if(!mime)return {error:'Choose a PNG, JPEG or WebP image.'};
   try{const {uploadMedia}=await import('@/lib/marketing/storage');url=(await uploadMedia(bytes,{mime,prefix:`headshots/${admin.id}`})).publicUrl;}catch{return {error:'Your headshot could not be uploaded. Please try again.'};}
  }
+ // One photo per person: keep the member profile photo in step with the admin headshot.
+ try{const {setMemberPhoto}=await import('@/lib/members/photo');await setMemberPhoto(admin.email,url);}catch{/* No member profile yet; onboarding prompts for one. */}
  const {error}=await createClient(await cookies()).auth.updateUser({data:{headshot_url:url}});
  if(error)return {error:'Your headshot could not be saved. Please try again.'};
- revalidatePath('/admin/profile');
+ revalidatePath('/admin/profile');revalidatePath('/admin/access');
  return {avatarUrl:url};
 }

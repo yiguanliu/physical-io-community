@@ -1,12 +1,12 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Play, ArrowUpRight } from 'lucide-react';
 import { Alert, Button, Card } from '@/workspace-ui/src';
 import { memberSignOut } from '@/app/login/actions';
 import LumaCalendar from '@/components/public/LumaCalendar';
 import { LUMA_URL } from '@/lib/site';
 type Episode = { id: string; title: string; label: string; description: string; youtubeId: string; start: number };
-export default function Library({ episodes }: { episodes: Episode[] }) {
+export default function Library({ episodes, profile }: { episodes: Episode[]; profile?: ReactNode }) {
   const [watching, setWatching] = useState<{ episode: Episode; start: number } | null>(null);
   const playerHeading = useRef<HTMLHeadingElement>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
@@ -20,6 +20,7 @@ export default function Library({ episodes }: { episodes: Episode[] }) {
   return <div className="member-library">
     <div className="member-heading"><div><h1>Members</h1></div><Button variant="ghost" busy={busy} onClick={signOut}>Sign out</Button></div>
     {error && <Alert title="Sign out failed" tone="danger">{error}</Alert>}
+    {profile}
     <section className="member-stack" aria-labelledby="member-events-title">
       <div className="member-heading"><h2 id="member-events-title">Events</h2><a className="ui-button ui-button-ghost" href={LUMA_URL} target="_blank" rel="noopener noreferrer">Full calendar <ArrowUpRight size={16} aria-hidden /></a></div>
       <LumaCalendar />

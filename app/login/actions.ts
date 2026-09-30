@@ -90,5 +90,7 @@ export async function memberVerifyCode(_previous: MemberAuthState, form: FormDat
     const { data, error } = await createClient(await cookies()).auth.verifyOtp({ email, token, type: 'email' });
     if (error || !data.user?.email_confirmed_at || data.user.is_anonymous) return { error: 'This code is invalid or expired. Check the latest email or request a new code.' };
   } catch { return { error: 'Unable to connect. Please try again.' }; }
-  redirect('/members');
+  // New members who chose a public profile land on it; anything else returns to the library.
+  const next = String(form.get('next') ?? '');
+  redirect(/^\/members\/[a-z0-9-]{1,60}$/.test(next) ? next : '/members');
 }

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Default profile headshot">
+  <!-- Default headshot for people without an uploaded photo. Light backing keeps it visible in dark mode. -->
+  <rect width="256" height="256" fill="#efefef"/>
+  <g fill="none" stroke="#000" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M182 250V196C182 187 216 164 218 112C220 57 180 18 128 18C88 18 64 48 62 88C61 104 62 116 57 126L40 150C37 156 40 160 47 160H64V178C64 187 70 193 79 193H97C106 193 111 199 111 208V250"/>
+  </g>
+  <circle cx="93" cy="113" r="7.5" fill="#000"/>
+</svg>
