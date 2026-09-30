@@ -43,7 +43,7 @@
 /* Share the public header on desktop; preserve the compact mobile navigation. */
 .desktopHeader{padding-inline:3%;position:relative;z-index:20}
 @media(min-width:761px){.page .site-header{display:none}}
-@media(max-width:760px){.desktopHeader{display:none}}
+
 
 .navigationMenu :global(.ui-popover-heading){gap:12px;align-items:center}
 .navigationMenu :global(.ui-popover-heading>strong){min-width:0;flex:1}
@@ -56,3 +56,4 @@
 .page :is(button,a,:global(.ui-context-item),:global(.ui-select-trigger),:global(.ui-select-option)),.page :is(button,a,:global(.ui-context-item),:global(.ui-select-trigger),:global(.ui-select-option)) :where(span){font-family:var(--font-public-body);font-weight:var(--font-public-body-weight)!important;font-size-adjust:none}
 .page :global(.ui-context-heading),.page :global(.ui-popover-heading)>strong{font-family:var(--font-public-heading);font-weight:var(--font-public-heading-weight)!important;font-size-adjust:none}
 
+@media(max-width:600px){.desktopHeader{padding-inline:20px}}

@@ -78,3 +78,14 @@
 .public-settings-dock .public-settings-button.ui-icon-button{width:48px;height:48px;min-height:48px;max-height:48px;background:var(--ui-surface);color:var(--ui-text);box-shadow:0 4px 16px rgb(0 0 0 / 18%);border:0}
 .public-settings-dock .public-settings-button.ui-icon-button:hover{background:var(--ui-subtle)}
 .wui:has(.public-settings-dock) .ui-toast-viewport{bottom:calc(max(20px,env(safe-area-inset-bottom)) + 60px)}
+
+/* One header everywhere: nav icons, Login and Join free form a single evenly spaced group,
+   right-aligned; on narrow screens the group wraps below the logo, still right-aligned. */
+.public-header-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-inline-start:auto;min-width:0}
+.public-header .public-header-controls>.public-nav{margin-inline-start:0;gap:8px}
+.public-header .public-header-controls>.public-header-actions{margin-inline-start:0;gap:8px}
+@media(max-width:600px){
+  .public-header .public-header-controls{order:2;width:100%;flex-wrap:wrap}
+  .public-header .public-header-controls>.public-nav{order:0;width:auto}
+  .public-header .public-header-actions>.ui-button{padding-inline:16px;font-size:14px}
+}
