@@ -1,10 +1,11 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, CalendarDays, Download, MapPin, Share2, UserRound, Video } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, CalendarDays, Download, MapPin, Share2, Video } from 'lucide-react';
 import { Alert, Button, Card, Field } from '@/workspace-ui/src';
 import { labelSize, renderLabelSvg, type LabelData } from '@/lib/rsvp/label';
 import TicketEdit from './TicketEdit';
+import { ClosingNote } from '@/components/public/Sections';
 
 type Episode = { slug: string; number: string; title: string; theme: string; date: string; time: string; venue: string; cover: string; lumaUrl: string };
 type Account = { kind: 'join' | 'member' | 'profile'; href: string };
@@ -148,23 +149,13 @@ export default function TicketView({ label, episode, isOwner, emailPending = fal
           </div>
         </Card>
 
-        {isOwner && <Card className="public-card ticket-card">
-          <UserRound size={28} aria-hidden />
-          {account.kind === 'profile' ? <>
-            <h2>Your profile is live.</h2>
-            <p>Share your Physical I/O profile with the people you meet.</p>
-            <Link className="ui-button ui-button-primary" href={account.href}>View my profile <ArrowRight size={16} aria-hidden /></Link>
-          </> : account.kind === 'member' ? <>
-            <h2>Welcome back.</h2>
-            <p>You’re already a member. Sign in to publish your profile page and watch past recordings.</p>
-            <Link className="ui-button ui-button-primary" href={account.href}>Member sign in <ArrowRight size={16} aria-hidden /></Link>
-          </> : <>
-            <h2>Join the community.</h2>
-            <p>Create your free member account in a minute. We’ll fill in what you told us on Luma, and you can publish a profile page showing the episodes you’ve attended.</p>
-            <Link className="ui-button ui-button-primary" href={account.href}>Create my account <ArrowRight size={16} aria-hidden /></Link>
-          </>}
-        </Card>}
       </div>
     </div>
+
+    {isOwner && (account.kind === 'profile'
+      ? <ClosingNote title="Your profile is live." href={account.href} action="View my profile">Share your Physical I/O profile with the people you meet.</ClosingNote>
+      : account.kind === 'member'
+        ? <ClosingNote title="Welcome back." href={account.href} action="Member sign in">You’re already a member. Sign in to publish your profile page and watch past recordings.</ClosingNote>
+        : <ClosingNote title="Join the community." href={account.href} action="Create my account">Create your free member account in a minute. We’ll fill in what you told us on Luma, and you can publish a profile page showing the episodes you’ve attended.</ClosingNote>)}
   </div>;
 }

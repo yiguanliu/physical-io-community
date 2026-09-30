@@ -157,3 +157,6 @@
 /* Edit details sits beside the ticket title. */
 .ticket-title-row{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px}
 .ticket-title-row>.ui-button{flex-shrink:0}
+.ticket-page .ticket-heading{max-width:none}
+.ticket-title-row{justify-content:space-between}
+.public-site .public-main .ticket-heading>p{max-width:60ch}
