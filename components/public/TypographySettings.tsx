@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Settings2 } from 'lucide-react';
-import { Button, Dialog, IconButton, Select } from '@/workspace-ui/src';
+import { Moon, Settings2, Sun } from 'lucide-react';
+import { Button, Dialog, IconButton, Select, ViewSwitch } from '@/workspace-ui/src';
 
 const fonts = {
   manrope: '"Manrope", Arial, Helvetica, sans-serif',
@@ -47,9 +47,11 @@ export default function TypographySettings({ dark, onToggleTheme }: { dark: bool
     <IconButton className="public-settings-button" label="Settings" title="Settings" variant="ghost" onClick={() => setOpen(true)}><Settings2 size={18} /></IconButton>
     <Dialog open={open} onOpenChange={setOpen} title="Settings" description="Choose your theme and fonts. Changes appear immediately and are remembered on this device.">
       <div className="public-text-settings">
-        <Select label="Theme" value={dark ? 'dark' : 'light'} options={[{ value: 'dark', label: 'Dark' }, { value: 'light', label: 'Light' }]} onValueChange={mode => { if ((mode === 'dark' || mode === 'light') && (mode === 'dark') !== dark) onToggleTheme(); }} />
-        <Select label="Heading font" options={options} value={value.headings} onValueChange={font => { if (isFont(font)) change({ ...value, headings: font }); }} />
-        <Select label="Body, buttons and labels" options={options} value={value.body} onValueChange={font => { if (isFont(font)) change({ ...value, body: font }); }} />
+        <div className="public-theme-row"><span id="public-theme-label">Theme</span><ViewSwitch label="Theme" value={dark ? 'dark' : 'light'} onValueChange={mode => { if ((mode === 'dark') !== dark) onToggleTheme(); }} items={[{ value: 'light', label: 'Day', icon: <Sun size={17} aria-hidden /> }, { value: 'dark', label: 'Night', icon: <Moon size={17} aria-hidden /> }]} /></div>
+        <div className="public-font-row">
+          <Select label="Heading font" options={options} value={value.headings} onValueChange={font => { if (isFont(font)) change({ ...value, headings: font }); }} />
+          <Select label="Body, buttons and labels" options={options} value={value.body} onValueChange={font => { if (isFont(font)) change({ ...value, body: font }); }} />
+        </div>
         <div className="public-type-preview"><h3>Curious minds. Physical possibilities.</h3><p>Meet people, share ideas and build something together.</p></div>
         <Button variant="ghost" onClick={() => change(defaults)}>Reset to Manrope</Button>
       </div>

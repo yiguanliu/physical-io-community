@@ -48,3 +48,15 @@
    Applies to overlays opened from public pages too. Choice buttons keep their own styling. */
 .wui:has(> .public-site) .ui-button-secondary:not([aria-pressed]){background:transparent;border-color:transparent;box-shadow:none}
 .wui:has(> .public-site) .ui-button-secondary:not([aria-pressed]):not(:disabled):hover{background:color-mix(in srgb,var(--ui-text) 8%,transparent)}
+
+/* Settings dialog: theme as a day/night switch; both font choices on one row. */
+.public-theme-row{display:flex;align-items:center;justify-content:space-between;gap:var(--ui-space-control);font-weight:600}
+.public-font-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-control)}
+@media(max-width:480px){.public-font-row{grid-template-columns:1fr}}
+
+/* Separator lines on public pages sit at 20% of the text colour in both themes. */
+.public-site{--ui-border:color-mix(in srgb,var(--ui-text) 20%,transparent)}
+
+/* Format cards: the action sits at the bottom of every card, with room above it. */
+.public-format>.ui-button{margin-top:auto}
+.public-site .public-format>p{margin-block-end:32px}

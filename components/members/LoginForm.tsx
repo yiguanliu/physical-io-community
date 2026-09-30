@@ -28,25 +28,33 @@ function Credentials({ mode, configured, onMode }: { mode: Mode; configured: boo
 
   </form>;
 }
-export default function LoginForm({ configured, invalidLink = false, joined = false, codePrompt }: { configured: boolean; invalidLink?: boolean; joined?: boolean; codePrompt?: 'confirmed' | 'request' }) {
+const TITLES = { code: 'Member sign in', signin: 'Member sign in', recovery: 'Reset your password', confirm: 'Confirm your email' };
+
+/** Sign-in content shared by the /login page and the member login modal. */
+export function MemberSignIn({ configured, invalidLink = false, joined = false, codePrompt, heading }: { configured: boolean; invalidLink?: boolean; joined?: boolean; codePrompt?: 'confirmed' | 'request'; heading?: (title: string) => React.ReactNode }) {
   const [mode, setMode] = useState<Mode | 'code'>('code');
-  const [dark, setDark] = useState(false);
-  useEffect(() => { try { const saved = localStorage.getItem('ohi-appearance'); setDark(saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches); } catch {} }, []);
-  function toggleAppearance() { setDark(value => { try { localStorage.setItem('ohi-appearance', value ? 'light' : 'dark'); } catch {} return !value; }); }
-  const titles = { code: 'Member sign in', signin: 'Member sign in', recovery: 'Reset your password', confirm: 'Confirm your email' };
-  return <ThemeProvider theme={{ ...defaultTheme, mode: dark ? 'dark' : 'light' }}><main className="admin-login member-login">
-    <div className="admin-login-frame">
-    <section className="admin-login-brand" aria-label="Physical I/O"><div className="admin-login-art" aria-hidden="true"><LogoMark /></div></section>
-    <section className="admin-login-panel" aria-labelledby="member-login-title">
-    <div className="admin-login-top"><Link href="/join" className="ui-button ui-button-ghost">Create account</Link><IconButton variant="ghost" label={dark ? 'Use light appearance' : 'Use dark appearance'} onClick={toggleAppearance}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</IconButton></div>
-    <div className="admin-login-form">
-    <header className="admin-login-heading"><Link href="/" className="admin-login-identity"><LogoMark/><span>Physical I/O</span></Link><h1 id="member-login-title">{titles[mode]}</h1></header>
+  return <>
+    {heading?.(TITLES[mode])}
     {!(joined && mode === 'code') && <p>{mode === 'code' ? 'Get a one-time code at your account email. No password needed.' : mode === 'recovery' ? 'Enter your account email and we’ll send a link to choose a new password.' : mode === 'confirm' ? 'Enter the email you registered with to request a new confirmation link.' : 'Use your email and password to watch Physical I/O talks and past events.'}</p>}
     {codePrompt && <Alert title={codePrompt === 'confirmed' ? 'Email confirmed' : 'Sign in with an email code'}>{codePrompt === 'confirmed' ? 'Your email is confirmed. Enter your email below and select “Email me a sign-in code” to continue.' : 'Enter your email below and select “Email me a sign-in code” to continue. Use the latest code from your inbox.'}</Alert>}
     {invalidLink && <Alert title="This email link is invalid or expired" tone="danger">Request a new confirmation or password reset email below. Open the latest link in the same browser.<div className="member-actions"><Button variant="ghost" onClick={() => setMode('confirm')}>Resend confirmation</Button><Button variant="ghost" onClick={() => setMode('recovery')}>Reset password</Button></div></Alert>}
     {!configured && <Alert title="Login temporarily unavailable">Please try again later.</Alert>}
     {mode === 'code' ? <EmailCodeForm configured={configured} joined={joined} /> : <Credentials key={mode} mode={mode} configured={configured} onMode={setMode} />}
     <Button variant="ghost" onClick={() => setMode(mode === 'code' ? 'signin' : 'code')}>{mode === 'code' ? 'Use a password instead' : 'Back to email sign-in'}</Button>
+  </>;
+}
+
+export default function LoginForm(props: { configured: boolean; invalidLink?: boolean; joined?: boolean; codePrompt?: 'confirmed' | 'request' }) {
+  const [dark, setDark] = useState(false);
+  useEffect(() => { try { const saved = localStorage.getItem('ohi-appearance'); setDark(saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches); } catch {} }, []);
+  function toggleAppearance() { setDark(value => { try { localStorage.setItem('ohi-appearance', value ? 'light' : 'dark'); } catch {} return !value; }); }
+  return <ThemeProvider theme={{ ...defaultTheme, mode: dark ? 'dark' : 'light' }}><main className="admin-login member-login">
+    <div className="admin-login-frame">
+    <section className="admin-login-brand" aria-label="Physical I/O"><div className="admin-login-art" aria-hidden="true"><LogoMark /></div></section>
+    <section className="admin-login-panel" aria-labelledby="member-login-title">
+    <div className="admin-login-top"><Link href="/join" className="ui-button ui-button-ghost">Create account</Link><IconButton variant="ghost" label={dark ? 'Use light appearance' : 'Use dark appearance'} onClick={toggleAppearance}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</IconButton></div>
+    <div className="admin-login-form">
+    <MemberSignIn {...props} heading={title => <header className="admin-login-heading"><Link href="/" className="admin-login-identity"><LogoMark/><span>Physical I/O</span></Link><h1 id="member-login-title">{title}</h1></header>} />
     </div></section></div>
   </main></ThemeProvider>;
 }
