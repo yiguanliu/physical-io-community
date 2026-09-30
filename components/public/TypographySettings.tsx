@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
-import { Button, Dialog, Select, ViewSwitch } from '@/workspace-ui/src';
+import { Button, Dialog, Select, Switch } from '@/workspace-ui/src';
 
 const fonts = {
   manrope: '"Manrope", Arial, Helvetica, sans-serif',
@@ -27,9 +26,9 @@ function apply(value: Preferences) {
   document.documentElement.style.setProperty('--font-public-body-weight', value.body === 'dot' ? '600' : '400');
   document.documentElement.style.setProperty('--font-public-heading-weight', value.headings === 'rokkitt' ? '400' : '600');
 }
-/** Day/night switch shared by the site menu and the settings dialog. */
-export function ThemeSwitch({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () => void }) {
-  return <div className="public-theme-row"><span>Theme</span><ViewSwitch label="Theme" value={dark ? 'dark' : 'light'} onValueChange={mode => { if ((mode === 'dark') !== dark) onToggleTheme(); }} items={[{ value: 'light', label: 'Day', icon: <Sun size={17} aria-hidden /> }, { value: 'dark', label: 'Night', icon: <Moon size={17} aria-hidden /> }]} /></div>;
+/** Night mode on/off, using the shared Switch toggle. */
+function ThemeSwitch({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () => void }) {
+  return <div className="public-theme-toggle"><Switch label="Night mode" checked={dark} onCheckedChange={checked => { if (checked !== dark) onToggleTheme(); }} /></div>;
 }
 
 /** Theme and font settings. Always mounted so saved fonts apply on every page. */

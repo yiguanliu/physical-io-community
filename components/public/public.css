@@ -50,7 +50,6 @@
 .wui:has(> .public-site) .ui-button-secondary:not([aria-pressed]):not(:disabled):hover{background:color-mix(in srgb,var(--ui-text) 8%,transparent)}
 
 /* Settings dialog: theme as a day/night switch; both font choices on one row. */
-.public-theme-row{display:flex;align-items:center;justify-content:space-between;gap:var(--ui-space-control);font-weight:600}
 .public-font-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-control)}
 @media(max-width:480px){.public-font-row{grid-template-columns:1fr}}
 
@@ -85,5 +84,10 @@
 .public-menu :is(nav a,.public-menu-item){display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--ui-text);font-size:14px;text-align:left;cursor:pointer}
 .public-menu :is(nav a,.public-menu-item):hover{background:var(--ui-subtle)}
 .public-menu nav a[aria-current=page]{background:var(--ui-subtle);font-weight:600}
-.public-menu .public-theme-row{padding:4px 4px 4px 12px;border-block:1px solid var(--ui-border);padding-block:10px;font-size:14px}
-.wui:has(> .public-site) .public-menu :is(nav a,.public-menu-item,.public-theme-row span){font-family:var(--font-public-body)}
+.wui:has(> .public-site) .public-menu :is(nav a,.public-menu-item){font-family:var(--font-public-body)}
+.public-menu nav{padding-bottom:var(--ui-space-control);border-bottom:1px solid var(--ui-border)}
+
+/* Night mode toggle in settings: the shared Switch, without an outline. */
+.public-theme-toggle .ui-switch-field{min-height:44px;font-weight:600}
+.public-theme-toggle .ui-switch{border-color:transparent;background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
+.public-theme-toggle .ui-switch[data-state=checked]{background:var(--ui-action)}
