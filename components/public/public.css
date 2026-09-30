@@ -91,3 +91,9 @@
 .public-theme-toggle .ui-switch-field{min-height:44px;font-weight:600}
 .public-theme-toggle .ui-switch{border-color:transparent;background:color-mix(in srgb,var(--ui-text) 14%,transparent)}
 .public-theme-toggle .ui-switch[data-state=checked]{background:var(--ui-action)}
+
+/* Pinned header: hides while scrolling down, returns on scroll up. The page colour extends
+   edge to edge behind it so content never shows beside the centred header. */
+.public-header{position:sticky;top:0;z-index:30;background:var(--ui-bg);box-shadow:0 0 0 100vmax var(--ui-bg);clip-path:inset(0 -100vmax);transition:transform var(--ui-normal) var(--ui-ease)}
+.public-header[data-hidden]{transform:translateY(-100%)}
+@media(prefers-reduced-motion:reduce){.public-header{transition:none}}
