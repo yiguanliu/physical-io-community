@@ -12,6 +12,7 @@ export type Registration = {
   id: string; eventSlug: string; email: string; fullName: string; firstName: string; lastName: string;
   organisation: string; jobTitle: string; linkedin: string; lumaStatus: string;
   attendance: Attendance | null; category: string; ticketSlug: string | null; memberId: string | null; rsvpAt: string | null;
+  checkedInAt: string | null;
 };
 type Row = Record<string, unknown>;
 const toRegistration = (r: Row): Registration => ({
@@ -19,8 +20,9 @@ const toRegistration = (r: Row): Registration => ({
   organisation: String(r.organisation), jobTitle: String(r.job_title), linkedin: String(r.linkedin_url), lumaStatus: String(r.luma_status),
   attendance: (r.attendance as Attendance | null) ?? null, category: String(r.category ?? ''), ticketSlug: (r.ticket_slug as string | null) ?? null,
   memberId: (r.member_id as string | null) ?? null, rsvpAt: r.rsvp_at ? new Date(r.rsvp_at as string).toISOString() : null,
+  checkedInAt: r.checked_in_at ? new Date(r.checked_in_at as string).toISOString() : null,
 });
-const FIELDS = 'id,event_slug,email,full_name,first_name,last_name,organisation,job_title,linkedin_url,luma_status,attendance,category,ticket_slug,member_id,rsvp_at';
+const FIELDS = 'id,event_slug,email,full_name,first_name,last_name,organisation,job_title,linkedin_url,luma_status,attendance,category,ticket_slug,member_id,rsvp_at,checked_in_at';
 
 /** Per-event httpOnly cookie that marks the device which completed the RSVP. */
 export const ownerCookie = (eventSlug: string) => `pio_rsvp_${eventSlug.replace(/[^a-z0-9]/gi, '_')}`;
@@ -148,6 +150,18 @@ export async function setCapacity(db: PoolClient, eventSlug: string, capacity: n
      on conflict(event_slug) do update set in_person_capacity=excluded.in_person_capacity,updated_by_name=excluded.updated_by_name,updated_at=now()`,
     [eventSlug, capacity, actor],
   );
+}
+
+/** Marks a guest as checked in at the door, or reverts it. Returns the stored check-in time, or null. */
+export async function setCheckIn(db: PoolClient, eventSlug: string, id: string, checkedIn: boolean, actor: string) {
+  const result = await db.query(
+    `update public.event_registrations set checked_in_at=case when $3 then coalesce(checked_in_at,now()) end,checked_in_by_name=case when $3 then $4 else '' end,updated_at=now()
+     where event_slug=$1 and id=$2 returning full_name,checked_in_at`,
+    [eventSlug, id, checkedIn, actor],
+  );
+  if (!result.rowCount) throw new RsvpNotAllowed('unknown_guest');
+  const row = result.rows[0];
+  return { name: String(row.full_name), checkedInAt: row.checked_in_at ? new Date(row.checked_in_at).toISOString() : null };
 }
 
 export async function adminGuests(eventSlug: string) {

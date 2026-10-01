@@ -299,3 +299,7 @@
 .access-candidate:hover{background:var(--ui-subtle)}.access-candidate[aria-selected=true]{border-color:var(--ui-action);background:var(--ui-subtle)}
 .admin-onboarding{margin-bottom:var(--ui-space-section)}.admin-onboarding .ui-alert p{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
 .admin-member-name{display:inline-flex;align-items:center;gap:6px}
+/* Door check-in toggle in the event guest table: neutral until pressed, green once checked in. */
+.event-checkin{white-space:nowrap;border-radius:999px;border-color:transparent;background:var(--ui-subtle);color:var(--ui-text)}
+.event-checkin[data-checked]{background:var(--ui-success-bg);color:var(--ui-success)}
+.event-checkin[data-checked]:hover{background:color-mix(in srgb,var(--ui-success) 22%,transparent)}
