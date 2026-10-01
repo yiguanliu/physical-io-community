@@ -7,6 +7,7 @@ describe("adminAllowlist", () => {
     expect(adminAllowlist("ops@physical-io.com")).toEqual([
       "soul@physical-io.com",
       "anthony@physical-io.com",
+      "anthony.liu218@gmail.com",
       "ops@physical-io.com",
     ]);
   });

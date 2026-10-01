@@ -61,7 +61,9 @@ export default function LoginForm({ initialStatus, hasAdminConfig = true }: { in
   const [notice, setNotice] = useState<string | null>(
     initialStatus === "pending"
       ? "Your request is waiting for an administrator to add you."
-      : null,
+      : initialStatus === "expired"
+        ? "Your previous session ended, for example after signing out in another tab or switching accounts. Sign in again to continue."
+        : null,
   );
   const [pending, setPending] = useState(false);
 
