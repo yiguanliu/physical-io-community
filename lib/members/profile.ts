@@ -5,25 +5,29 @@ import { findEpisode, type PublicEpisode } from '@/lib/events/catalog';
 export type PublicProfile = {
   slug: string; name: string; jobTitle: string; company: string; role: string; city: string; bio: string;
   linkedin: string; website: string; memberSince: string; photoUrl: string; communityAdmin: boolean;
+  /** Has administrator access: shows the Physical I/O mark when there is no photo. */
+  isAdmin: boolean;
   events: { episode: PublicEpisode; attendance: 'in_person' | 'online' }[];
 };
 
 export type MemberProfile = Omit<PublicProfile, 'slug'> & { slug: string | null; isPublic: boolean };
 
-const PROFILE_FIELDS = 'm.id,m.public_slug,m.full_name,m.job_title,m.company,m.professional_role,m.city,m.bio,m.linkedin_url,m.website_url,m.signed_up_at,m.photo_url,m.community_admin,m.profile_public';
+const PROFILE_FIELDS = `m.id,m.public_slug,m.full_name,m.job_title,m.company,m.professional_role,m.city,m.bio,m.linkedin_url,m.website_url,m.signed_up_at,m.photo_url,m.community_admin,m.profile_public,
+  exists(select 1 from auth.users u where lower(trim(u.email))=m.email_normalized and u.deleted_at is null and u.raw_app_meta_data->>'admin_role'='admin') is_admin`;
 
 async function withEvents(m: Record<string, any>): Promise<MemberProfile> {
   const attended = await database().query(
     `select event_slug,attendance from public.event_registrations
-     where (member_id=$1 or email_normalized=(select email_normalized from public.members where id=$1)) and attendance in ('in_person','online')`,
+     where (member_id=$1 or email_normalized=(select email_normalized from public.members where id=$1)) and attendance in ('in_person','online','admin')`,
     [m.id],
   );
   return {
     slug: m.public_slug, name: m.full_name, jobTitle: m.job_title, company: m.company, role: m.professional_role, city: m.city, bio: m.bio,
-    linkedin: m.linkedin_url, website: m.website_url, memberSince: new Date(m.signed_up_at).toISOString(), photoUrl: m.photo_url, communityAdmin: m.community_admin,
+    linkedin: m.linkedin_url, website: m.website_url, memberSince: new Date(m.signed_up_at).toISOString(), photoUrl: m.photo_url, communityAdmin: m.community_admin, isAdmin: Boolean(m.is_admin),
     isPublic: m.profile_public,
     events: attended.rows
-      .map(row => ({ episode: findEpisode(row.event_slug), attendance: row.attendance }))
+      // Admin tickets are in person.
+      .map(row => ({ episode: findEpisode(row.event_slug), attendance: row.attendance === 'online' ? 'online' : 'in_person' }))
       .filter((row): row is PublicProfile['events'][number] => Boolean(row.episode))
       .sort((a, b) => b.episode.startsAt.localeCompare(a.episode.startsAt)),
   };
@@ -52,4 +56,4 @@ export async function getMemberProfile(email: string): Promise<MemberProfile | n
   return result.rows[0] ? withEvents(result.rows[0]) : null;
 }
 
-export type OwnProfile = { slug: string | null; name: string; jobTitle: string; company: string; bio: string; isPublic: boolean; photoUrl: string; communityAdmin: boolean };
+export type OwnProfile = { slug: string | null; name: string; jobTitle: string; company: string; bio: string; isPublic: boolean; photoUrl: string; communityAdmin: boolean; isAdmin: boolean };
