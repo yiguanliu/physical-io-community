@@ -289,14 +289,15 @@ export async function declineAccessAction(formData: FormData) {
 export async function changeAccessAction(formData: FormData) {
   return accessAction(async (admin) => {
     const { z } = await import("zod");
-    const value = z.object({ userId: z.string().uuid(), role: z.enum(["admin", "pending", "denied"]), certified: z.enum(["true", "false"]).optional() })
-      .parse({ userId: text(formData, "userId"), role: text(formData, "role"), certified: text(formData, "certified") || undefined });
-    const { setUserRole, setCommunityAdmin } = await import("@/lib/admin/access");
+    const value = z.object({ userId: z.string().uuid(), role: z.enum(["admin", "pending", "denied"]), certified: z.enum(["true", "false"]).optional(), public: z.enum(["true", "false"]).optional() })
+      .parse({ userId: text(formData, "userId"), role: text(formData, "role"), certified: text(formData, "certified") || undefined, public: text(formData, "public") || undefined });
+    const { setUserRole, setCommunityAdmin, setAdminProfilePublic } = await import("@/lib/admin/access");
     const { listAdminProfiles } = await import("@/lib/auth/profiles");
     const current = (await listAdminProfiles()).find((user) => user.id === value.userId);
     if (!current) throw new Error("User not found.");
     if (current.role !== value.role) await setUserRole({ userId: value.userId, role: value.role, actor: admin });
     if (value.role === "admin" && value.certified) await setCommunityAdmin({ userId: value.userId, certified: value.certified === "true", actor: admin });
+    if (value.role === "admin" && value.public) await setAdminProfilePublic({ userId: value.userId, isPublic: value.public === "true", actor: admin });
   });
 }
 

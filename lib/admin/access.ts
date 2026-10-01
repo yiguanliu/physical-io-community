@@ -2,17 +2,18 @@ import { ADMIN_ROLE, PENDING_ROLE, isAllowlistedAdmin } from "@/lib/auth/allowli
 import { listAdminProfiles, setAdminRole, type AdminProfile } from "@/lib/auth/profiles";
 import { writeAudit } from "@/lib/admin/store";
 import { database } from "@/lib/admin/database";
+import { uniqueProfileSlug } from "@/lib/members/slug";
 
-export type MemberLink = { memberId: string; memberName: string; photoUrl: string; communityAdmin: boolean; publicSlug: string | null } | null;
+export type MemberLink = { memberId: string; memberName: string; photoUrl: string; communityAdmin: boolean; publicSlug: string | null; profilePublic: boolean } | null;
 export type AccessUser = AdminProfile & { member: MemberLink };
 export type AccessCandidate = { id: string; name: string; email: string; photoUrl: string; hasAccount: boolean };
 
 async function membersByEmail(emails: string[]) {
   const result = await database().query(
-    "select id,email_normalized,full_name,photo_url,community_admin,public_slug from public.members where email_normalized=any($1::text[]) and status<>'archived'",
+    "select id,email_normalized,full_name,photo_url,community_admin,public_slug,profile_public from public.members where email_normalized=any($1::text[]) and status<>'archived'",
     [emails.map((email) => email.trim().toLowerCase())],
   );
-  return new Map(result.rows.map((m) => [m.email_normalized as string, { memberId: m.id, memberName: m.full_name, photoUrl: m.photo_url, communityAdmin: m.community_admin, publicSlug: m.public_slug } as NonNullable<MemberLink>]));
+  return new Map(result.rows.map((m) => [m.email_normalized as string, { memberId: m.id, memberName: m.full_name, photoUrl: m.photo_url, communityAdmin: m.community_admin, publicSlug: m.public_slug, profilePublic: m.profile_public } as NonNullable<MemberLink>]));
 }
 
 async function memberFor(email: string) {
@@ -101,6 +102,34 @@ export async function setCommunityAdmin(input: { userId: string; certified: bool
     entityType: "member",
     entityId: member.memberId,
     summary: `${input.certified ? "Certified" : "Removed certification for"} ${target.email} as community admin`,
+  });
+}
+
+/** Super admins publish or hide an administrator's member profile. Their access vouches for the address. */
+export async function setAdminProfilePublic(input: { userId: string; isPublic: boolean; actor: { id: string; name: string } }) {
+  const target = (await listAdminProfiles()).find((user) => user.id === input.userId);
+  if (!target) throw new Error("User not found.");
+  const member = await memberFor(target.email);
+  if (input.isPublic) {
+    if (target.role !== ADMIN_ROLE) throw new Error("Only administrators' profiles can be published from Access.");
+    if (!member) throw new Error("This administrator has not completed their member profile yet.");
+  }
+  if (!member || member.profilePublic === input.isPublic) return;
+  const client = await database().connect();
+  try {
+    await client.query("begin");
+    const row = (await client.query("select full_name,public_slug from public.members where id=$1 for update", [member.memberId])).rows[0];
+    const slug = row.public_slug ?? (input.isPublic ? await uniqueProfileSlug(client, row.full_name, member.memberId) : null);
+    await client.query("update public.members set profile_public=$2,public_slug=$3,updated_at=now() where id=$1", [member.memberId, input.isPublic, slug]);
+    await client.query("commit");
+  } catch (error) { await client.query("rollback"); throw error; } finally { client.release(); }
+  await writeAudit({
+    actorUserId: input.actor.id,
+    actorName: input.actor.name,
+    action: input.isPublic ? "access.profile_public" : "access.profile_hidden",
+    entityType: "member",
+    entityId: member.memberId,
+    summary: `${input.isPublic ? "Published" : "Hid"} the public profile of ${target.email}`,
   });
 }
 
