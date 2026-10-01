@@ -96,7 +96,11 @@ describe('thermal label', () => {
     expect(svg).not.toContain('ROLE:');
     expect(svg.indexOf('ROOM: LG17 BENTHAM HOUSE')).toBeLessThan(svg.indexOf('ENDSLEIGH GARDENS'));
     expect(svg).toContain('LONDON WC1H 0EG');
-    expect(renderLabelSvg({ ...data, attendance: 'online' })).not.toContain('ENDSLEIGH GARDENS');
+    const online = renderLabelSvg({ ...data, attendance: 'online' });
+    expect(online).toContain('Founder, Physical &lt;I/O&gt;<');
+    expect(online).not.toContain('ROLE:');
+    expect(online).toContain('ROOM: GOOGLE MEET');
+    expect(online).not.toContain('ENDSLEIGH GARDENS');
   });
   it('marks admin tickets', () => {
     const svg = renderLabelSvg({ ...data, attendance: 'admin' });
