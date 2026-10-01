@@ -23,6 +23,9 @@ export async function signInAdminAction(formData: FormData): Promise<AdminAuthAc
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const password = String(formData.get("password") ?? "");
     supabase = createClient(await cookies());
+    // Drop any sign-in cookies left from another account (e.g. after switching accounts) so the new
+    // session is the only one the dashboard sees. Local scope: no other device or tab is signed out.
+    await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error || !data.user) return { ok: false, error: authErrorMessage(error?.message) };
 
