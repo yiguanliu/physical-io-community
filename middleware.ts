@@ -9,7 +9,10 @@ function hasAdminSessionCookie(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isAdminApp = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
+  // Sign-in, invitation/reset links and their landing page must open without a session cookie:
+  // invitation emails carry the session in the URL fragment, which the server cannot see.
+  const isAdminPublic = ["/admin/login", "/admin/reset-password", "/admin/auth/"].some((path) => pathname.startsWith(path));
+  const isAdminApp = pathname.startsWith("/admin") && !isAdminPublic;
   if (isAdminApp && !hasAdminSessionCookie(request)) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";

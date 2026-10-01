@@ -14,7 +14,7 @@ export default function AdminOnboarding({ steps }: { steps: Steps }) {
   useEffect(() => { try { setHidden(localStorage.getItem(KEY) === signature); } catch { setHidden(false); } }, [signature]);
   if (hidden) return null;
   const items = [
-    { done: true, title: 'Sign in to the workspace', detail: 'You’re in. Keep your password safe; use “Forgot password” on the sign-in page if you need a new one.' },
+    { done: true, title: 'Sign in to the workspace', detail: 'You’re in. If you forget your password, choose “Forgot password?” on the sign-in page to reset it by email.' },
     { done: steps.profile, title: 'Complete your member profile', detail: 'Administrators are community members too. Add your name, role and interests.', href: '/join?onboarding=admin', action: 'Complete profile' },
     { done: steps.photo, title: 'Add a headshot', detail: 'Until you do, your profile shows the Physical I/O logo. Use a clear, recent photo of just you.', href: '/members', action: 'Add photo', disabled: !steps.profile },
     { done: steps.publicProfile, title: 'Make your profile public', detail: 'Open the settings icon on your profile and switch on Public so guests can find you.', href: '/members', action: 'Open my profile', disabled: !steps.profile },

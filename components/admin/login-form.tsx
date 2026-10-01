@@ -160,6 +160,8 @@ export default function LoginForm({ initialStatus, hasAdminConfig = true }: { in
                     {pending ? "Please wait…" : mode === "signin" ? "Sign in" : "Request admin access"}
                     <ArrowUpRight size={17} />
                   </Button>
+                  {/* Admin and member sign-ins share one account, so the member reset sets this password too. */}
+                  {mode === "signin" && <a className="admin-login-forgot" href="/login">Forgot password?</a>}
                 </div>
               </form>
             </section>
