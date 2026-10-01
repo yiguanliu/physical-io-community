@@ -15,6 +15,8 @@ import MarketingWorkspace from './MarketingWorkspace';
 import EventWorkspace from './EventWorkspace';
 import MessageEditor from '@/components/robot/MessageEditor';
 import { AdminSignIn } from './AdminSignIn';
+import AdminOnboarding from './AdminOnboarding';
+import type { AdminOnboarding as OnboardingSteps } from '@/lib/admin/access';
 import { createClient } from '@/utils/supabase/client';
 import type { Member, Lead, Campaign, CommunityEvent, Activity, WorkspaceData, Command } from '@/lib/admin/contracts';
 
@@ -24,7 +26,7 @@ const options = (values: string[]) => values.map(value=>({value,label:value}));
 const tone = (status:string) => status==='Failed'?'danger' as const:['Active','Completed','Sent'].includes(status)?'success' as const:['Review','Needs review'].includes(status)?'warning' as const:'neutral' as const;
 
 
-export default function AdminWorkspace({initialPage='Overview',accessPage,userPage,onboarding=null}:{initialPage?:string;accessPage?:ReactNode;userPage?:ReactNode;onboarding?:'profile'|'photo'|null}) {
+export default function AdminWorkspace({initialPage='Overview',accessPage,userPage,onboarding=null}:{initialPage?:string;accessPage?:ReactNode;userPage?:ReactNode;onboarding?:OnboardingSteps|null}) {
  const router=useRouter();
  const {page,pendingPage,navigate}=useWorkspaceNavigation(initialPage);
  const [identity,setIdentity]=useState({name:'Administrator',avatarUrl:''});
@@ -117,7 +119,7 @@ export default function AdminWorkspace({initialPage='Overview',accessPage,userPa
  {loadError&&<Alert title="Unable to refresh workspace" tone="danger">{loadError}<Button variant="ghost" onClick={()=>void refresh()}>Retry</Button></Alert>}
  {truncated&&<Alert title="Large workspace">Showing the latest 1,000 records per collection. Counts refer to loaded records.</Alert>}
  {error&&!member&&!lead&&!compose&&<Alert title="Unable to save" tone="danger">{error}</Alert>}
- {onboarding&&<div className="admin-onboarding"><Alert title={onboarding==='profile'?'Complete your member profile':'Add your profile photo'}>{onboarding==='profile'?'Administrators are community members too. Complete the member form and add a headshot to finish your onboarding.':'Add a headshot to finish your onboarding. It appears on your profile and in the workspace.'} <a className="ui-button ui-button-primary" href={onboarding==='profile'?'/join?onboarding=admin':'/members'}>{onboarding==='profile'?'Complete profile':'Add photo'}</a></Alert></div>}
+ {onboarding&&<AdminOnboarding steps={onboarding}/>}
  <PageTransition page={page} pendingPage={pendingPage}>
  <Toast message={notice} onDismiss={()=>setNotice('')}/>
  {page==='Access'&&accessPage}

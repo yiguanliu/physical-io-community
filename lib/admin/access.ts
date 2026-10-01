@@ -148,9 +148,36 @@ export async function inviteAdministrator(email:string,actor:{id:string;name:str
 }
 
 /** Onboarding state shown to an administrator until their member profile and headshot are complete. */
-export async function adminOnboarding(email: string) {
+export type AdminOnboarding = { profile: boolean; photo: boolean; publicProfile: boolean; slug: string | null };
+/** Setup checklist for the signed-in administrator; null once every step is done (or on error). */
+export async function adminOnboarding(email: string): Promise<AdminOnboarding | null> {
   try {
     const member = await memberFor(email);
-    return member ? (member.photoUrl ? null : "photo" as const) : "profile" as const;
+    const steps = { profile: Boolean(member), photo: Boolean(member?.photoUrl), publicProfile: Boolean(member?.profilePublic), slug: member?.publicSlug ?? null };
+    return steps.profile && steps.photo && steps.publicProfile ? null : steps;
   } catch { return null; }
+}
+
+/** Super admins set or remove an administrator's photo (the member headshot, also their workspace avatar). */
+export async function setAdminPhoto(input: { userId: string; url: string | null; actor: { id: string; name: string } }) {
+  const target = (await listAdminProfiles()).find((user) => user.id === input.userId);
+  if (!target) throw new Error("User not found.");
+  if (target.role !== ADMIN_ROLE) throw new Error("Only administrators' photos can be managed from Access.");
+  const member = await memberFor(target.email);
+  if (!member) throw new Error("This administrator has not completed their member profile yet.");
+  await database().query("update public.members set photo_url=$2,updated_at=now() where id=$1", [member.memberId, input.url ?? ""]);
+  const { getSupabaseAdminClient } = await import("@/utils/supabase/admin");
+  const supabase = getSupabaseAdminClient();
+  const { data } = await supabase.auth.admin.getUserById(input.userId);
+  // Keep the workspace avatar in step with the member photo.
+  if (data.user) await supabase.auth.admin.updateUserById(input.userId, { user_metadata: { ...data.user.user_metadata, headshot_url: input.url } }).catch(() => undefined);
+  await writeAudit({
+    actorUserId: input.actor.id,
+    actorName: input.actor.name,
+    action: input.url ? "access.photo_set" : "access.photo_removed",
+    entityType: "member",
+    entityId: member.memberId,
+    summary: `${input.url ? "Updated" : "Removed"} the profile photo of ${target.email}`,
+  });
+  return { memberId: member.memberId, slug: member.publicSlug };
 }
