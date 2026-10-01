@@ -11,7 +11,9 @@ import { EPISODES, isUpcoming } from '@/lib/events/catalog';
 import { publicSeats } from '@/lib/rsvp/service';
 import '@/components/events/events.css';
 
-export const dynamic = 'force-dynamic';
+// Served from cache and refreshed each minute, so links to /events (like Learn more on the home page)
+// prefetch the whole page and open instantly. Live seat checks happen in the RSVP form itself.
+export const revalidate = 60;
 export const metadata: Metadata = { title: 'Events | Physical I/O', description: 'Free community gatherings for curious minds. Speaker nights, hackathons and robotics workshops from Physical I/O.', alternates: { canonical: '/events' }, openGraph: { description: 'Free community gatherings for curious minds. Speaker nights, hackathons and robotics workshops from Physical I/O.', title: 'Meet. Share. Build. | Physical I/O', url: '/events' } };
 
 export default async function EventsPage() {

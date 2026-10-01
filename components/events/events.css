@@ -161,3 +161,8 @@
 .ticket-page .ticket-heading{max-width:none}
 .ticket-title-row{justify-content:space-between}
 .public-site .public-main .ticket-heading>p{max-width:60ch}
+
+/* Placeholder for the episode shelf while /events loads. */
+.events-loading{height:min(56vw,420px);border-radius:var(--ui-radius,24px);background:color-mix(in srgb,var(--ui-text) 6%,transparent);animation:events-loading 1.4s ease-in-out infinite alternate}
+@keyframes events-loading{from{opacity:.55}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.events-loading{animation:none}}
