@@ -297,9 +297,20 @@
 .access-candidate{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 10px;border:1px solid transparent;border-radius:var(--ui-radius);background:transparent;color:var(--ui-text);text-align:left}
 .access-candidate>span{display:grid;gap:2px;min-width:0}.access-candidate small{font-size:12px;color:var(--ui-muted);overflow:hidden;text-overflow:ellipsis}
 .access-candidate:hover{background:var(--ui-subtle)}.access-candidate[aria-selected=true]{border-color:var(--ui-action);background:var(--ui-subtle)}
-.admin-onboarding{margin-bottom:var(--ui-space-section)}.admin-onboarding .ui-alert p{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.admin-onboarding{margin-bottom:var(--ui-space-section);display:grid;gap:16px}
+.admin-onboarding-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}.admin-onboarding-head h2{font-size:18px;margin:0 0 4px}
+.admin-onboarding-steps{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.admin-onboarding-steps li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:12px}
+.admin-onboarding-steps li p{margin:2px 0 0}.admin-onboarding-steps li>.ui-button{white-space:nowrap}
+.admin-onboarding-mark{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:600;background:var(--ui-subtle);color:var(--ui-text)}
+.admin-onboarding-steps li[data-done] .admin-onboarding-mark{background:var(--ui-success-bg);color:var(--ui-success)}
+.admin-onboarding-steps li[data-done] strong{color:var(--ui-muted);text-decoration:line-through}
+.admin-onboarding-tip{margin:0}
+@media(max-width:640px){.admin-onboarding-steps li{grid-template-columns:28px minmax(0,1fr)}.admin-onboarding-steps li>.ui-button{grid-column:2;justify-self:start}}
 .admin-member-name{display:inline-flex;align-items:center;gap:6px}
 /* Door check-in toggle in the event guest table: neutral until pressed, green once checked in. */
 .event-checkin{white-space:nowrap;border-radius:999px;border-color:transparent;background:var(--ui-subtle);color:var(--ui-text)}
 .event-checkin[data-checked]{background:var(--ui-success-bg);color:var(--ui-success)}
 .event-checkin[data-checked]:hover{background:color-mix(in srgb,var(--ui-success) 22%,transparent)}
+/* Super admins set an administrator's photo inside the Edit administrator rights dialog. */
+.access-photo{display:grid;gap:8px}
