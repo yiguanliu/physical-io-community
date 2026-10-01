@@ -30,14 +30,17 @@ async function withEvents(m: Record<string, any>): Promise<MemberProfile> {
 }
 
 /**
- * A profile is public only when the member opted in AND verified their email, so nobody can
- * publish a page under someone else's address through the unauthenticated join form.
+ * A profile is public only when it is switched on (by the member, or by a super admin for an
+ * administrator) AND the email is vouched for: verified by the member, or an account a super admin
+ * granted administrator access. Nobody can publish a page under someone else's address through
+ * the unauthenticated join form.
  */
 export async function getPublicProfile(slug: string): Promise<PublicProfile | null> {
   const result = await database().query(
     `select ${PROFILE_FIELDS} from public.members m
      where m.public_slug=$1 and m.profile_public and m.status<>'archived'
-       and exists(select 1 from auth.users u where lower(trim(u.email))=m.email_normalized and u.email_confirmed_at is not null and u.deleted_at is null)`,
+       and exists(select 1 from auth.users u where lower(trim(u.email))=m.email_normalized and u.deleted_at is null
+         and (u.email_confirmed_at is not null or u.raw_app_meta_data->>'admin_role'='admin'))`,
     [slug],
   );
   return result.rows[0] ? await withEvents(result.rows[0]) as PublicProfile : null;
