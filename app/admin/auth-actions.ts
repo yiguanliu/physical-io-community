@@ -10,6 +10,8 @@ export type AdminAuthActionResult =
   | { ok: true; pending?: boolean; confirmationRequired?: boolean }
   | { ok: false; error: string };
 
+const ACCOUNT_EXISTS = "An account already exists for this email. Sign in instead, or use “Forgot password?” to set a new password.";
+
 function authErrorMessage(message?: string) {
   if (!message) return "Authentication failed.";
   if (/invalid login credentials/i.test(message)) return "Email or password is incorrect.";
@@ -59,7 +61,9 @@ export async function requestAdminAccessAction(formData: FormData): Promise<Admi
         data: { name },
       },
     });
-    if (error || !data.user) return { ok: false, error: authErrorMessage(error?.message) };
+    if (error || !data.user) return { ok: false, error: /already registered|already exists/i.test(error?.message ?? "") ? ACCOUNT_EXISTS : authErrorMessage(error?.message) };
+    // An existing email gets a placeholder user with no identities (Supabase hides that the account exists).
+    if (Array.isArray(data.user.identities) && data.user.identities.length === 0) return { ok: false, error: ACCOUNT_EXISTS };
 
     const profile = await ensureAdminProfile(data.user, { email, name });
     if (!profile) {
