@@ -314,3 +314,7 @@
 .event-checkin[data-checked]:hover{background:color-mix(in srgb,var(--ui-success) 22%,transparent)}
 /* Super admins set an administrator's photo inside the Edit administrator rights dialog. */
 .access-photo{display:grid;gap:8px}
+/* "Forgot password?" sits beside Sign in; resets go through the shared member sign-in. */
+.admin-login-submit:has(.admin-login-forgot){display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.admin-login-forgot{font-size:14px;color:var(--ui-muted);text-decoration:underline;text-underline-offset:3px}
+.admin-login-forgot:hover{color:var(--ui-text)}
