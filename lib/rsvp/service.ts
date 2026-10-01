@@ -60,7 +60,7 @@ export async function findRegistration(db: Pick<PoolClient, 'query'>, eventSlug:
   return result.rows[0] ? toRegistration(result.rows[0]) : null;
 }
 
-export type RsvpInput = { eventSlug: string; email: string; attendance: Attendance; category: string; fullName: string; organisation: string; jobTitle: string; linkedin: string; details?: boolean };
+export type RsvpInput = { eventSlug: string; email: string; attendance: Attendance; /** Legacy badge category; '' keeps what's stored. */ category: string; fullName: string; organisation: string; jobTitle: string; linkedin: string; details?: boolean };
 /** Caller owns the transaction. The capacity row lock serialises in-person seat claims. */
 export async function submitRsvp(db: PoolClient, input: RsvpInput) {
   const current = await db.query(`select ${FIELDS},owner_token from public.event_registrations where event_slug=$1 and email_normalized=$2 for update`, [input.eventSlug, input.email]);
@@ -71,15 +71,15 @@ export async function submitRsvp(db: PoolClient, input: RsvpInput) {
     const state = await seats(db, input.eventSlug, true);
     if (state && state.full) throw new SeatsFull();
   }
-  // Badge details come from the in-person step, or from the ticket's edit form for either ticket type.
-  const badge = input.attendance === 'in_person' || Boolean(input.details && input.attendance !== 'not_going');
+  // Badge details come from the in-person or admin step, or from the ticket's edit form for any ticket type.
+  const badge = input.attendance === 'in_person' || input.attendance === 'admin' || Boolean(input.details && input.attendance !== 'not_going');
   let slug = registration.ticketSlug;
   for (let attempt = 0; attempt < 5; attempt++) {
     const candidate = slug ?? ticketSlug(badge && input.fullName ? input.fullName : registration.fullName);
     try {
       await db.query('savepoint rsvp_slug');
       await db.query(
-        `update public.event_registrations set attendance=$2,category=case when $3 then $4 else category end,full_name=case when $3 and $5<>'' then $5 else full_name end,
+        `update public.event_registrations set attendance=$2,category=case when $3 and $4<>'' then $4 else category end,full_name=case when $3 and $5<>'' then $5 else full_name end,
          organisation=case when $3 then $6 else organisation end,job_title=case when $3 then $7 else job_title end,linkedin_url=case when $3 then $8 else linkedin_url end,
          ticket_slug=$9,rsvp_at=now(),updated_at=now() where id=$1`,
         [registration.id, input.attendance, badge, input.category, input.fullName, input.organisation, input.jobTitle, input.linkedin, input.attendance === 'not_going' ? slug : candidate],
@@ -103,7 +103,7 @@ export async function getTicket(eventSlug: string, slug: string, ownerToken?: st
   const result = await database().query(
     `select ${TICKET_FIELDS},(owner_token=$3) is_owner,ticket_emailed_attendance,exists(select 1 from public.members m where m.email_normalized=r.email_normalized) has_member,
       (select m.public_slug from public.members m where m.email_normalized=r.email_normalized and m.profile_public) profile_slug
-     from public.event_registrations r where event_slug=$1 and ticket_slug=$2 and attendance in ('in_person','online')`,
+     from public.event_registrations r where event_slug=$1 and ticket_slug=$2 and attendance in ('in_person','online','admin')`,
     [eventSlug, slug, ownerToken ?? ''],
   );
   const row = result.rows[0];

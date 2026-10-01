@@ -77,7 +77,7 @@ describe('Code 128 barcode', () => {
 });
 
 describe('thermal label', () => {
-  const data = { name: 'Yiguan Liu', category: 'Engineer', jobTitle: 'Founder', organisation: 'Physical <I/O>', linkedin: 'https://www.linkedin.com/in/example', ticketUrl: 'https://www.physical-io.com/t', code: '02-ABCD', attendance: 'in_person' as const, episode: { number: '02', title: 'Robotics', theme: 'Love, Mind + Body', date: '07.10.2026', time: '18:00 ~ 21:00', room: 'LG17 BENTHAM HOUSE' } };
+  const data = { name: 'Yiguan Liu', jobTitle: 'Founder', organisation: 'Physical <I/O>', linkedin: 'https://www.linkedin.com/in/example', ticketUrl: 'https://www.physical-io.com/t', code: '02-ABCD', attendance: 'in_person' as const, episode: { number: '02', title: 'Robotics', theme: 'Love, Mind + Body', date: '07.10.2026', time: '18:00 ~ 21:00', room: 'LG17 BENTHAM HOUSE', address: ['Endsleigh Gardens', 'London WC1H 0EG'] } };
   it('renders every stock size at its physical dimensions in pure black and white', () => {
     for (const size of LABEL_SIZES) {
       const svg = renderLabelSvg(data, size.id);
@@ -89,6 +89,20 @@ describe('thermal label', () => {
     const svg = renderLabelSvg(data);
     expect(svg).toContain('Physical &lt;I/O&gt;');
     expect(svg).not.toContain('<I/O>');
+  });
+  it('prints the job title without a role line or trailing full stop, and the address under the room', () => {
+    const svg = renderLabelSvg(data);
+    expect(svg).toContain('Founder, Physical &lt;I/O&gt;<');
+    expect(svg).not.toContain('ROLE:');
+    expect(svg.indexOf('ROOM: LG17 BENTHAM HOUSE')).toBeLessThan(svg.indexOf('ENDSLEIGH GARDENS'));
+    expect(svg).toContain('LONDON WC1H 0EG');
+    expect(renderLabelSvg({ ...data, attendance: 'online' })).not.toContain('ENDSLEIGH GARDENS');
+  });
+  it('marks admin tickets', () => {
+    const svg = renderLabelSvg({ ...data, attendance: 'admin' });
+    expect(svg).toContain('TICKET: ADMIN');
+    expect(svg).toContain('>ADMIN<');
+    expect(svg).not.toContain('PERSON');
   });
   it('wraps long text and splits names into headline lines', () => {
     expect(wrap('Co-founder and Chief Technology Officer at a very long organisation', 20, 2)).toEqual(['Co-founder and Chief', 'Technology Officer…']);

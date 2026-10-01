@@ -15,6 +15,8 @@ export type PublicEpisode = {
   venueDetail: string;
   /** Short location printed on badges. */
   room: string;
+  /** Street address printed under the room on in-person badges, one entry per line. */
+  address?: string[];
   format: EpisodeFormat;
   /** Livestream window in London time, when it differs from the in-person evening. */
   onlineTime?: string;
@@ -44,6 +46,7 @@ export const EPISODES: PublicEpisode[] = [
     venue: 'Bentham House, Endsleigh Gardens',
     venueDetail: 'LG17 Lecture Room, Bentham House, Endsleigh Gardens, London WC1H 0EG',
     room: 'LG17 Bentham House',
+    address: ['Endsleigh Gardens', 'London WC1H 0EG'],
     format: 'hybrid',
     onlineTime: '18:45–20:15',
     cover: '/assets/episodes/episode-02-robotics.jpg',

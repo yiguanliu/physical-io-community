@@ -136,6 +136,7 @@
 .ticket-chip[data-tone=episode]{background:color-mix(in srgb,var(--ui-accent) 16%,transparent);color:var(--ui-text)}
 .ticket-chip[data-tone=in-person]{background:var(--ui-success-bg);color:var(--ui-success)}
 .ticket-chip[data-tone=online]{background:color-mix(in srgb,var(--verified-blue,#48acf2) 18%,transparent);color:var(--ui-text)}
+.ticket-chip[data-tone=admin]{background:var(--ui-text);color:var(--ui-bg)}
 
 /* Ticket edit dialog. */
 .ticket-edit{display:grid;gap:var(--ui-space-card)}

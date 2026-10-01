@@ -2,20 +2,20 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowUpRight, Check, Pencil } from 'lucide-react';
-import { Alert, Button, Dialog, Field, Select } from '@/workspace-ui/src';
-import { ATTENDEE_CATEGORIES, guessCategory, normalizeLinkedin, type Attendance } from '@/lib/rsvp/model';
+import { Alert, Button, Dialog, Field } from '@/workspace-ui/src';
+import { normalizeLinkedin, type Attendance } from '@/lib/rsvp/model';
 
-type Details = { fullName: string; category: string; jobTitle: string; organisation: string; linkedin: string };
+type Details = { fullName: string; jobTitle: string; organisation: string; linkedin: string };
 const CHOICES: [Attendance, string, string][] = [
   ['in_person', 'In person', 'Printable badge for check-in'],
   ['online', 'Online', 'Google Meet livestream'],
+  ['admin', 'Admin', 'Community operators and special guests only'],
   ['not_going', 'Not going', 'Cancel on Luma'],
 ];
 
 /** Lets the ticket holder correct their badge details or change how they're attending. */
 export default function TicketEdit({ eventSlug, lumaUrl, attendance: current, details: saved }: { eventSlug: string; lumaUrl: string; attendance: Attendance; details: Details }) {
-  // Online RSVPs never chose a category; suggest one from the job title, as the RSVP form does.
-  const initial = { ...saved, category: saved.category || guessCategory(saved.jobTitle) };
+  const initial = saved;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [attendance, setAttendance] = useState<Attendance>(current);
@@ -27,7 +27,6 @@ export default function TicketEdit({ eventSlug, lumaUrl, attendance: current, de
   function reset(next: boolean) { setOpen(next); if (next) { setAttendance(current); setDetails(initial); setError(''); } }
   async function save() {
     if (!details.fullName.trim()) { setError('Add the name for your badge.'); return; }
-    if (!details.category) { setError('Choose what best describes you.'); return; }
     if (details.linkedin.trim() && !normalizeLinkedin(details.linkedin)) { setError('Enter your LinkedIn profile link (linkedin.com/in/your-name).'); return; }
     setBusy(true); setError('');
     try {
@@ -57,7 +56,6 @@ export default function TicketEdit({ eventSlug, lumaUrl, attendance: current, de
         </fieldset>
         {attendance === 'not_going' ? <p className="ticket-hint">We’ll open the event on Luma in a new tab. Choose “Can’t make it” there to cancel and free your place for someone on the waitlist.</p> : <>
           <Field label="Name on badge" required maxLength={160} autoComplete="name" value={details.fullName} onChange={e => setDetails({ ...details, fullName: e.target.value })} />
-          <Select label="What best describes you?" placeholder="Choose one" value={details.category || undefined} onValueChange={category => setDetails({ ...details, category })} options={ATTENDEE_CATEGORIES.map(value => ({ value, label: value }))} />
           <div className="ticket-edit-row">
             <Field label="Job title" maxLength={160} autoComplete="organization-title" value={details.jobTitle} onChange={e => setDetails({ ...details, jobTitle: e.target.value })} />
             <Field label="Company or organisation" maxLength={160} autoComplete="organization" value={details.organisation} onChange={e => setDetails({ ...details, organisation: e.target.value })} />

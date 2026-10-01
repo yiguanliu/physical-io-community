@@ -106,10 +106,10 @@ export default function TicketView({ label, episode, isOwner, emailPending = fal
     <div className="ticket-print" aria-hidden dangerouslySetInnerHTML={{ __html: svg }} />
 
     <header className="ticket-heading">
-      <div className="ticket-chips"><span className="ticket-chip" data-tone="episode">Episode {episode.number}</span><span className="ticket-chip" data-tone={online ? 'online' : 'in-person'}>{online ? 'Online ticket' : 'In-person ticket'}</span></div>
+      <div className="ticket-chips"><span className="ticket-chip" data-tone="episode">Episode {episode.number}</span><span className="ticket-chip" data-tone={online ? 'online' : label.attendance === 'admin' ? 'admin' : 'in-person'}>{online ? 'Online ticket' : label.attendance === 'admin' ? 'Admin ticket' : 'In-person ticket'}</span></div>
       <div className="ticket-title-row">
         <h1>{isOwner ? `You’re in, ${label.name.split(' ')[0]}.` : `${label.name}’s ticket`}</h1>
-        {isOwner && <TicketEdit eventSlug={episode.slug} lumaUrl={episode.lumaUrl} attendance={label.attendance} details={{ fullName: label.name, category: label.category, jobTitle: label.jobTitle, organisation: label.organisation, linkedin: label.linkedin }} />}
+        {isOwner && <TicketEdit eventSlug={episode.slug} lumaUrl={episode.lumaUrl} attendance={label.attendance} details={{ fullName: label.name, jobTitle: label.jobTitle, organisation: label.organisation, linkedin: label.linkedin }} />}
       </div>
       <p>{online ? 'Join the livestream from anywhere. Keep this page to find the Google Meet link.' : 'Show this ticket or your printed label at check-in.'}</p>
       {emailState !== 'idle' && <p className="ticket-email-status" role="status">{emailState === 'sending' ? 'Emailing your ticket…' : emailState === 'sent' ? 'We’ve emailed your ticket to you.' : 'We couldn’t email your ticket just now. Save the image or share the link below.'}</p>}

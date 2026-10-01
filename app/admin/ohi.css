@@ -281,7 +281,7 @@
 
 /* Event guest list: Luma import, in-person capacity and RSVP follow-up. */
 .event-guests .ui-table-scroll{max-height:560px}
-.event-guest-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--ui-space-control);margin:0}
+.event-guest-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--ui-space-control);margin:0}
 .event-guests .ui-table td:first-child,.event-guests .ui-table th:first-child{width:56px}.event-guests .ui-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--ui-action)}
 .event-guest-stats>div{padding:var(--ui-space-card);border-radius:var(--ui-radius);background:var(--ui-subtle)}
 .event-guest-stats dt{font-size:12px;color:var(--ui-muted)}.event-guest-stats small{font-size:12px;color:var(--ui-muted)}.event-guest-stats dd{margin:4px 0 0;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}

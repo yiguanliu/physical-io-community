@@ -2,9 +2,11 @@ import { parseCsv } from '../admin/audience';
 
 export const ATTENDEE_CATEGORIES = ['Designer', 'Engineer', 'Marketer', 'Investor', 'Founder', 'Operator', 'Other'] as const;
 export type AttendeeCategory = (typeof ATTENDEE_CATEGORIES)[number];
-export const ATTENDANCE = ['in_person', 'online', 'not_going'] as const;
+// Admin tickets are for community operators and special guests: in person, outside the guest seat cap.
+export const ATTENDANCE = ['in_person', 'online', 'admin', 'not_going'] as const;
 export type Attendance = (typeof ATTENDANCE)[number];
-export const ATTENDANCE_LABEL: Record<Attendance, string> = { in_person: 'In person', online: 'Online', not_going: 'Not going' };
+export type TicketAttendance = Exclude<Attendance, 'not_going'>;
+export const ATTENDANCE_LABEL: Record<Attendance, string> = { in_person: 'In person', online: 'Online', admin: 'Admin', not_going: 'Not going' };
 
 // Ordered: the first match wins, so "Co-founder & CTO" reads as Founder.
 const CATEGORY_PATTERNS: [AttendeeCategory, RegExp][] = [

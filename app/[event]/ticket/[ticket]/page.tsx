@@ -35,7 +35,7 @@ export default async function TicketPage(props: Params) {
   if (!data) notFound();
   const { episode, registration } = data;
   const path = `/${episode.slug}/ticket/${registration.ticketSlug}`;
-  const attendance = registration.attendance === 'online' ? 'online' : 'in_person';
+  const attendance = registration.attendance === 'online' || registration.attendance === 'admin' ? registration.attendance : 'in_person';
   return <PublicShell>
     <TicketView
       isOwner={registration.isOwner}
@@ -45,9 +45,9 @@ export default async function TicketPage(props: Params) {
       account={registration.profileSlug ? { kind: 'profile', href: `/members/${registration.profileSlug}` } : registration.hasMember ? { kind: 'member', href: '/login' } : { kind: 'join', href: `/join?event=${episode.slug}` }}
       episode={{ slug: episode.slug, number: episode.number, title: episode.title, theme: episode.theme, date: episodeDate(episode), time: attendance === 'online' && episode.onlineTime ? episode.onlineTime : episodeTime(episode), venue: episode.venueDetail, cover: episode.cover, lumaUrl: episode.lumaUrl }}
       label={{
-        name: registration.fullName, category: registration.category, jobTitle: registration.jobTitle, organisation: registration.organisation,
+        name: registration.fullName, jobTitle: registration.jobTitle, organisation: registration.organisation,
         linkedin: registration.linkedin, ticketUrl: `${SITE_URL}${path}`, code: ticketCode(episode.number, registration.ticketSlug!), attendance,
-        episode: { number: episode.number, title: episode.title, theme: episode.theme, date: labelDate(episode), time: (attendance === 'online' && episode.onlineTime ? episode.onlineTime : episodeTime(episode)).replace('–', ' ~ '), room: episode.room.toUpperCase() },
+        episode: { number: episode.number, title: episode.title, theme: episode.theme, date: labelDate(episode), time: (attendance === 'online' && episode.onlineTime ? episode.onlineTime : episodeTime(episode)).replace('–', ' ~ '), room: episode.room.toUpperCase(), address: episode.address },
       }}
     />
   </PublicShell>;
