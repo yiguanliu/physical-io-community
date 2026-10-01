@@ -5,11 +5,12 @@ import { renderEmailHtml } from '@/lib/email/template';
 import { deliverySettings, sendEmail, type EmailTransport } from '@/lib/email/transport';
 import { episodeDate, episodeTime, type PublicEpisode } from '@/lib/events/catalog';
 import { meetUrl } from './service';
+import type { TicketAttendance } from './model';
 
 /** The community team is copied on every ticket confirmation. */
 export const TICKET_EMAIL_CC = ['soul@physical-io.com', 'sylvan@physical-io.com', 'anthony@physical-io.com'];
 
-type Claim = { id: string; email: string; firstName: string; fullName: string; attendance: 'in_person' | 'online'; ticketSlug: string; previous: string | null };
+type Claim = { id: string; email: string; firstName: string; fullName: string; attendance: TicketAttendance; ticketSlug: string; previous: string | null };
 
 /**
  * Claims the confirmation email for the device that owns the ticket: once per ticket type,
@@ -19,7 +20,7 @@ export async function claimTicketEmail(db: Pick<PoolClient, 'query'>, eventSlug:
   const result = await db.query(
     `update public.event_registrations r set ticket_emailed_attendance=r.attendance,ticket_emailed_at=now()
      from (select id,ticket_emailed_attendance previous from public.event_registrations where event_slug=$1 and ticket_slug=$2 and owner_token=$3 for update) old
-     where r.id=old.id and r.attendance in ('in_person','online') and r.ticket_emailed_attendance is distinct from r.attendance
+     where r.id=old.id and r.attendance in ('in_person','online','admin') and r.ticket_emailed_attendance is distinct from r.attendance
      returning r.id,r.email,r.first_name,r.full_name,r.attendance,r.ticket_slug,old.previous`,
     [eventSlug, ticketSlug, ownerToken],
   );
@@ -36,11 +37,12 @@ export function ticketEmail(claim: Claim, episode: PublicEpisode, imageUrl: stri
   const site = deliverySettings().site;
   const ticketUrl = `${site}/${episode.slug}/ticket/${claim.ticketSlug}`;
   const online = claim.attendance === 'online';
+  const kind = online ? 'online' : claim.attendance === 'admin' ? 'admin' : 'in person';
   const meet = online ? meetUrl(episode.slug) : null;
   const when = `${episodeDate(episode)} · ${online && episode.onlineTime ? episode.onlineTime : episodeTime(episode)} (London time)`;
   const body = [
     `Hi ${claim.firstName || claim.fullName.split(' ')[0] || 'there'},`,
-    `You’re in for **Physical I/O Episode ${episode.number}: ${episode.title}**, ${online ? 'joining online' : 'in person'}.`,
+    `You’re in for **Physical I/O Episode ${episode.number}: ${episode.title}**, ${online ? 'joining online' : claim.attendance === 'admin' ? 'in person with an admin ticket' : 'in person'}.`,
     `**When:** ${when}`,
     online
       ? `**Where:** Online via Google Meet${meet ? ` · [Join Google Meet](${meet})` : '. Your ticket shows the link before the event.'}`
@@ -54,9 +56,9 @@ export function ticketEmail(claim: Claim, episode: PublicEpisode, imageUrl: stri
     'See you there,\nPhysical I/O',
   ].join('\n\n');
   return {
-    subject: `Your ticket: Physical I/O Episode ${episode.number}: ${episode.title} (${online ? 'online' : 'in person'})`,
+    subject: `Your ticket: Physical I/O Episode ${episode.number}: ${episode.title} (${kind})`,
     text: markdownToPlainText(body),
-    html: renderEmailHtml({ previewText: `Your ${online ? 'online' : 'in-person'} ticket for Episode ${episode.number}: ${episode.title}`, body, bodyHtml: markdownToHtml(body) }),
+    html: renderEmailHtml({ previewText: `Your ${online ? 'online' : claim.attendance === 'admin' ? 'admin' : 'in-person'} ticket for Episode ${episode.number}: ${episode.title}`, body, bodyHtml: markdownToHtml(body) }),
   };
 }
 

@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, Mail, Upload } from 'lucide-react';
+import { ArrowUpRight, Check, Mail, Upload } from 'lucide-react';
 import { Alert, Badge, Button, Card, DataTable, Dialog, Field, SearchField, Select, Skeleton, Toast, Toolbar, type Column } from '@/workspace-ui/src';
 import EmailComposer from './EmailComposer';
 import CampaignDelivery from './CampaignDelivery';
@@ -10,11 +10,11 @@ import type { SeatState } from '@/lib/rsvp/model';
 import type { Episode } from '@/lib/events/model';
 
 type Data = { events: { slug: string; name: string }[]; event?: string; guests: Registration[]; seats: SeatState | null };
-const RSVP_LABEL: Record<string, string> = { in_person: 'In person', online: 'Online', not_going: 'Not going' };
-const VIEWS = ['Attending', 'In person', 'Online', 'Awaiting RSVP', 'Not going', 'Waitlist', 'All guests'] as const;
+const RSVP_LABEL: Record<string, string> = { in_person: 'In person', online: 'Online', admin: 'Admin', not_going: 'Not going' };
+const VIEWS = ['Attending', 'In person', 'Online', 'Admin', 'Awaiting RSVP', 'Not going', 'Waitlist', 'All guests'] as const;
 type View = (typeof VIEWS)[number];
 const inView = (g: Registration, view: View) => view === 'All guests' ? true
-  : view === 'Attending' ? g.attendance === 'in_person' || g.attendance === 'online'
+  : view === 'Attending' ? g.attendance === 'in_person' || g.attendance === 'online' || g.attendance === 'admin'
   : view === 'Awaiting RSVP' ? g.lumaStatus === 'approved' && !g.attendance
   : view === 'Waitlist' ? g.lumaStatus === 'waitlist'
   : g.attendance === Object.keys(RSVP_LABEL).find(key => RSVP_LABEL[key] === view);
@@ -52,6 +52,7 @@ export default function EventGuests({ eventSlug, compact = false, onOpen }: { ev
   const [notice, setNotice] = useState('');
   const [compose, setCompose] = useState<{ ids: string[]; subject: string; body: string } | null>(null);
   const [delivery, setDelivery] = useState<string | null>(null);
+  const [checking, setChecking] = useState<string[]>([]);
   const file = useRef<HTMLInputElement>(null);
   const request = useRef<{ signature: string; id: string } | null>(null);
 
@@ -66,8 +67,20 @@ export default function EventGuests({ eventSlug, compact = false, onOpen }: { ev
   const guests = data?.guests ?? [];
   const shown = useMemo(() => guests.filter(g => inView(g, view) && `${g.fullName} ${g.email} ${g.organisation} ${g.jobTitle}`.toLowerCase().includes(query.trim().toLowerCase())), [guests, view, query]);
   const count = (predicate: (g: Registration) => boolean) => guests.filter(predicate).length;
-  const inPerson = count(g => g.attendance === 'in_person'), online = count(g => g.attendance === 'online');
+  const inPerson = count(g => g.attendance === 'in_person'), online = count(g => g.attendance === 'online'), admins = count(g => g.attendance === 'admin');
   const eventName = data?.events.find(e => e.slug === event)?.name ?? 'Event';
+
+  // Check-in toggles at the door: pressing again reverts. The row updates immediately and rolls back on failure.
+  async function toggleCheckIn(guest: Registration) {
+    const checkedIn = !guest.checkedInAt;
+    const patch = (checkedInAt: string | null) => setData(current => current && { ...current, guests: current.guests.map(g => g.id === guest.id ? { ...g, checkedInAt } : g) });
+    setChecking(current => [...current, guest.id]); setError('');
+    patch(checkedIn ? new Date().toISOString() : null);
+    try {
+      const result = await post('/api/admin/event-guests', { action: 'checkin', event, id: guest.id, checkedIn });
+      patch(result.checkedInAt ?? null);
+    } catch (e) { patch(guest.checkedInAt); setError((e as Error).message); } finally { setChecking(current => current.filter(id => id !== guest.id)); }
+  }
 
   async function saveCapacity() {
     setBusy('capacity'); setError('');
@@ -104,9 +117,10 @@ export default function EventGuests({ eventSlug, compact = false, onOpen }: { ev
   if (!data) return <Card className="admin-stack"><h2>Guests & RSVP</h2>{error ? <Alert title="Guest list unavailable" tone="danger">{error}</Alert> : <Skeleton label="Loading guest list" />}</Card>;
 
   const stats = <dl className="event-guest-stats">
-    <div><dt>Attending</dt><dd>{inPerson + online}</dd></div>
+    <div><dt>Attending</dt><dd>{inPerson + online + admins}</dd><small>{count(g => Boolean(g.checkedInAt))} checked in</small></div>
     <div><dt>In person</dt><dd>{data.seats ? `${inPerson} / ${data.seats.capacity}` : inPerson}</dd>{data.seats && <small>{data.seats.full ? 'Full' : `${data.seats.left} seats left`}</small>}</div>
     <div><dt>Online</dt><dd>{online}</dd></div>
+    <div><dt>Admin</dt><dd>{admins}</dd><small>Operators and special guests, outside the seat cap</small></div>
     <div><dt>Awaiting RSVP</dt><dd>{count(g => g.lumaStatus === 'approved' && !g.attendance)}</dd><small>of {count(g => g.lumaStatus === 'approved')} approved on Luma</small></div>
     <div><dt>Not going</dt><dd>{count(g => g.attendance === 'not_going')}</dd></div>
   </dl>;
@@ -119,10 +133,12 @@ export default function EventGuests({ eventSlug, compact = false, onOpen }: { ev
   const allShownSelected = shown.length > 0 && shown.every(g => selected.includes(g.id));
   const columns: Column<Registration>[] = [
     { key: 'select', label: 'Select', render: g => <input type="checkbox" aria-label={`Select ${g.fullName || g.email}`} checked={selected.includes(g.id)} onChange={e => setSelected(current => e.target.checked ? [...current, g.id] : current.filter(id => id !== g.id))} /> },
+    { key: 'checkin', label: 'Check-in', sortValue: g => g.checkedInAt ?? '', render: g => <Button className="event-checkin" data-checked={g.checkedInAt ? true : undefined} variant="ghost" aria-pressed={Boolean(g.checkedInAt)} disabled={checking.includes(g.id)} title={g.checkedInAt ? 'Press again to undo check-in' : undefined} onClick={() => toggleCheckIn(g)}>
+      {g.checkedInAt ? <><Check size={14} aria-hidden />Checked in {new Date(g.checkedInAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' })}</> : 'Check in'}
+    </Button> },
     { key: 'name', label: 'Guest', sortValue: g => g.fullName.toLowerCase(), render: g => <div className="event-guest-name"><strong>{g.fullName || '—'}</strong><span className="admin-muted">{g.email}</span></div> },
     { key: 'rsvp', label: 'RSVP', sortValue: g => g.attendance ?? '', render: g => g.attendance ? <Badge tone={g.attendance === 'not_going' ? 'neutral' : 'success'}>{RSVP_LABEL[g.attendance]}</Badge> : <span className="admin-muted">Awaiting</span> },
     { key: 'luma', label: 'Luma', sortValue: g => g.lumaStatus, render: g => <Badge tone={statusTone(g.lumaStatus)}>{g.lumaStatus}</Badge> },
-    { key: 'category', label: 'Badge', sortValue: g => g.category, render: g => g.category || <span className="admin-muted">—</span> },
     { key: 'org', label: 'Organisation', sortValue: g => g.organisation.toLowerCase(), render: g => <div className="event-guest-name"><span>{g.organisation || '—'}</span>{g.jobTitle && <span className="admin-muted">{g.jobTitle}</span>}</div> },
     { key: 'when', label: 'RSVP’d', sortValue: g => g.rsvpAt ?? '', render: g => g.rsvpAt ? new Date(g.rsvpAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/London' }) : <span className="admin-muted">—</span> },
     { key: 'ticket', label: 'Ticket', render: g => g.ticketSlug && g.attendance !== 'not_going' ? <a className="ui-button ui-button-ghost" href={`/${event}/ticket/${g.ticketSlug}`} target="_blank" rel="noopener noreferrer">Open<ArrowUpRight size={14} aria-hidden /></a> : <span className="admin-muted">—</span> },

@@ -281,7 +281,7 @@
 
 /* Event guest list: Luma import, in-person capacity and RSVP follow-up. */
 .event-guests .ui-table-scroll{max-height:560px}
-.event-guest-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--ui-space-control);margin:0}
+.event-guest-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--ui-space-control);margin:0}
 .event-guests .ui-table td:first-child,.event-guests .ui-table th:first-child{width:56px}.event-guests .ui-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--ui-action)}
 .event-guest-stats>div{padding:var(--ui-space-card);border-radius:var(--ui-radius);background:var(--ui-subtle)}
 .event-guest-stats dt{font-size:12px;color:var(--ui-muted)}.event-guest-stats small{font-size:12px;color:var(--ui-muted)}.event-guest-stats dd{margin:4px 0 0;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -299,3 +299,7 @@
 .access-candidate:hover{background:var(--ui-subtle)}.access-candidate[aria-selected=true]{border-color:var(--ui-action);background:var(--ui-subtle)}
 .admin-onboarding{margin-bottom:var(--ui-space-section)}.admin-onboarding .ui-alert p{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
 .admin-member-name{display:inline-flex;align-items:center;gap:6px}
+/* Door check-in toggle in the event guest table: neutral until pressed, green once checked in. */
+.event-checkin{white-space:nowrap;border-radius:999px;border-color:transparent;background:var(--ui-subtle);color:var(--ui-text)}
+.event-checkin[data-checked]{background:var(--ui-success-bg);color:var(--ui-success)}
+.event-checkin[data-checked]:hover{background:color-mix(in srgb,var(--ui-success) 22%,transparent)}

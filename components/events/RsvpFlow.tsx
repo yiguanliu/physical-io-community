@@ -3,16 +3,16 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Moon, Sun } from 'lucide-react';
-import { Button, IconButton, Field, Select, ThemeProvider, defaultTheme } from '@/workspace-ui/src';
+import { Button, IconButton, Field, ThemeProvider, defaultTheme } from '@/workspace-ui/src';
 import LogoMark from '@/workspace-ui/app/LogoMark';
-import { ATTENDEE_CATEGORIES, normalizeLinkedin, type Attendance, type SeatState } from '@/lib/rsvp/model';
+import { normalizeLinkedin, ATTENDANCE_LABEL, type Attendance, type SeatState } from '@/lib/rsvp/model';
 import '@/workspace-ui/src/styles.css';
 import styles from '@/app/join/join.module.css';
 import rsvp from './rsvp.module.css';
 import homeStyles from '@/components/HomeCommunity.module.css';
 
 type Episode = { slug: string; number: string; title: string; date: string; time: string; venue: string; lumaUrl: string };
-type Badge = { fullName: string; organisation: string; jobTitle: string; linkedin: string; category: string };
+type Badge = { fullName: string; organisation: string; jobTitle: string; linkedin: string };
 type Lookup =
   | { status: 'not_found'; lumaUrl: string }
   | { status: 'found'; eligibility: 'eligible' | 'waitlist' | 'invited' | 'declined'; firstName: string; attendance: Attendance | null; seats: SeatState | null; badge: Badge | null; lumaUrl: string };
@@ -38,7 +38,7 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
   const [email, setEmail] = useState('');
   const [lookup, setLookup] = useState<Lookup | null>(null);
   const [attendance, setAttendance] = useState<Attendance | null>(null);
-  const [badge, setBadge] = useState<Badge>({ fullName: '', organisation: '', jobTitle: '', linkedin: '', category: '' });
+  const [badge, setBadge] = useState<Badge>({ fullName: '', organisation: '', jobTitle: '', linkedin: '' });
   const [seats, setSeats] = useState(initialSeats);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -51,6 +51,7 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
   const found = lookup?.status === 'found' ? lookup : null;
   // A guest who already holds an in-person seat keeps it even when the room is full.
   const inPersonFull = Boolean(seats?.full) && found?.attendance !== 'in_person';
+  const admin = attendance === 'admin';
 
   async function findMe() {
     setBusy(true); setError('');
@@ -68,7 +69,7 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
   async function submit(choice: Attendance) {
     setBusy(true); setError('');
     try {
-      const result = await post({ action: 'submit', event: episode.slug, email, attendance: choice, ...(choice === 'in_person' ? badge : {}) });
+      const result = await post({ action: 'submit', event: episode.slug, email, attendance: choice, ...(choice === 'in_person' || choice === 'admin' ? badge : {}) });
       router.push(result.redirectTo);
     } catch (e) {
       const failure = e as Error & { seatsFull?: boolean };
@@ -83,14 +84,14 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
     if (step === 'attendance') {
       if (!attendance) { setError('Choose how you’ll join us.'); return; }
       if (attendance === 'in_person') { if (inPersonFull) { setError('In-person places are full. Choose online instead.'); return; } setStep('badge'); return; }
+      if (attendance === 'admin') { setStep('badge'); return; }
       if (attendance === 'not_going') { setStep('leaving'); return; }
       void submit('online'); return;
     }
     if (step === 'badge') {
       if (!badge.fullName.trim()) { setError('Add the name for your badge.'); return; }
-      if (!badge.category) { setError('Choose what best describes you.'); return; }
       if (badge.linkedin.trim() && !normalizeLinkedin(badge.linkedin)) { setError('Enter your LinkedIn profile link (linkedin.com/in/your-name).'); return; }
-      void submit('in_person'); return;
+      void submit(admin ? 'admin' : 'in_person'); return;
     }
   }
   // Cancelling happens on Luma: open it in a new tab straight away and record the choice in the
@@ -132,7 +133,7 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
         {step === 'found' && found && <>
           <div className={styles.check}><Check size={28} /></div>
           <h1 ref={heading} tabIndex={-1}>Found you, {found.firstName}.</h1>
-          <p>You’re registered for Episode {episode.number}: {episode.title} on {episode.date}, {episode.time}. {found.attendance ? `You previously chose ${found.attendance === 'in_person' ? 'in person' : found.attendance === 'online' ? 'online' : 'not going'}; you can change it now.` : 'Next, tell us how you’ll join.'}</p>
+          <p>You’re registered for Episode {episode.number}: {episode.title} on {episode.date}, {episode.time}. {found.attendance ? `You previously chose ${ATTENDANCE_LABEL[found.attendance].toLowerCase()}; you can change it now.` : 'Next, tell us how you’ll join.'}</p>
         </>}
         {step === 'attendance' && <>
           <h1 ref={heading} tabIndex={-1}>How will you join us?</h1>
@@ -141,6 +142,7 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
             {([
               ['in_person', 'Attending in person', inPersonFull ? 'In-person is full. Join us online instead.' : `${episode.venue}. Get a printable badge for check-in.`],
               ['online', 'Attending online', 'Watch the livestream and get the Google Meet link.'],
+              ['admin', 'Admin', 'Only for community operators and special guests. Get an admin badge for check-in.'],
               ['not_going', 'Not going', 'Cancel on Luma so someone else can take your place.'],
             ] as [Attendance, string, string][]).map(([value, label, hint]) => {
               const disabled = value === 'in_person' && inPersonFull;
@@ -151,11 +153,10 @@ export default function RsvpFlow({ episode, initialSeats, closed }: { episode: E
           </div>
         </>}
         {step === 'badge' && <>
-          <h1 ref={heading} tabIndex={-1}>Confirm your badge.</h1>
-          <p>This prints on your label at check-in. The QR code links to your LinkedIn.</p>
+          <h1 ref={heading} tabIndex={-1}>{admin ? 'Confirm your admin badge.' : 'Confirm your badge.'}</h1>
+          <p>{admin ? 'Admin tickets are for community operators and special guests. This prints on your label at check-in.' : 'This prints on your label at check-in.'} The QR code links to your LinkedIn.</p>
           <div className={rsvp.fields}>
             <Field label="Name on badge" required maxLength={160} autoComplete="name" value={badge.fullName} onChange={event => setBadge({ ...badge, fullName: event.target.value })} />
-            <Select label="What best describes you?" placeholder="Choose one" value={badge.category || undefined} onValueChange={category => setBadge({ ...badge, category })} options={ATTENDEE_CATEGORIES.map(value => ({ value, label: value }))} />
             <Field label="Job title" maxLength={160} autoComplete="organization-title" value={badge.jobTitle} onChange={event => setBadge({ ...badge, jobTitle: event.target.value })} />
             <Field label="Company or organisation" maxLength={160} autoComplete="organization" value={badge.organisation} onChange={event => setBadge({ ...badge, organisation: event.target.value })} />
             <Field label="LinkedIn profile" type="url" maxLength={500} placeholder="linkedin.com/in/your-name" value={badge.linkedin} onChange={event => setBadge({ ...badge, linkedin: event.target.value })} />

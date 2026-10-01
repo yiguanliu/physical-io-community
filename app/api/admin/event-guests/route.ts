@@ -6,7 +6,7 @@ import { isAdmin } from '@/lib/admin/contracts';
 import { database } from '@/lib/admin/database';
 import { EPISODES, findEpisode } from '@/lib/events/catalog';
 import { parseLumaCsv } from '@/lib/rsvp/model';
-import { adminGuests, importGuests, setCapacity } from '@/lib/rsvp/service';
+import { adminGuests, importGuests, RsvpNotAllowed, setCapacity, setCheckIn } from '@/lib/rsvp/service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -16,6 +16,7 @@ const eventSlug = z.string().refine(slug => Boolean(findEpisode(slug)?.rsvp), 'U
 const schema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('capacity'), event: eventSlug, capacity: z.number().int().min(0).max(5000) }),
   z.object({ action: z.literal('import'), event: eventSlug, csv: z.string().min(1).max(5_000_000) }),
+  z.object({ action: z.literal('checkin'), event: eventSlug, id: z.uuid(), checkedIn: z.boolean() }),
 ]);
 
 export async function GET(request: Request) {
@@ -38,22 +39,30 @@ export async function POST(request: Request) {
   const client = await database().connect();
   try {
     await client.query('begin');
-    let summary: string, result: object = {};
-    if (input.action === 'capacity') {
+    let summary: string, result: object = {}, action: string;
+    if (input.action === 'checkin') {
+      const guest = await setCheckIn(client, input.event, input.id, input.checkedIn, actor);
+      result = { checkedInAt: guest.checkedInAt };
+      action = input.checkedIn ? 'event.guest.checkin' : 'event.guest.checkin_reverted';
+      summary = `${input.event}: ${guest.name || 'Guest'} ${input.checkedIn ? 'checked in' : 'check-in reverted'}`;
+    } else if (input.action === 'capacity') {
       await setCapacity(client, input.event, input.capacity, actor);
+      action = 'event.capacity';
       summary = `${input.event}: in-person capacity set to ${input.capacity}`;
     } else {
       const { guests, errors } = parseLumaCsv(input.csv);
       if (!guests.length) { await client.query('rollback'); return json({ error: errors[0] ?? 'No guests found in this file.' }, 400); }
       const counts = await importGuests(client, input.event, guests);
       result = { ...counts, skipped: errors.length };
+      action = 'event.guests.import';
       summary = `${input.event}: Luma guests imported (${counts.created} new, ${counts.updated} updated, ${errors.length} skipped)`;
     }
-    await client.query("insert into public.audit_log(actor_user_id,actor_name,action,entity_type,entity_id,summary) values($1,$2,$3,'event',$4,$5)", [user.id, actor, `event.${input.action === 'capacity' ? 'capacity' : 'guests.import'}`, input.event, summary]);
+    await client.query("insert into public.audit_log(actor_user_id,actor_name,action,entity_type,entity_id,summary) values($1,$2,$3,'event',$4,$5)", [user.id, actor, action, input.event, summary]);
     await client.query('commit');
     return json({ ok: true, ...result });
-  } catch {
+  } catch (error) {
     await client.query('rollback');
+    if (error instanceof RsvpNotAllowed) return json({ error: 'This guest is no longer on the list. Refresh and try again.' }, 404);
     console.error('Event guest update failed');
     return json({ error: 'The change could not be saved. Please retry.' }, 503);
   } finally { client.release(); }

@@ -1,5 +1,6 @@
 import QRCode from 'qrcode';
 import { code128Bars } from './code128';
+import type { TicketAttendance } from './model';
 import { PHYSICAL_IO_MARK_PATH } from '@/workspace-ui/app/LogoMark';
 
 // Thermal label artwork. One SVG drives the screen preview, printing and PNG export.
@@ -16,14 +17,13 @@ export function labelSize(id: string) { return LABEL_SIZES.find(size => size.id 
 
 export type LabelData = {
   name: string;
-  category: string;
   jobTitle: string;
   organisation: string;
   linkedin: string;
   ticketUrl: string;
   code: string;
-  attendance: 'in_person' | 'online';
-  episode: { number: string; title: string; theme: string; date: string; time: string; room: string };
+  attendance: TicketAttendance;
+  episode: { number: string; title: string; theme: string; date: string; time: string; room: string; address?: string[] };
 };
 
 const FONT = `'Helvetica Neue',Helvetica,Arial,sans-serif`;
@@ -102,8 +102,8 @@ export function renderLabelSvg(data: LabelData, sizeId: string = '100x150') {
 
   // Headline + tagline fill the space between the header and the rule.
   const lines = nameLines(data.name);
-  const tagline = [data.jobTitle || data.category, data.organisation].filter(Boolean).join(', ');
-  const tagLines = tagline ? wrap(`${tagline}.`, 34, 2) : [];
+  const tagline = [data.jobTitle, data.organisation].filter(Boolean).join(', ');
+  const tagLines = tagline ? wrap(tagline, 34, 2) : [];
   const top = headerBase + 10, tagBlock = tagLines.length * 6.2 + (tagLines.length ? 5 : 0);
   const longest = Math.max(...lines.map(line => line.length));
   const size0 = Math.min(26, (W - 2 * m) / (longest * BOLD_CAPS), (rule - 5 - tagBlock - top) / (lines.length * .96));
@@ -116,13 +116,15 @@ export function renderLabelSvg(data: LabelData, sizeId: string = '100x150') {
   parts.push(barcode(data.code, m, barY, col, barH));
   parts.push(text(m + col / 2, barY + barH + 4.2, 3.4, data.code.split('').join(' '), { font: MONO, anchor: 'middle', weight: 700 }));
   const specs = [
-    `TICKET: ${data.attendance === 'online' ? 'ONLINE' : 'IN PERSON'}`,
-    `ROLE: ${(data.category || 'GUEST').toUpperCase()}`,
+    `TICKET: ${data.attendance === 'online' ? 'ONLINE' : data.attendance === 'admin' ? 'ADMIN' : 'IN PERSON'}`,
     `DATE: ${data.episode.date}`,
     `TIME: ${data.episode.time}`,
     data.attendance === 'online' ? 'ROOM: GOOGLE MEET' : `ROOM: ${data.episode.room}`,
+    // The street address sits under the room; it uses part of the gap above the QR row.
+    ...(data.attendance === 'online' ? [] : (data.episode.address ?? []).map(line => line.toUpperCase())),
   ];
-  const rowH = barH + 4.6, specSize = Math.min(3.3, col / (Math.max(...specs.map(x => x.length)) * CAPS));
+  // With the address the block runs slightly smaller and lower, leaving a clear gap above the episode line.
+  const extra = specs.length > 4, rowH = barH + 4.6 + (extra ? 2 : 0), specSize = Math.min(extra ? 3 : 3.3, col / (Math.max(...specs.map(x => x.length)) * CAPS));
   specs.forEach((line, i) => parts.push(text(right, barY + specSize * .75 + i * (rowH - specSize * .75) / (specs.length - 1), specSize, line)));
 
   // Row 2 — left: LinkedIn QR (falls back to the ticket page) with its caption beneath;
@@ -131,7 +133,7 @@ export function renderLabelSvg(data: LabelData, sizeId: string = '100x150') {
   parts.push(text(m, bottom - 3.4, 2.7, data.linkedin ? 'SCAN TO CONNECT' : 'SCAN FOR TICKET', { weight: 700 }));
   parts.push(text(m, bottom, 2.7, data.linkedin ? 'ON LINKEDIN' : 'DETAILS'));
   parts.push(text(right, qrY + 2.4, 3, `EP.${data.episode.number} ${data.episode.title.toUpperCase()}`, { weight: 700 }));
-  const mark = data.attendance === 'online' ? ['ONLINE'] : ['IN', 'PERSON'];
+  const mark = data.attendance === 'online' ? ['ONLINE'] : data.attendance === 'admin' ? ['ADMIN'] : ['IN', 'PERSON'];
   const markSize = Math.min(10, col / (Math.max(...mark.map(word => word.length)) * BOLD_CAPS));
   const markBase = bottom - 5.6;
   mark.forEach((word, i) => parts.push(text(right - markSize * .04, markBase - (mark.length - 1 - i) * markSize * .9, markSize, word, { weight: 700, spacing: -markSize * .03 })));

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { z } from 'zod';
 import { database } from '@/lib/admin/database';
 import { findEpisode, isUpcoming } from '@/lib/events/catalog';
-import { ATTENDANCE, ATTENDEE_CATEGORIES, guessCategory, normalizeLinkedin, rsvpEligibility } from '@/lib/rsvp/model';
+import { ATTENDANCE, normalizeLinkedin, rsvpEligibility } from '@/lib/rsvp/model';
 import { findRegistration, ownerCookie, rateLimit, RsvpNotAllowed, RsvpRateLimit, seats, SeatsFull, submitRsvp } from '@/lib/rsvp/service';
 
 export const runtime = 'nodejs';
@@ -14,15 +14,15 @@ const schema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('lookup'), event: z.string().max(80), email }),
   z.object({
     action: z.literal('submit'), event: z.string().max(80), email, attendance: z.enum(ATTENDANCE),
-    category: z.union([z.enum(ATTENDEE_CATEGORIES), z.literal('')]).default(''), fullName: text.default(''), organisation: text.default(''), jobTitle: text.default(''),
+    fullName: text.default(''), organisation: text.default(''), jobTitle: text.default(''),
     linkedin: z.string().trim().max(500).default('').refine(value => !value || Boolean(normalizeLinkedin(value)), 'Enter your LinkedIn profile link (linkedin.com/in/your-name).'),
-  }).refine(value => value.attendance !== 'in_person' || (value.fullName && value.category), { message: 'Add your name and choose what best describes you.' }),
+  }).refine(value => (value.attendance !== 'in_person' && value.attendance !== 'admin') || value.fullName, { message: 'Add the name for your badge.' }),
   // Ticket holders editing their ticket: identified by the RSVP cookie on this device, not by email.
   z.object({
     action: z.literal('update'), event: z.string().max(80), attendance: z.enum(ATTENDANCE),
-    category: z.union([z.enum(ATTENDEE_CATEGORIES), z.literal('')]).default(''), fullName: text.default(''), organisation: text.default(''), jobTitle: text.default(''),
+    fullName: text.default(''), organisation: text.default(''), jobTitle: text.default(''),
     linkedin: z.string().trim().max(500).default('').refine(value => !value || Boolean(normalizeLinkedin(value)), 'Enter your LinkedIn profile link (linkedin.com/in/your-name).'),
-  }).refine(value => value.attendance === 'not_going' || (value.fullName && value.category), { message: 'Add your name and choose what best describes you.' }),
+  }).refine(value => value.attendance === 'not_going' || value.fullName, { message: 'Add the name for your badge.' }),
 ]);
 
 export async function POST(request: Request) {
@@ -57,7 +57,6 @@ export async function POST(request: Request) {
         attendance: registration.attendance, seats: state,
         badge: eligibility === 'eligible' ? {
           fullName: registration.fullName, organisation: registration.organisation, jobTitle: registration.jobTitle, linkedin: registration.linkedin,
-          category: registration.category || guessCategory(registration.jobTitle),
         } : null,
         lumaUrl: episode.lumaUrl,
       });
@@ -69,7 +68,7 @@ export async function POST(request: Request) {
       if (!owned?.rowCount) { await db.query('rollback'); return json({ error: 'Only the ticket holder can edit this ticket, on the device used to RSVP.' }, 403); }
       email = owned.rows[0].email_normalized;
     }
-    const result = await submitRsvp(db, { ...input, email, details: input.action === 'update', eventSlug: episode.slug, linkedin: normalizeLinkedin(input.linkedin) });
+    const result = await submitRsvp(db, { ...input, email, details: input.action === 'update', eventSlug: episode.slug, category: '', linkedin: normalizeLinkedin(input.linkedin) });
     await db.query('commit');
     (await cookies()).set(ownerCookie(episode.slug), result.ownerToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 120 });
     if (input.attendance === 'not_going') return json({ ok: true, redirectTo: episode.lumaUrl });

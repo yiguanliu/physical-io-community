@@ -12,6 +12,7 @@ export type Registration = {
   id: string; eventSlug: string; email: string; fullName: string; firstName: string; lastName: string;
   organisation: string; jobTitle: string; linkedin: string; lumaStatus: string;
   attendance: Attendance | null; category: string; ticketSlug: string | null; memberId: string | null; rsvpAt: string | null;
+  checkedInAt: string | null;
 };
 type Row = Record<string, unknown>;
 const toRegistration = (r: Row): Registration => ({
@@ -19,8 +20,9 @@ const toRegistration = (r: Row): Registration => ({
   organisation: String(r.organisation), jobTitle: String(r.job_title), linkedin: String(r.linkedin_url), lumaStatus: String(r.luma_status),
   attendance: (r.attendance as Attendance | null) ?? null, category: String(r.category ?? ''), ticketSlug: (r.ticket_slug as string | null) ?? null,
   memberId: (r.member_id as string | null) ?? null, rsvpAt: r.rsvp_at ? new Date(r.rsvp_at as string).toISOString() : null,
+  checkedInAt: r.checked_in_at ? new Date(r.checked_in_at as string).toISOString() : null,
 });
-const FIELDS = 'id,event_slug,email,full_name,first_name,last_name,organisation,job_title,linkedin_url,luma_status,attendance,category,ticket_slug,member_id,rsvp_at';
+const FIELDS = 'id,event_slug,email,full_name,first_name,last_name,organisation,job_title,linkedin_url,luma_status,attendance,category,ticket_slug,member_id,rsvp_at,checked_in_at';
 
 /** Per-event httpOnly cookie that marks the device which completed the RSVP. */
 export const ownerCookie = (eventSlug: string) => `pio_rsvp_${eventSlug.replace(/[^a-z0-9]/gi, '_')}`;
@@ -60,7 +62,7 @@ export async function findRegistration(db: Pick<PoolClient, 'query'>, eventSlug:
   return result.rows[0] ? toRegistration(result.rows[0]) : null;
 }
 
-export type RsvpInput = { eventSlug: string; email: string; attendance: Attendance; category: string; fullName: string; organisation: string; jobTitle: string; linkedin: string; details?: boolean };
+export type RsvpInput = { eventSlug: string; email: string; attendance: Attendance; /** Legacy badge category; '' keeps what's stored. */ category: string; fullName: string; organisation: string; jobTitle: string; linkedin: string; details?: boolean };
 /** Caller owns the transaction. The capacity row lock serialises in-person seat claims. */
 export async function submitRsvp(db: PoolClient, input: RsvpInput) {
   const current = await db.query(`select ${FIELDS},owner_token from public.event_registrations where event_slug=$1 and email_normalized=$2 for update`, [input.eventSlug, input.email]);
@@ -71,15 +73,15 @@ export async function submitRsvp(db: PoolClient, input: RsvpInput) {
     const state = await seats(db, input.eventSlug, true);
     if (state && state.full) throw new SeatsFull();
   }
-  // Badge details come from the in-person step, or from the ticket's edit form for either ticket type.
-  const badge = input.attendance === 'in_person' || Boolean(input.details && input.attendance !== 'not_going');
+  // Badge details come from the in-person or admin step, or from the ticket's edit form for any ticket type.
+  const badge = input.attendance === 'in_person' || input.attendance === 'admin' || Boolean(input.details && input.attendance !== 'not_going');
   let slug = registration.ticketSlug;
   for (let attempt = 0; attempt < 5; attempt++) {
     const candidate = slug ?? ticketSlug(badge && input.fullName ? input.fullName : registration.fullName);
     try {
       await db.query('savepoint rsvp_slug');
       await db.query(
-        `update public.event_registrations set attendance=$2,category=case when $3 then $4 else category end,full_name=case when $3 and $5<>'' then $5 else full_name end,
+        `update public.event_registrations set attendance=$2,category=case when $3 and $4<>'' then $4 else category end,full_name=case when $3 and $5<>'' then $5 else full_name end,
          organisation=case when $3 then $6 else organisation end,job_title=case when $3 then $7 else job_title end,linkedin_url=case when $3 then $8 else linkedin_url end,
          ticket_slug=$9,rsvp_at=now(),updated_at=now() where id=$1`,
         [registration.id, input.attendance, badge, input.category, input.fullName, input.organisation, input.jobTitle, input.linkedin, input.attendance === 'not_going' ? slug : candidate],
@@ -103,7 +105,7 @@ export async function getTicket(eventSlug: string, slug: string, ownerToken?: st
   const result = await database().query(
     `select ${TICKET_FIELDS},(owner_token=$3) is_owner,ticket_emailed_attendance,exists(select 1 from public.members m where m.email_normalized=r.email_normalized) has_member,
       (select m.public_slug from public.members m where m.email_normalized=r.email_normalized and m.profile_public) profile_slug
-     from public.event_registrations r where event_slug=$1 and ticket_slug=$2 and attendance in ('in_person','online')`,
+     from public.event_registrations r where event_slug=$1 and ticket_slug=$2 and attendance in ('in_person','online','admin')`,
     [eventSlug, slug, ownerToken ?? ''],
   );
   const row = result.rows[0];
@@ -148,6 +150,18 @@ export async function setCapacity(db: PoolClient, eventSlug: string, capacity: n
      on conflict(event_slug) do update set in_person_capacity=excluded.in_person_capacity,updated_by_name=excluded.updated_by_name,updated_at=now()`,
     [eventSlug, capacity, actor],
   );
+}
+
+/** Marks a guest as checked in at the door, or reverts it. Returns the stored check-in time, or null. */
+export async function setCheckIn(db: PoolClient, eventSlug: string, id: string, checkedIn: boolean, actor: string) {
+  const result = await db.query(
+    `update public.event_registrations set checked_in_at=case when $3 then coalesce(checked_in_at,now()) end,checked_in_by_name=case when $3 then $4 else '' end,updated_at=now()
+     where event_slug=$1 and id=$2 returning full_name,checked_in_at`,
+    [eventSlug, id, checkedIn, actor],
+  );
+  if (!result.rowCount) throw new RsvpNotAllowed('unknown_guest');
+  const row = result.rows[0];
+  return { name: String(row.full_name), checkedInAt: row.checked_in_at ? new Date(row.checked_in_at).toISOString() : null };
 }
 
 export async function adminGuests(eventSlug: string) {
