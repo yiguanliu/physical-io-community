@@ -20,7 +20,7 @@ export default async function MembersPage() {
   return <PublicShell member>
     <PendingPhotoUpload />
     <ProfileView profile={profile} owner={{
-      settings: <ProfileSettingsButton profile={{ slug: profile.slug, name: profile.name, jobTitle: profile.jobTitle, company: profile.company, bio: profile.bio, isPublic: profile.isPublic, photoUrl: profile.photoUrl, communityAdmin: profile.communityAdmin }} />,
+      settings: <ProfileSettingsButton profile={{ slug: profile.slug, name: profile.name, jobTitle: profile.jobTitle, company: profile.company, bio: profile.bio, isPublic: profile.isPublic, photoUrl: profile.photoUrl, communityAdmin: profile.communityAdmin, isAdmin: profile.isAdmin }} />,
       recordings: <MemberRecordings episodes={memberEpisodes} />,
       events: <MemberEvents />,
     }} />

@@ -1,6 +1,6 @@
 'use client';
 import { useRef, useState } from 'react';
-import {DEFAULT_HEADSHOT} from '@/lib/members/default-headshot';
+import {headshot} from '@/lib/members/default-headshot';
 import { Camera, Trash2 } from 'lucide-react';
 import { Button } from '@/workspace-ui/src';
 import './headshot.css';
@@ -37,7 +37,7 @@ export async function uploadMemberPhoto(photo: Blob) {
   return result.url as string;
 }
 
-export default function HeadshotPicker({ preview, name, onChange, onRemove, busy = false }: { preview: string | null; name: string; onChange: (photo: Blob, preview: string) => void | Promise<void>; onRemove?: () => void; busy?: boolean }) {
+export default function HeadshotPicker({ preview, name, onChange, onRemove, busy = false, admin = false }: { preview: string | null; name: string; onChange: (photo: Blob, preview: string) => void | Promise<void>; onRemove?: () => void; busy?: boolean; admin?: boolean }) {
   const input = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   async function choose(file: File | undefined) {
@@ -48,7 +48,7 @@ export default function HeadshotPicker({ preview, name, onChange, onRemove, busy
     finally { if (input.current) input.current.value = ''; }
   }
   return <div className="headshot-picker">
-    <div className="headshot-preview" aria-hidden><img src={preview || DEFAULT_HEADSHOT} alt="" /></div>
+    <div className="headshot-preview" aria-hidden><img src={headshot(preview, admin)} alt="" /></div>
     <div className="headshot-copy">
       <p>{HEADSHOT_GUIDANCE}</p>
       <input ref={input} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e => void choose(e.target.files?.[0])} />

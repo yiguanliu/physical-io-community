@@ -29,11 +29,10 @@ describe('access management safeguards',()=>{
   expect(await grantAdminToMember('New@Example.test',actor)).toEqual({invited:false});
   expect(mocks.set).toHaveBeenCalledWith('m1','admin');expect(mocks.invite).not.toHaveBeenCalled();
  });
- it('certifies only administrators with a member profile and photo',async()=>{
+ it('certifies administrators with a member profile, with or without a photo',async()=>{
   mocks.list.mockResolvedValue([{id:'actor',email:'admin@example.test',role:'admin'},{id:'other',email:'other@example.test',role:'admin'},{id:'p',email:'new@example.test',role:'pending'}]);
-  await expect(setCommunityAdmin({userId:'other',certified:true,actor})).rejects.toThrow(/profile photo/);
   await expect(setCommunityAdmin({userId:'p',certified:true,actor})).rejects.toThrow(/Only administrators/);
-  member('other@example.test',{photo_url:'https://example.test/a.jpg'});
+  member('other@example.test');
   await setCommunityAdmin({userId:'other',certified:true,actor});
   expect(mocks.updates).toContainEqual(['m-other@example.test',true]);
   expect(mocks.audit).toHaveBeenCalledWith(expect.objectContaining({action:'access.certified'}));

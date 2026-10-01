@@ -4,7 +4,7 @@ import { ArrowUpRight, Grid3x3 } from 'lucide-react';
 import ShareButton from '@/components/events/ShareButton';
 import { CommunityAdminMark } from './VerifiedSeal';
 import ProfileTabs from './ProfileTabs';
-import { DEFAULT_HEADSHOT } from '@/lib/members/default-headshot';
+import { headshot } from '@/lib/members/default-headshot';
 import { episodeDate, isUpcoming } from '@/lib/events/catalog';
 import type { MemberProfile } from '@/lib/members/profile';
 import { SITE_URL } from '@/lib/site';
@@ -28,7 +28,7 @@ export default function ProfileView({ profile, owner }: { profile: MemberProfile
 
   return <article className="profile-page">
     <header className="profile-header">
-      <div className="profile-avatar"><img src={profile.photoUrl || DEFAULT_HEADSHOT} alt={profile.photoUrl ? `${profile.name}’s headshot` : ''} width={320} height={320} /></div>
+      <div className="profile-avatar"><img src={headshot(profile.photoUrl, profile.isAdmin)} alt={profile.photoUrl ? `${profile.name}’s headshot` : ''} width={320} height={320} /></div>
       <div>
         <div className="profile-title-row">
           <h1 className="profile-name">{profile.name}{profile.communityAdmin && <CommunityAdminMark />}</h1>

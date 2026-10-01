@@ -91,7 +91,6 @@ export async function setCommunityAdmin(input: { userId: string; certified: bool
   if (input.certified) {
     if (target.role !== ADMIN_ROLE) throw new Error("Only administrators can be certified as community admins.");
     if (!member) throw new Error("This administrator has not completed their member profile yet.");
-    if (!member.photoUrl) throw new Error("This administrator needs a profile photo before they can be certified.");
   }
   if (!member || member.communityAdmin === input.certified) return;
   await database().query("update public.members set community_admin=$2,updated_at=now() where id=$1", [member.memberId, input.certified]);

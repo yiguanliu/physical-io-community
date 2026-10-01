@@ -31,7 +31,7 @@ export default function ProfileSettings({ profile }: { profile: OwnProfile }) {
     <form action={action} className="member-stack">
       <p className="member-note">Your profile shows your photo, name, job title, company, bio and the episodes you attend. Your email is never shown.</p>
       {profile.communityAdmin && <p className="member-note"><CommunityAdminMark size={18} /></p>}
-      <HeadshotPicker name={profile.name} preview={photo} busy={photoBusy} onChange={changePhoto} onRemove={removePhoto} />
+      <HeadshotPicker name={profile.name} admin={profile.isAdmin} preview={photo} busy={photoBusy} onChange={changePhoto} onRemove={removePhoto} />
       {photoMessage && <Alert title={photoMessage.tone === 'success' ? 'Photo saved' : 'Photo not saved'} tone={photoMessage.tone}>{photoMessage.text}</Alert>}
       <div className="member-profile-fields">
         <Field label="Job title" name="jobTitle" maxLength={160} defaultValue={profile.jobTitle} autoComplete="organization-title" />
